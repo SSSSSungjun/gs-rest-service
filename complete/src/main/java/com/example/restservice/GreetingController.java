@@ -16,4 +16,6 @@ public class GreetingController {
   public Greeting greeting(@RequestParam(defaultValue = "World") String name) {
     return new Greeting(counter.incrementAndGet(), template.formatted(name));
   }
+
+  //test commit and push
 }
