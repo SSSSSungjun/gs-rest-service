@@ -1,27 +1,38 @@
 package com.example.restservice.controller;
-import org.springframework.web.bind.annotation.*;
-import lombok.RequiredArgsConstructor;
-import java.time.LocalDateTime;
-import java.util.*;
 
-import com.example.restservice.entity.Post;             
-import com.example.restservice.repository.PostRepository;
+import com.example.restservice.dto.request.PostRequestDto;
+import com.example.restservice.dto.response.PostResponseDto;
+import com.example.restservice.service.PostService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/posts")
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class PostController {
 
-   private final PostRepository postRepository;
+    private final PostService postService;
 
     @GetMapping
-    public List<Post> getAllPosts() {
-        return postRepository.findAllByOrderByCreatedAtDesc();
+    public ResponseEntity<List<PostResponseDto>> getAllPosts() {
+        return ResponseEntity.ok(postService.getAllPosts());
     }
 
     @PostMapping
-    public Post createPost(@RequestBody Post post) {
-        return postRepository.save(post);
+    public ResponseEntity<PostResponseDto> createPost(@RequestBody PostRequestDto requestDto) {
+        return ResponseEntity.ok(postService.createPost(requestDto));
+    }
+
+    // 삭제 요청 시 헤더나 파라미터로 토큰을 받아 검증
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePost(
+            @PathVariable Long id,
+            @RequestHeader("X-Anonymous-Token") String token) {
+        postService.deletePost(id, token);
+        return ResponseEntity.noContent().build();
     }
 }
