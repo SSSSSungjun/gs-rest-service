@@ -1,7 +1,11 @@
-package com.example.restservice;
+package com.example.restservice.controller;
 import org.springframework.web.bind.annotation.*;
+import lombok.RequiredArgsConstructor;
 import java.time.LocalDateTime;
 import java.util.*;
+
+import com.example.restservice.entity.Post;             
+import com.example.restservice.repository.PostRepository;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -11,7 +15,6 @@ public class PostController {
 
    private final PostRepository postRepository;
 
-   // 1. 대나무숲 글 전체 최신순 조회 (Read)
     @GetMapping
     public List<Post> getAllPosts() {
         return postRepository.findAllByOrderByCreatedAtDesc();
