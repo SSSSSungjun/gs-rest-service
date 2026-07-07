@@ -5,7 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "posts")
+@Table(name = "posts", indexes = @Index(name = "idx_anonymous_token", columnList = "anonymousToken"))
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -22,8 +22,8 @@ public class Post {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(nullable = false, unique = true)
-    private String anonymousToken; // 슬라이도식 익명 검증 토큰
+    @Column(name = "anonymous_token", nullable = false)
+    private String anonymousToken; //익명 검증 토큰
 
     private LocalDateTime createdAt;
 

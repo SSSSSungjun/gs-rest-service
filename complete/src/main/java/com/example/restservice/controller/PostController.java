@@ -30,9 +30,10 @@ public class PostController {
     // 삭제 요청 시 헤더나 파라미터로 토큰을 받아 검증
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(
-            @PathVariable Long id,
-            @RequestHeader("X-Anonymous-Token") String token) {
-        postService.deletePost(id, token);
+        @PathVariable Long id,
+           @RequestParam(name = "token") String anonymousToken) { // 프론트의 data: { anonymousToken } 매핑
+
+        postService.deletePost(id, anonymousToken);
         return ResponseEntity.noContent().build();
     }
 }

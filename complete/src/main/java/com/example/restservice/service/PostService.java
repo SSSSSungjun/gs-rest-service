@@ -18,6 +18,7 @@ public class PostService {
     private final PostRepository postRepository;
 
     // 최신순 전체 조회
+    @Transactional(readOnly = true)
     public List<PostResponseDto> getAllPosts() {
         return postRepository.findAllByOrderByCreatedAtDesc().stream()
                 .map(PostResponseDto::from)
@@ -38,13 +39,15 @@ public class PostService {
 
     //토큰 검증 후 삭제
     @Transactional
-    public void deletePost(Long id, String token) {
-        postRepository.findById(id)
-                .filter(post -> post.getAnonymousToken().equals(token)) // 토큰 일치 여부 필터링
-                .ifPresentOrElse(
-                        postRepository::delete, // 일치하면 삭제
-                        () -> { throw new IllegalArgumentException("인증되지 않은 사용자가 아니거나 게시글이 없습니다."); } // 다르면 예외
-                );
+public void deletePost(Long id, String anonymousToken) {
+    Post post = postRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
+
+    if (!post.getAnonymousToken().equals(anonymousToken)) {
+        throw new IllegalArgumentException("본인이 작성한 글만 삭제할 수 있습니다.");
     }
+
+    postRepository.delete(post);
+}
     
 }

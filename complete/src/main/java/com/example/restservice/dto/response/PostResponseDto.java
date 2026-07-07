@@ -11,6 +11,7 @@ public class PostResponseDto {
     private Long id;
     private String nickname;
     private String content;
+    private String anonymousToken;
     private LocalDateTime createdAt;
 
     public static PostResponseDto from(Post post) {
@@ -19,6 +20,7 @@ public class PostResponseDto {
                 .nickname(post.getNickname())
                 .content(post.getContent())
                 .createdAt(post.getCreatedAt())
+                .anonymousToken(post.getAnonymousToken())
                 .build();
     }
 }
