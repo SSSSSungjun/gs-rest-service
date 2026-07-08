@@ -5,6 +5,8 @@ export interface Comment {
   nickname: string
   content: string
   ownedByMe: boolean
+  likeCount: number
+  likedByMe: boolean
   createdAt: string
 }
 
@@ -13,6 +15,8 @@ export interface Post {
   nickname: string
   content: string
   ownedByMe: boolean
+  likeCount: number
+  likedByMe: boolean
   createdAt: string
   comments: Comment[]
 }
@@ -42,6 +46,10 @@ export const boardApi = {
     await apiClient.delete(`/posts/${postId}`)
   },
 
+  async togglePostLike(postId: number) {
+    await apiClient.post(`/posts/${postId}/likes`)
+  },
+
   async createComment(postId: number, payload: BoardWritePayload) {
     const response = await apiClient.post<Comment>(`/posts/${postId}/comments`, payload)
     return response.data
@@ -54,5 +62,9 @@ export const boardApi = {
 
   async deleteComment(commentId: number) {
     await apiClient.delete(`/comments/${commentId}`)
+  },
+
+  async toggleCommentLike(commentId: number) {
+    await apiClient.post(`/comments/${commentId}/likes`)
   },
 }
