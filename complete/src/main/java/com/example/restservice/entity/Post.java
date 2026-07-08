@@ -70,4 +70,9 @@ public class Post {
     public boolean isOwnedBy(String sessionId) {
         return ownerSessionId != null && ownerSessionId.equals(sessionId);
     }
+
+    public void update(String nickname, String content) {
+        this.nickname = nickname;
+        this.content = content;
+    }
 }

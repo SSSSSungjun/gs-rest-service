@@ -33,12 +33,22 @@ export const boardApi = {
     return response.data
   },
 
+  async updatePost(postId: number, payload: BoardWritePayload) {
+    const response = await apiClient.patch<Post>(`/posts/${postId}`, payload)
+    return response.data
+  },
+
   async deletePost(postId: number) {
     await apiClient.delete(`/posts/${postId}`)
   },
 
   async createComment(postId: number, payload: BoardWritePayload) {
     const response = await apiClient.post<Comment>(`/posts/${postId}/comments`, payload)
+    return response.data
+  },
+
+  async updateComment(commentId: number, payload: BoardWritePayload) {
+    const response = await apiClient.patch<Comment>(`/comments/${commentId}`, payload)
     return response.data
   },
 

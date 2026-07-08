@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,6 +34,17 @@ public class CommentController {
     ) {
         String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
         return ResponseEntity.ok(commentService.createComment(postId, requestDto, sessionId));
+    }
+
+    @PatchMapping("/comments/{commentId}")
+    public ResponseEntity<CommentResponseDto> updateComment(
+            @PathVariable Long commentId,
+            @Valid @RequestBody CommentRequestDto requestDto,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
+        return ResponseEntity.ok(commentService.updateComment(commentId, requestDto, sessionId));
     }
 
     @DeleteMapping("/comments/{commentId}")

@@ -39,15 +39,30 @@ public class PostService {
     }
 
     @Transactional
+    public PostResponseDto updatePost(Long id, PostRequestDto requestDto, String sessionId) {
+        validateContent(requestDto.getContent());
+
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
+        validateOwner(post, sessionId);
+
+        post.update(normalizeNickname(requestDto.getNickname()), requestDto.getContent().trim());
+        return PostResponseDto.from(post, sessionId);
+    }
+
+    @Transactional
     public void deletePost(Long id, String sessionId) {
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
-
-        if (!post.isOwnedBy(sessionId)) {
-            throw new ForbiddenOperationException("본인이 작성한 글만 삭제할 수 있습니다.");
-        }
+        validateOwner(post, sessionId);
 
         postRepository.delete(post);
+    }
+
+    private void validateOwner(Post post, String sessionId) {
+        if (!post.isOwnedBy(sessionId)) {
+            throw new ForbiddenOperationException("본인이 작성한 글만 수정하거나 삭제할 수 있습니다.");
+        }
     }
 
     private void validateContent(String content) {
