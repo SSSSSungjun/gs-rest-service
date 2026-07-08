@@ -17,6 +17,12 @@ export function formatDate(value: string) {
   }).format(new Date(value))
 }
 
+export function wasEdited(createdAt: string, updatedAt: string | null) {
+  if (!createdAt || !updatedAt) return false
+
+  return new Date(updatedAt).getTime() > new Date(createdAt).getTime()
+}
+
 export function preventEnterSubmit(event: KeyboardEvent<HTMLFormElement>) {
   if (event.key !== 'Enter') return
   if (event.target instanceof HTMLTextAreaElement) return
