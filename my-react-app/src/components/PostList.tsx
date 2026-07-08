@@ -1,7 +1,7 @@
 import type { FormEvent, MouseEvent } from 'react'
 import type { Post } from '../boardApi'
 import type { BoardDraft } from '../boardReducer'
-import { formatDate, isInteractiveClick, wasEdited } from '../boardUi'
+import { formatDate, isInteractiveClick, isPopularPost, wasEdited } from '../boardUi'
 import { ActionMenu } from './ActionMenu'
 import { PostEditForm } from './PostEditForm'
 import { PostImageGallery } from './PostImageGallery'
@@ -51,16 +51,20 @@ export function PostList({
       {posts.map((post) => {
         const postEditDraft = editingPosts[post.id]
         const postImages = post.images ?? []
+        const isPopular = isPopularPost(post.likeCount)
 
         return (
           <article
-            className={`post-card ${postEditDraft ? '' : 'clickable-card'}`}
+            className={`post-card ${postEditDraft ? '' : 'clickable-card'} ${isPopular ? 'popular-post' : ''}`}
             key={post.id}
             onClick={(event) => handleCardClick(event, post.id)}
           >
             <header className="post-header">
               <div>
-                <strong>{post.nickname || '익명'}</strong>
+                <div className="post-title-row">
+                  <strong>{post.nickname || '익명'}</strong>
+                  {isPopular && <span className="popular-badge">인기글</span>}
+                </div>
                 <time dateTime={post.createdAt}>
                   {formatDate(post.createdAt)}
                   {wasEdited(post.createdAt, post.updatedAt) && <span className="edited-label">(수정됨)</span>}
