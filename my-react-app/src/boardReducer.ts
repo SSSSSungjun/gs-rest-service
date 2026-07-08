@@ -36,6 +36,8 @@ export type BoardAction =
   | { type: 'posts/loadSucceeded'; payload: Post[] }
   | { type: 'posts/loadFailed'; payload: string }
   | { type: 'posts/toggled'; payload: number }
+  | { type: 'posts/detailOpened'; payload: number }
+  | { type: 'posts/detailClosed' }
   | { type: 'composer/nicknameChanged'; payload: string }
   | { type: 'composer/contentChanged'; payload: string }
   | { type: 'composer/submitStarted' }
@@ -106,6 +108,10 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
       return { ...state, isLoading: false, errorMessage: action.payload }
     case 'posts/toggled':
       return { ...state, expandedPostId: state.expandedPostId === action.payload ? null : action.payload }
+    case 'posts/detailOpened':
+      return { ...state, expandedPostId: action.payload }
+    case 'posts/detailClosed':
+      return { ...state, expandedPostId: null }
     case 'composer/nicknameChanged':
       return { ...state, nickname: action.payload }
     case 'composer/contentChanged':
