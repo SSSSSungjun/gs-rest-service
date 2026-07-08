@@ -7,17 +7,18 @@ import { boardReducer, initialBoardState } from './boardReducer'
 import { BoardComposer } from './components/BoardComposer'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { Pagination } from './components/Pagination'
-import { PopularPostSection } from './components/PopularPostSection'
 import { PostDetail } from './components/PostDetail'
 import { PostList } from './components/PostList'
 import { getPostIdFromHash, isPopularPost, POST_HASH_PREFIX, POSTS_PER_PAGE, resizeTextarea } from './boardUi'
 
+type FeedTab = 'all' | 'popular'
+
 const MAX_IMAGE_COUNT = 10
-const MAX_POPULAR_SECTION_POSTS = 3
 
 function App() {
   const [state, dispatch] = useReducer(boardReducer, initialBoardState)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
+  const [activeFeedTab, setActiveFeedTab] = useState<FeedTab>('all')
   const {
     posts,
     nickname,
@@ -41,11 +42,6 @@ function App() {
   )
   const isDetailView = selectedPost !== null
   const hasActivePostEdit = Object.keys(editingPosts).length > 0
-  const pageCount = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE))
-  const visiblePosts = useMemo(() => {
-    const startIndex = (currentPage - 1) * POSTS_PER_PAGE
-    return posts.slice(startIndex, startIndex + POSTS_PER_PAGE)
-  }, [currentPage, posts])
   const popularPosts = useMemo(
     () => posts
       .filter((post) => isPopularPost(post.likeCount))
@@ -54,10 +50,15 @@ function App() {
           return second.likeCount - first.likeCount
         }
         return new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime()
-      })
-      .slice(0, MAX_POPULAR_SECTION_POSTS),
+      }),
     [posts],
   )
+  const activePosts = activeFeedTab === 'popular' ? popularPosts : posts
+  const pageCount = Math.max(1, Math.ceil(activePosts.length / POSTS_PER_PAGE))
+  const visiblePosts = useMemo(() => {
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE
+    return activePosts.slice(startIndex, startIndex + POSTS_PER_PAGE)
+  }, [activePosts, currentPage])
 
   const showSystemMessage = useCallback((message: string) => {
     window.alert(message)
@@ -97,6 +98,11 @@ function App() {
     }
     dispatch({ type: 'posts/detailClosed' })
   }, [])
+
+  const changeFeedTab = (nextTab: FeedTab) => {
+    setActiveFeedTab(nextTab)
+    dispatch({ type: 'pagination/pageChanged', payload: 1 })
+  }
 
   const handleComposerChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
     dispatch({ type: 'composer/contentChanged', payload: event.target.value })
@@ -216,6 +222,7 @@ function App() {
       await boardApi.createPost({ nickname, content, images, showImagesInContent })
       dispatch({ type: 'composer/resetContent' })
       dispatch({ type: 'pagination/pageChanged', payload: 1 })
+      setActiveFeedTab('all')
       showSystemMessage('게시글을 등록했습니다.')
       await fetchPosts(false)
     } catch (error) {
@@ -369,18 +376,40 @@ function App() {
       <section className="feed" aria-label={isDetailView ? '게시글 상세' : '게시글 목록'}>
         <div className="feed-toolbar">
           <div>
-            <strong>{isDetailView ? '게시글 상세' : '전체 글'}</strong>
-            {!isDetailView && <span>{posts.length}개</span>}
+            <strong>{isDetailView ? '게시글 상세' : activeFeedTab === 'popular' ? '인기글' : '전체 글'}</strong>
+            {!isDetailView && <span>{activePosts.length}개</span>}
           </div>
           <button className="refresh-button" type="button" onClick={() => fetchPosts(false)} disabled={isLoading}>
             {isLoading ? '갱신 중' : '갱신하기'}
           </button>
         </div>
 
+        {!isDetailView && (
+          <div className="feed-tabs" role="tablist" aria-label="게시글 목록 종류">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeFeedTab === 'all'}
+              className={activeFeedTab === 'all' ? 'active' : undefined}
+              onClick={() => changeFeedTab('all')}
+            >
+              전체글
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={activeFeedTab === 'popular'}
+              className={activeFeedTab === 'popular' ? 'active' : undefined}
+              onClick={() => changeFeedTab('popular')}
+            >
+              인기글
+            </button>
+          </div>
+        )}
+
         {isLoading && posts.length === 0 && <p className="empty-state">게시글을 불러오는 중입니다.</p>}
         {!isLoading && posts.length === 0 && <p className="empty-state">아직 게시글이 없습니다.</p>}
-
-        {!isDetailView && <PopularPostSection posts={popularPosts} onOpenPost={openPostDetail} />}
+        {!isLoading && posts.length > 0 && activePosts.length === 0 && <p className="empty-state">아직 인기글이 없습니다.</p>}
 
         {selectedPost ? (
           <PostDetail
@@ -465,7 +494,7 @@ function App() {
           />
         )}
 
-        {!isDetailView && !isLoading && posts.length > 0 && (
+        {!isDetailView && !isLoading && activePosts.length > 0 && (
           <Pagination
             pageCount={pageCount}
             currentPage={currentPage}
