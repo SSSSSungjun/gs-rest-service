@@ -52,6 +52,11 @@ function App() {
     errorMessage,
   } = state
 
+  const selectedPost = useMemo(
+    () => posts.find((post) => post.id === expandedPostId) ?? null,
+    [expandedPostId, posts],
+  )
+  const isDetailView = selectedPost !== null
   const pageCount = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE))
   const visiblePosts = useMemo(() => {
     const startIndex = (currentPage - 1) * POSTS_PER_PAGE
@@ -258,17 +263,196 @@ function App() {
         </div>
       </section>
 
-      <section className="feed" aria-label="게시글 목록">
+      <section className="feed" aria-label={isDetailView ? '게시글 상세' : '게시글 목록'}>
         {isLoading && <p className="empty-state">게시글을 불러오는 중입니다.</p>}
         {!isLoading && posts.length === 0 && <p className="empty-state">아직 게시글이 없습니다.</p>}
 
-        {visiblePosts.map((post) => {
+        {selectedPost ? (() => {
+          const post = selectedPost
           const commentDraft = commentDrafts[post.id] ?? { nickname: '', content: '' }
           const postEditDraft = editingPosts[post.id]
-          const isExpanded = expandedPostId === post.id
 
           return (
-            <article className={`post-card ${isExpanded ? 'expanded' : ''}`} key={post.id}>
+            <article className="post-card detail-card" key={post.id}>
+              <div className="detail-toolbar">
+                <button className="back-button" type="button" onClick={() => dispatch({ type: 'posts/toggled', payload: post.id })}>
+                  목록
+                </button>
+              </div>
+              <header className="post-header">
+                <div>
+                  <strong>{post.nickname || '익명'}</strong>
+                  <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
+                </div>
+                {post.ownedByMe && !postEditDraft && (
+                  <details className="action-menu">
+                    <summary aria-label="게시글 메뉴">⋮</summary>
+                    <div className="action-menu-panel">
+                      <button onClick={() => dispatch({ type: 'posts/editStarted', payload: post })} type="button">
+                        수정
+                      </button>
+                      <button
+                        className="danger-menu-button"
+                        onClick={() => dispatch({ type: 'delete/requested', payload: { target: 'post', id: post.id } })}
+                        type="button"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </details>
+                )}
+              </header>
+
+              {postEditDraft ? (
+                <form className="edit-form" onSubmit={(event) => handleUpdatePost(event, post.id)} onKeyDown={preventEnterSubmit}>
+                  <input
+                    value={postEditDraft.nickname}
+                    onChange={(event) => dispatch({
+                      type: 'posts/editNicknameChanged',
+                      payload: { postId: post.id, nickname: event.target.value },
+                    })}
+                    maxLength={40}
+                    placeholder="익명"
+                    aria-label="게시글 수정 닉네임"
+                  />
+                  <textarea
+                    value={postEditDraft.content}
+                    onChange={(event) => dispatch({
+                      type: 'posts/editContentChanged',
+                      payload: { postId: post.id, content: event.target.value },
+                    })}
+                    rows={4}
+                    aria-label="게시글 수정 내용"
+                  />
+                  <div className="inline-actions">
+                    <button type="submit">저장</button>
+                    <button className="ghost-button" type="button" onClick={() => dispatch({ type: 'posts/editCanceled', payload: post.id })}>
+                      취소
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <p className="detail-content">{post.content}</p>
+              )}
+
+              {!postEditDraft && (
+                <div className="post-card-meta-row">
+                  <button
+                    className={`like-button ${post.likedByMe ? 'active' : ''}`}
+                    type="button"
+                    aria-pressed={post.likedByMe}
+                    onClick={() => handleTogglePostLike(post.id)}
+                  >
+                    좋아요 {post.likeCount}
+                  </button>
+                  <span className="meta-pill">댓글 {post.comments.length}</span>
+                </div>
+              )}
+
+              <div className="comments">
+                <div className="comments-title">댓글 {post.comments.length}</div>
+                {post.comments.map((comment) => {
+                  const commentEditDraft = editingComments[comment.id]
+
+                  return (
+                    <div className="comment" key={comment.id}>
+                      {commentEditDraft ? (
+                        <form className="comment-edit-form" onSubmit={(event) => handleUpdateComment(event, comment.id)} onKeyDown={preventEnterSubmit}>
+                          <input
+                            value={commentEditDraft.nickname}
+                            onChange={(event) => dispatch({
+                              type: 'comments/editNicknameChanged',
+                              payload: { commentId: comment.id, nickname: event.target.value },
+                            })}
+                            maxLength={40}
+                            placeholder="익명"
+                            aria-label="댓글 수정 닉네임"
+                          />
+                          <textarea
+                            value={commentEditDraft.content}
+                            onChange={(event) => dispatch({
+                              type: 'comments/editContentChanged',
+                              payload: { commentId: comment.id, content: event.target.value },
+                            })}
+                            rows={1}
+                            aria-label="댓글 수정 내용"
+                          />
+                          <div className="inline-actions">
+                            <button type="submit">저장</button>
+                            <button className="ghost-button" type="button" onClick={() => dispatch({ type: 'comments/editCanceled', payload: comment.id })}>
+                              취소
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <>
+                          <div className="comment-body">
+                            <div>
+                              <strong>{comment.nickname || '익명'}</strong>
+                              <time dateTime={comment.createdAt}>{formatDate(comment.createdAt)}</time>
+                              <p>{comment.content}</p>
+                            </div>
+                            {comment.ownedByMe && (
+                              <details className="action-menu compact">
+                                <summary aria-label="댓글 메뉴">⋮</summary>
+                                <div className="action-menu-panel">
+                                  <button onClick={() => dispatch({ type: 'comments/editStarted', payload: comment })} type="button">
+                                    수정
+                                  </button>
+                                  <button
+                                    className="danger-menu-button"
+                                    onClick={() => dispatch({ type: 'delete/requested', payload: { target: 'comment', id: comment.id } })}
+                                    type="button"
+                                  >
+                                    삭제
+                                  </button>
+                                </div>
+                              </details>
+                            )}
+                          </div>
+                          <button
+                            className={`like-button compact-like ${comment.likedByMe ? 'active' : ''}`}
+                            type="button"
+                            aria-pressed={comment.likedByMe}
+                            onClick={() => handleToggleCommentLike(comment.id)}
+                          >
+                            좋아요 {comment.likeCount}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  )
+                })}
+
+                <form className="comment-form" onSubmit={(event) => handleCreateComment(event, post.id)} onKeyDown={preventEnterSubmit}>
+                  <input
+                    className="comment-nickname-input"
+                    value={commentDraft.nickname}
+                    onChange={(event) => dispatch({
+                      type: 'comments/nicknameChanged',
+                      payload: { postId: post.id, nickname: event.target.value },
+                    })}
+                    maxLength={40}
+                    placeholder="익명"
+                    aria-label="댓글 닉네임"
+                  />
+                  <textarea
+                    value={commentDraft.content}
+                    onChange={(event) => handleCommentChange(event, post.id)}
+                    rows={1}
+                    placeholder="댓글을 남겨보세요"
+                    aria-label="댓글 내용"
+                  />
+                  <button type="submit">등록</button>
+                </form>
+              </div>
+            </article>
+          )
+        })() : visiblePosts.map((post) => {
+          const postEditDraft = editingPosts[post.id]
+
+          return (
+            <article className="post-card" key={post.id}>
               <header className="post-header">
                 <div>
                   <strong>{post.nickname || '익명'}</strong>
@@ -325,7 +509,7 @@ function App() {
                 <button
                   className="post-open-button"
                   type="button"
-                  aria-expanded={isExpanded}
+                  aria-label="게시글 상세 보기"
                   onClick={() => dispatch({ type: 'posts/toggled', payload: post.id })}
                 >
                   <span className="post-content">{post.content}</span>
@@ -345,111 +529,11 @@ function App() {
                   <span className="meta-pill">댓글 {post.comments.length}</span>
                 </div>
               )}
-
-              {isExpanded && (
-                <div className="comments">
-                  <div className="comments-title">댓글 {post.comments.length}</div>
-                  {post.comments.map((comment) => {
-                    const commentEditDraft = editingComments[comment.id]
-
-                    return (
-                      <div className="comment" key={comment.id}>
-                        {commentEditDraft ? (
-                          <form className="comment-edit-form" onSubmit={(event) => handleUpdateComment(event, comment.id)} onKeyDown={preventEnterSubmit}>
-                            <input
-                              value={commentEditDraft.nickname}
-                              onChange={(event) => dispatch({
-                                type: 'comments/editNicknameChanged',
-                                payload: { commentId: comment.id, nickname: event.target.value },
-                              })}
-                              maxLength={40}
-                              placeholder="익명"
-                              aria-label="댓글 수정 닉네임"
-                            />
-                            <textarea
-                              value={commentEditDraft.content}
-                              onChange={(event) => dispatch({
-                                type: 'comments/editContentChanged',
-                                payload: { commentId: comment.id, content: event.target.value },
-                              })}
-                              rows={1}
-                              aria-label="댓글 수정 내용"
-                            />
-                            <div className="inline-actions">
-                              <button type="submit">저장</button>
-                              <button className="ghost-button" type="button" onClick={() => dispatch({ type: 'comments/editCanceled', payload: comment.id })}>
-                                취소
-                              </button>
-                            </div>
-                          </form>
-                        ) : (
-                          <>
-                            <div className="comment-body">
-                              <div>
-                                <strong>{comment.nickname || '익명'}</strong>
-                                <time dateTime={comment.createdAt}>{formatDate(comment.createdAt)}</time>
-                                <p>{comment.content}</p>
-                              </div>
-                              {comment.ownedByMe && (
-                                <details className="action-menu compact">
-                                  <summary aria-label="댓글 메뉴">⋮</summary>
-                                  <div className="action-menu-panel">
-                                    <button onClick={() => dispatch({ type: 'comments/editStarted', payload: comment })} type="button">
-                                      수정
-                                    </button>
-                                    <button
-                                      className="danger-menu-button"
-                                      onClick={() => dispatch({ type: 'delete/requested', payload: { target: 'comment', id: comment.id } })}
-                                      type="button"
-                                    >
-                                      삭제
-                                    </button>
-                                  </div>
-                                </details>
-                              )}
-                            </div>
-                            <button
-                              className={`like-button compact-like ${comment.likedByMe ? 'active' : ''}`}
-                              type="button"
-                              aria-pressed={comment.likedByMe}
-                              onClick={() => handleToggleCommentLike(comment.id)}
-                            >
-                              좋아요 {comment.likeCount}
-                            </button>
-                          </>
-                        )}
-                      </div>
-                    )
-                  })}
-
-                  <form className="comment-form" onSubmit={(event) => handleCreateComment(event, post.id)} onKeyDown={preventEnterSubmit}>
-                    <input
-                      className="comment-nickname-input"
-                      value={commentDraft.nickname}
-                      onChange={(event) => dispatch({
-                        type: 'comments/nicknameChanged',
-                        payload: { postId: post.id, nickname: event.target.value },
-                      })}
-                      maxLength={40}
-                      placeholder="익명"
-                      aria-label="댓글 닉네임"
-                    />
-                    <textarea
-                      value={commentDraft.content}
-                      onChange={(event) => handleCommentChange(event, post.id)}
-                      rows={1}
-                      placeholder="댓글을 남겨보세요"
-                      aria-label="댓글 내용"
-                    />
-                    <button type="submit">등록</button>
-                  </form>
-                </div>
-              )}
             </article>
           )
         })}
 
-        {!isLoading && posts.length > POSTS_PER_PAGE && (
+        {!isDetailView && !isLoading && posts.length > POSTS_PER_PAGE && (
           <nav className="pagination" aria-label="게시글 페이지">
             {Array.from({ length: pageCount }, (_, index) => index + 1).map((page) => (
               <button
@@ -466,30 +550,32 @@ function App() {
         )}
       </section>
 
-      <section className="composer composer-bottom" aria-label="게시글 작성">
-        <form onSubmit={handleSubmit} onKeyDown={preventEnterSubmit}>
-          <div className="composer-input-panel">
-            <input
-              className="composer-nickname-input"
-              value={nickname}
-              onChange={(event) => dispatch({ type: 'composer/nicknameChanged', payload: event.target.value })}
-              maxLength={40}
-              placeholder="익명"
-              aria-label="게시글 닉네임"
-            />
-            <textarea
-              className="composer-textarea"
-              value={content}
-              onChange={handleComposerChange}
-              rows={1}
-              placeholder="오늘 나누고 싶은 이야기를 적어주세요."
-              aria-label="게시글 내용"
-            />
-            <button type="submit" disabled={isSubmitting}>{isSubmitting ? '등록 중' : '게시하기'}</button>
-          </div>
-          {errorMessage && <p className="form-error">{errorMessage}</p>}
-        </form>
-      </section>
+      {!isDetailView && (
+        <section className="composer composer-bottom" aria-label="게시글 작성">
+          <form onSubmit={handleSubmit} onKeyDown={preventEnterSubmit}>
+            <div className="composer-input-panel">
+              <input
+                className="composer-nickname-input"
+                value={nickname}
+                onChange={(event) => dispatch({ type: 'composer/nicknameChanged', payload: event.target.value })}
+                maxLength={40}
+                placeholder="익명"
+                aria-label="게시글 닉네임"
+              />
+              <textarea
+                className="composer-textarea"
+                value={content}
+                onChange={handleComposerChange}
+                rows={1}
+                placeholder="오늘 나누고 싶은 이야기를 적어주세요."
+                aria-label="게시글 내용"
+              />
+              <button type="submit" disabled={isSubmitting}>{isSubmitting ? '등록 중' : '게시하기'}</button>
+            </div>
+            {errorMessage && <p className="form-error">{errorMessage}</p>}
+          </form>
+        </section>
+      )}
 
       {pendingDelete && (
         <div className="modal-backdrop">
