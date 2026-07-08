@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useReducer } from 'react'
+import { useCallback, useEffect, useMemo, useReducer } from 'react'
 import type { FormEvent } from 'react'
 import './App.css'
 import { boardApi } from './boardApi'
@@ -24,7 +24,7 @@ function App() {
     [posts],
   )
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     dispatch({ type: 'posts/loadStarted' })
     try {
       const data = await boardApi.getPosts()
@@ -33,7 +33,7 @@ function App() {
       dispatch({ type: 'posts/loadFailed', payload: '게시글을 불러오지 못했습니다.' })
       console.error(error)
     }
-  }
+  }, [])
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -95,7 +95,7 @@ function App() {
 
   useEffect(() => {
     fetchPosts()
-  }, [])
+  }, [fetchPosts])
 
   return (
     <main className="board-shell">
