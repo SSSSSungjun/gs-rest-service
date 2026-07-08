@@ -50,6 +50,7 @@ export function PostList({
     <>
       {posts.map((post) => {
         const postEditDraft = editingPosts[post.id]
+        const postImages = post.images ?? []
 
         return (
           <article
@@ -91,7 +92,7 @@ export function PostList({
             ) : (
               <div className="post-open-button" aria-label="게시글 상세 보기">
                 <span className="post-content">{post.content}</span>
-                <PostImageGallery images={post.images ?? []} variant="list" />
+                <PostImageGallery images={postImages} variant="list" />
               </div>
             )}
 
@@ -106,7 +107,7 @@ export function PostList({
                   좋아요 {post.likeCount}
                 </button>
                 <span className="meta-pill">댓글 {post.comments.length}</span>
-                {post.images.length > 0 && <span className="meta-pill">사진 {post.images.length}</span>}
+                {postImages.length > 0 && <span className="meta-pill">사진 {postImages.length}</span>}
               </div>
             )}
           </article>
