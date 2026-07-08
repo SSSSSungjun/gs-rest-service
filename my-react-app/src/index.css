@@ -15,6 +15,7 @@
 html {
   min-width: 320px;
   background: #eef8e9;
+  scrollbar-gutter: stable;
 }
 
 body {
