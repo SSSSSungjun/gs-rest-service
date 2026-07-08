@@ -1,5 +1,6 @@
 package com.example.restservice.dto.request;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -7,6 +8,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -20,4 +24,10 @@ public class PostRequestDto {
     @NotBlank(message = "내용을 입력해주세요.")
     @Size(max = 2000, message = "내용은 2000자 이하로 입력해주세요.")
     private String content;
+
+    @Builder.Default
+    @Size(max = 10, message = "이미지는 최대 10장까지 첨부할 수 있습니다.")
+    private List<@Valid PostImageRequestDto> images = new ArrayList<>();
+
+    private boolean showImagesInContent;
 }
