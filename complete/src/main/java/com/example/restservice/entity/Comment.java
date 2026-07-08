@@ -1,5 +1,6 @@
 package com.example.restservice.entity;
 
+import com.example.restservice.support.SeoulTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -55,7 +56,7 @@ public class Comment {
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = SeoulTime.now();
     }
 
     public boolean isOwnedBy(String sessionId) {
