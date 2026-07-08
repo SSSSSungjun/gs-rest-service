@@ -3,51 +3,63 @@ package com.example.restservice.service;
 import com.example.restservice.dto.request.PostRequestDto;
 import com.example.restservice.dto.response.PostResponseDto;
 import com.example.restservice.entity.Post;
+import com.example.restservice.exception.ForbiddenOperationException;
 import com.example.restservice.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PostService {
+    private static final String DEFAULT_NICKNAME = "익명";
+
     private final PostRepository postRepository;
 
-    // 최신순 전체 조회
-    @Transactional(readOnly = true)
-    public List<PostResponseDto> getAllPosts() {
+    public List<PostResponseDto> getAllPosts(String sessionId) {
         return postRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(PostResponseDto::from)
-                .collect(Collectors.toList());
+                .map(post -> PostResponseDto.from(post, sessionId))
+                .toList();
     }
 
-    // 익명 피드 작성
     @Transactional
-    public PostResponseDto createPost(PostRequestDto requestDto) {
+    public PostResponseDto createPost(PostRequestDto requestDto, String sessionId) {
+        validateContent(requestDto.getContent());
+
         Post post = Post.builder()
-                .nickname(requestDto.getNickname())
-                .content(requestDto.getContent())
-                .anonymousToken(requestDto.getAnonymousToken())
+                .nickname(normalizeNickname(requestDto.getNickname()))
+                .content(requestDto.getContent().trim())
+                .ownerSessionId(sessionId)
                 .build();
 
-        return PostResponseDto.from(postRepository.save(post));
+        return PostResponseDto.from(postRepository.save(post), sessionId);
     }
 
-    //토큰 검증 후 삭제
     @Transactional
-public void deletePost(Long id, String anonymousToken) {
-    Post post = postRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
+    public void deletePost(Long id, String sessionId) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
 
-    if (!post.getAnonymousToken().equals(anonymousToken)) {
-        throw new IllegalArgumentException("본인이 작성한 글만 삭제할 수 있습니다.");
+        if (!post.isOwnedBy(sessionId)) {
+            throw new ForbiddenOperationException("본인이 작성한 글만 삭제할 수 있습니다.");
+        }
+
+        postRepository.delete(post);
     }
 
-    postRepository.delete(post);
-}
-    
+    private void validateContent(String content) {
+        if (content == null || content.isBlank()) {
+            throw new IllegalArgumentException("내용을 입력해주세요.");
+        }
+    }
+
+    private String normalizeNickname(String nickname) {
+        if (nickname == null || nickname.isBlank()) {
+            return DEFAULT_NICKNAME;
+        }
+        return nickname.trim();
+    }
 }

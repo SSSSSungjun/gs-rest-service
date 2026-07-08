@@ -1,59 +1,48 @@
 package com.example.restservice.controller;
 
-import com.example.restservice.dto.request.PostRequestDto;
-import com.example.restservice.dto.response.PostResponseDto;
+import com.example.restservice.dto.request.CommentRequestDto;
+import com.example.restservice.dto.response.CommentResponseDto;
 import com.example.restservice.service.AnonymousSessionService;
-import com.example.restservice.service.PostService;
+import com.example.restservice.service.CommentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/api/posts")
+@RequestMapping("/api")
 @RequiredArgsConstructor
-public class PostController {
+public class CommentController {
 
-    private final PostService postService;
+    private final CommentService commentService;
     private final AnonymousSessionService anonymousSessionService;
 
-    @GetMapping
-    public ResponseEntity<List<PostResponseDto>> getAllPosts(
+    @PostMapping("/posts/{postId}/comments")
+    public ResponseEntity<CommentResponseDto> createComment(
+            @PathVariable Long postId,
+            @Valid @RequestBody CommentRequestDto requestDto,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
         String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
-        return ResponseEntity.ok(postService.getAllPosts(sessionId));
+        return ResponseEntity.ok(commentService.createComment(postId, requestDto, sessionId));
     }
 
-    @PostMapping
-    public ResponseEntity<PostResponseDto> createPost(
-            @Valid @RequestBody PostRequestDto requestDto,
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(
+            @PathVariable Long commentId,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
         String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
-        return ResponseEntity.ok(postService.createPost(requestDto, sessionId));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(
-            @PathVariable Long id,
-            HttpServletRequest request,
-            HttpServletResponse response
-    ) {
-        String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
-        postService.deletePost(id, sessionId);
+        commentService.deleteComment(commentId, sessionId);
         return ResponseEntity.noContent().build();
     }
 }

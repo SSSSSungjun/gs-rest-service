@@ -14,28 +14,22 @@ java {
 
 repositories {
     mavenCentral()
-   // maven { url 'https://repo.spring.io/milestone' } 
 }
 
 dependencies {
-
     developmentOnly 'org.springframework.boot:spring-boot-devtools:3.2.5'
 
     implementation 'org.springframework.boot:spring-boot-starter-web:3.2.4'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa:3.2.4'
+    implementation 'org.springframework.boot:spring-boot-starter-validation:3.2.4'
     runtimeOnly 'com.mysql:mysql-connector-j:8.0.33'
 
-    //LOMBOK
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
     testCompileOnly 'org.projectlombok:lombok:1.18.30'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
 
-    //SWAGGER
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
-
-    //SPRING BOOT AI
-    //implementation 'org.springframework.ai:spring-ai-openai-spring-boot-starter:1.0.0-M1'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test:3.2.4'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
