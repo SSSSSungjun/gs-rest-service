@@ -107,10 +107,17 @@ textarea {
   padding: 10px 12px;
   resize: none;
   overflow-y: auto;
+  scrollbar-width: none;
+}
+
+textarea::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .composer-textarea,
 .comment-form textarea,
+.edit-form textarea,
 .comment-edit-form textarea {
   max-height: 220px;
   line-height: 1.55;
@@ -427,11 +434,20 @@ time {
 
 .edit-form {
   margin: 14px 0 0;
+  padding: 12px;
+  border: 1px solid #dcebd8;
+  border-radius: 8px;
+  background: #f7fcf2;
+}
+
+.edit-status-row {
+  color: #486255;
+  font-size: 13px;
+  font-weight: 800;
 }
 
 .edit-form textarea {
-  min-height: 110px;
-  resize: vertical;
+  min-height: 96px;
 }
 
 .comments {
@@ -480,6 +496,10 @@ time {
   grid-column: 1 / -1;
   grid-template-columns: minmax(96px, 132px) minmax(0, 1fr) auto;
   align-items: end;
+}
+
+.comment-edit-form .edit-status-row {
+  grid-column: 1 / -1;
 }
 
 .pagination {

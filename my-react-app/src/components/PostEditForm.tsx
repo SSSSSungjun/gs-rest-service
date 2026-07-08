@@ -1,6 +1,6 @@
-import type { FormEvent } from 'react'
+import type { ChangeEvent, FormEvent } from 'react'
 import type { BoardDraft } from '../boardReducer'
-import { preventEnterSubmit } from '../boardUi'
+import { handleTextareaKeyDown, preventEnterSubmit, resizeTextarea } from '../boardUi'
 
 interface PostEditFormProps {
   postId: number
@@ -19,8 +19,14 @@ export function PostEditForm({
   onSubmit,
   onCancel,
 }: PostEditFormProps) {
+  const handleContentChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    onContentChange(postId, event.target.value)
+    resizeTextarea(event.currentTarget)
+  }
+
   return (
-    <form className="edit-form" onSubmit={(event) => onSubmit(event, postId)} onKeyDown={preventEnterSubmit}>
+    <form className="edit-form post-edit-form" onSubmit={(event) => onSubmit(event, postId)} onKeyDown={preventEnterSubmit}>
+      <div className="edit-status-row">게시글 수정 중</div>
       <input
         value={draft.nickname}
         onChange={(event) => onNicknameChange(postId, event.target.value)}
@@ -30,12 +36,13 @@ export function PostEditForm({
       />
       <textarea
         value={draft.content}
-        onChange={(event) => onContentChange(postId, event.target.value)}
-        rows={4}
+        onChange={handleContentChange}
+        onKeyDown={handleTextareaKeyDown}
+        rows={3}
         aria-label="게시글 수정 내용"
       />
       <div className="inline-actions">
-        <button type="submit">저장</button>
+        <button type="submit">수정 완료</button>
         <button className="ghost-button" type="button" onClick={() => onCancel(postId)}>취소</button>
       </div>
     </form>

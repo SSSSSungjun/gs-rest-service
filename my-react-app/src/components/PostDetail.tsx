@@ -1,7 +1,7 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import type { Post } from '../boardApi'
 import type { BoardDraft } from '../boardReducer'
-import { formatDate, preventEnterSubmit } from '../boardUi'
+import { formatDate, handleTextareaKeyDown, preventEnterSubmit } from '../boardUi'
 import { ActionMenu } from './ActionMenu'
 import { CommentEditForm } from './CommentEditForm'
 import { PostEditForm } from './PostEditForm'
@@ -159,6 +159,7 @@ export function PostDetail({
           <textarea
             value={commentDraft.content}
             onChange={(event) => onCommentContentChange(event, post.id)}
+            onKeyDown={handleTextareaKeyDown}
             rows={1}
             placeholder="댓글을 남겨보세요"
             aria-label="댓글 내용"

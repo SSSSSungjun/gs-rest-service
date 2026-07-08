@@ -34,6 +34,7 @@ function App() {
     [expandedPostId, posts],
   )
   const isDetailView = selectedPost !== null
+  const hasActivePostEdit = Object.keys(editingPosts).length > 0
   const pageCount = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE))
   const visiblePosts = useMemo(() => {
     const startIndex = (currentPage - 1) * POSTS_PER_PAGE
@@ -354,7 +355,7 @@ function App() {
         )}
       </section>
 
-      {!isDetailView && (
+      {!isDetailView && !hasActivePostEdit && (
         <BoardComposer
           nickname={nickname}
           content={content}
