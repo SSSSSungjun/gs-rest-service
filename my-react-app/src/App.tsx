@@ -4,6 +4,8 @@ import './App.css'
 import { boardApi } from './boardApi'
 import { boardReducer, initialBoardState } from './boardReducer'
 
+const POSTS_PER_PAGE = 8
+
 function formatDate(value: string) {
   if (!value) return ''
 
@@ -24,15 +26,17 @@ function App() {
     commentDrafts,
     editingPosts,
     editingComments,
+    currentPage,
     isLoading,
     isSubmitting,
     errorMessage,
   } = state
 
-  const totalComments = useMemo(
-    () => posts.reduce((total, post) => total + post.comments.length, 0),
-    [posts],
-  )
+  const pageCount = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE))
+  const visiblePosts = useMemo(() => {
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE
+    return posts.slice(startIndex, startIndex + POSTS_PER_PAGE)
+  }, [currentPage, posts])
 
   const fetchPosts = useCallback(async () => {
     dispatch({ type: 'posts/loadStarted' })
@@ -56,6 +60,7 @@ function App() {
     try {
       await boardApi.createPost({ nickname, content })
       dispatch({ type: 'composer/resetContent' })
+      dispatch({ type: 'pagination/pageChanged', payload: 1 })
       await fetchPosts()
     } catch (error) {
       dispatch({ type: 'error/set', payload: '게시글 등록에 실패했습니다.' })
@@ -145,6 +150,12 @@ function App() {
     fetchPosts()
   }, [fetchPosts])
 
+  useEffect(() => {
+    if (currentPage > pageCount) {
+      dispatch({ type: 'pagination/pageChanged', payload: pageCount })
+    }
+  }, [currentPage, pageCount])
+
   return (
     <main className="board-shell">
       <section className="board-hero" aria-labelledby="board-title">
@@ -153,16 +164,6 @@ function App() {
           <h1 id="board-title">대나무숲</h1>
           <p className="hero-copy">가입 없이 남기고, 내가 쓴 글과 댓글은 이 브라우저에서 바로 삭제할 수 있습니다.</p>
         </div>
-        <dl className="board-stats" aria-label="게시판 현황">
-          <div>
-            <dt>Posts</dt>
-            <dd>{posts.length}</dd>
-          </div>
-          <div>
-            <dt>Comments</dt>
-            <dd>{totalComments}</dd>
-          </div>
-        </dl>
       </section>
 
       <section className="composer" aria-label="게시글 작성">
@@ -198,7 +199,7 @@ function App() {
         {isLoading && <p className="empty-state">게시글을 불러오는 중입니다.</p>}
         {!isLoading && posts.length === 0 && <p className="empty-state">아직 게시글이 없습니다.</p>}
 
-        {posts.map((post) => {
+        {visiblePosts.map((post) => {
           const commentDraft = commentDrafts[post.id] ?? { nickname: '', content: '' }
           const postEditDraft = editingPosts[post.id]
 
@@ -337,6 +338,22 @@ function App() {
             </article>
           )
         })}
+
+        {!isLoading && posts.length > POSTS_PER_PAGE && (
+          <nav className="pagination" aria-label="게시글 페이지">
+            {Array.from({ length: pageCount }, (_, index) => index + 1).map((page) => (
+              <button
+                key={page}
+                type="button"
+                className={page === currentPage ? 'active' : undefined}
+                aria-current={page === currentPage ? 'page' : undefined}
+                onClick={() => dispatch({ type: 'pagination/pageChanged', payload: page })}
+              >
+                {page}
+              </button>
+            ))}
+          </nav>
+        )}
       </section>
     </main>
   )
