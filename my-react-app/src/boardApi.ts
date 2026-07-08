@@ -8,6 +8,7 @@ export interface Comment {
   likeCount: number
   likedByMe: boolean
   createdAt: string
+  updatedAt: string | null
 }
 
 export interface Post {
@@ -18,6 +19,7 @@ export interface Post {
   likeCount: number
   likedByMe: boolean
   createdAt: string
+  updatedAt: string | null
   comments: Comment[]
 }
 
