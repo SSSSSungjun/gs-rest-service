@@ -1,7 +1,6 @@
 import type { KeyboardEvent, MouseEvent } from 'react'
 
 export const POSTS_PER_PAGE = 8
-export const TOAST_DURATION_MS = 2400
 export const MAX_TEXTAREA_HEIGHT = 220
 export const POST_HASH_PREFIX = '#post-'
 
