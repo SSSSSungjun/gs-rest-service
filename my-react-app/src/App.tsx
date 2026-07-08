@@ -17,7 +17,17 @@ function formatDate(value: string) {
 
 function App() {
   const [state, dispatch] = useReducer(boardReducer, initialBoardState)
-  const { posts, nickname, content, commentDrafts, isLoading, isSubmitting, errorMessage } = state
+  const {
+    posts,
+    nickname,
+    content,
+    commentDrafts,
+    editingPosts,
+    editingComments,
+    isLoading,
+    isSubmitting,
+    errorMessage,
+  } = state
 
   const totalComments = useMemo(
     () => posts.reduce((total, post) => total + post.comments.length, 0),
@@ -55,6 +65,25 @@ function App() {
     }
   }
 
+  const handleUpdatePost = async (event: FormEvent, postId: number) => {
+    event.preventDefault()
+    const draft = editingPosts[postId]
+    if (!draft?.content.trim()) {
+      dispatch({ type: 'error/set', payload: '내용을 입력해주세요.' })
+      return
+    }
+
+    dispatch({ type: 'error/clear' })
+    try {
+      await boardApi.updatePost(postId, draft)
+      dispatch({ type: 'posts/editCanceled', payload: postId })
+      await fetchPosts()
+    } catch (error) {
+      dispatch({ type: 'error/set', payload: '내가 작성한 글만 수정할 수 있습니다.' })
+      console.error(error)
+    }
+  }
+
   const handleDeletePost = async (postId: number) => {
     dispatch({ type: 'error/clear' })
     try {
@@ -78,6 +107,25 @@ function App() {
       await fetchPosts()
     } catch (error) {
       dispatch({ type: 'error/set', payload: '댓글 등록에 실패했습니다.' })
+      console.error(error)
+    }
+  }
+
+  const handleUpdateComment = async (event: FormEvent, commentId: number) => {
+    event.preventDefault()
+    const draft = editingComments[commentId]
+    if (!draft?.content.trim()) {
+      dispatch({ type: 'error/set', payload: '댓글 내용을 입력해주세요.' })
+      return
+    }
+
+    dispatch({ type: 'error/clear' })
+    try {
+      await boardApi.updateComment(commentId, draft)
+      dispatch({ type: 'comments/editCanceled', payload: commentId })
+      await fetchPosts()
+    } catch (error) {
+      dispatch({ type: 'error/set', payload: '내가 작성한 댓글만 수정할 수 있습니다.' })
       console.error(error)
     }
   }
@@ -152,6 +200,7 @@ function App() {
 
         {posts.map((post) => {
           const commentDraft = commentDrafts[post.id] ?? { nickname: '', content: '' }
+          const postEditDraft = editingPosts[post.id]
 
           return (
             <article className="post-card" key={post.id}>
@@ -160,31 +209,106 @@ function App() {
                   <strong>{post.nickname || '익명'}</strong>
                   <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
                 </div>
-                {post.ownedByMe && (
-                  <button className="ghost-button" onClick={() => handleDeletePost(post.id)} type="button">
-                    삭제
-                  </button>
+                {post.ownedByMe && !postEditDraft && (
+                  <div className="owner-actions">
+                    <button className="ghost-button" onClick={() => dispatch({ type: 'posts/editStarted', payload: post })} type="button">
+                      수정
+                    </button>
+                    <button className="ghost-button" onClick={() => handleDeletePost(post.id)} type="button">
+                      삭제
+                    </button>
+                  </div>
                 )}
               </header>
 
-              <p className="post-content">{post.content}</p>
+              {postEditDraft ? (
+                <form className="edit-form" onSubmit={(event) => handleUpdatePost(event, post.id)}>
+                  <input
+                    value={postEditDraft.nickname}
+                    onChange={(event) => dispatch({
+                      type: 'posts/editNicknameChanged',
+                      payload: { postId: post.id, nickname: event.target.value },
+                    })}
+                    maxLength={40}
+                    placeholder="익명"
+                    aria-label="게시글 수정 닉네임"
+                  />
+                  <textarea
+                    value={postEditDraft.content}
+                    onChange={(event) => dispatch({
+                      type: 'posts/editContentChanged',
+                      payload: { postId: post.id, content: event.target.value },
+                    })}
+                    rows={4}
+                    aria-label="게시글 수정 내용"
+                  />
+                  <div className="inline-actions">
+                    <button type="submit">저장</button>
+                    <button className="ghost-button" type="button" onClick={() => dispatch({ type: 'posts/editCanceled', payload: post.id })}>
+                      취소
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <p className="post-content">{post.content}</p>
+              )}
 
               <div className="comments">
                 <div className="comments-title">댓글 {post.comments.length}</div>
-                {post.comments.map((comment) => (
-                  <div className="comment" key={comment.id}>
-                    <div>
-                      <strong>{comment.nickname || '익명'}</strong>
-                      <time dateTime={comment.createdAt}>{formatDate(comment.createdAt)}</time>
-                      <p>{comment.content}</p>
+                {post.comments.map((comment) => {
+                  const commentEditDraft = editingComments[comment.id]
+
+                  return (
+                    <div className="comment" key={comment.id}>
+                      {commentEditDraft ? (
+                        <form className="comment-edit-form" onSubmit={(event) => handleUpdateComment(event, comment.id)}>
+                          <input
+                            value={commentEditDraft.nickname}
+                            onChange={(event) => dispatch({
+                              type: 'comments/editNicknameChanged',
+                              payload: { commentId: comment.id, nickname: event.target.value },
+                            })}
+                            maxLength={40}
+                            placeholder="익명"
+                            aria-label="댓글 수정 닉네임"
+                          />
+                          <input
+                            value={commentEditDraft.content}
+                            onChange={(event) => dispatch({
+                              type: 'comments/editContentChanged',
+                              payload: { commentId: comment.id, content: event.target.value },
+                            })}
+                            aria-label="댓글 수정 내용"
+                          />
+                          <div className="inline-actions">
+                            <button type="submit">저장</button>
+                            <button className="ghost-button" type="button" onClick={() => dispatch({ type: 'comments/editCanceled', payload: comment.id })}>
+                              취소
+                            </button>
+                          </div>
+                        </form>
+                      ) : (
+                        <>
+                          <div>
+                            <strong>{comment.nickname || '익명'}</strong>
+                            <time dateTime={comment.createdAt}>{formatDate(comment.createdAt)}</time>
+                            <p>{comment.content}</p>
+                          </div>
+                          {comment.ownedByMe && (
+                            <div className="owner-actions compact">
+                              <button className="text-button" onClick={() => dispatch({ type: 'comments/editStarted', payload: comment })} type="button">
+                                수정
+                              </button>
+                              <button className="text-button" onClick={() => handleDeleteComment(comment.id)} type="button">
+                                삭제
+                              </button>
+                            </div>
+                          )}
+                        </>
+                      )}
                     </div>
-                    {comment.ownedByMe && (
-                      <button className="text-button" onClick={() => handleDeleteComment(comment.id)} type="button">
-                        삭제
-                      </button>
-                    )}
-                  </div>
-                ))}
+                  )
+                })}
 
                 <form className="comment-form" onSubmit={(event) => handleCreateComment(event, post.id)}>
                   <input
