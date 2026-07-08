@@ -22,7 +22,7 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: maven
+          cache: gradle
 
       - name: Build Initial with Maven
         working-directory: ./initial
@@ -35,10 +35,6 @@ jobs:
       - name: Build Initial Kotlin with Gradle
         working-directory: ./initial-kotlin
         run: ./gradlew build
-
-      - name: Build Complete with Maven
-        working-directory: ./complete
-        run: ./mvnw --batch-mode clean package
 
       - name: Build Complete with Gradle
         working-directory: ./complete
