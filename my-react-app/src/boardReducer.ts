@@ -5,11 +5,6 @@ export interface BoardDraft {
   content: string
 }
 
-export interface ToastState {
-  message: string
-  tone: 'success' | 'error'
-}
-
 export interface PendingDelete {
   target: 'post' | 'comment'
   id: number
@@ -24,7 +19,6 @@ export interface BoardState {
   editingComments: Record<number, BoardDraft>
   expandedPostId: number | null
   pendingDelete: PendingDelete | null
-  toast: ToastState | null
   currentPage: number
   isLoading: boolean
   isSubmitting: boolean
@@ -58,8 +52,6 @@ export type BoardAction =
   | { type: 'delete/canceled' }
   | { type: 'pagination/pageChanged'; payload: number }
   | { type: 'posts/deleted'; payload: number }
-  | { type: 'toast/show'; payload: ToastState }
-  | { type: 'toast/hidden' }
   | { type: 'error/set'; payload: string }
   | { type: 'error/clear' }
 
@@ -72,7 +64,6 @@ export const initialBoardState: BoardState = {
   editingComments: {},
   expandedPostId: null,
   pendingDelete: null,
-  toast: null,
   currentPage: 1,
   isLoading: true,
   isSubmitting: false,
@@ -217,10 +208,6 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
         expandedPostId: state.expandedPostId === action.payload ? null : state.expandedPostId,
         pendingDelete: null,
       }
-    case 'toast/show':
-      return { ...state, toast: action.payload }
-    case 'toast/hidden':
-      return { ...state, toast: null }
     case 'error/set':
       return { ...state, errorMessage: action.payload }
     case 'error/clear':
