@@ -1,11 +1,34 @@
 package com.example.restservice.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "posts", indexes = @Index(name = "idx_anonymous_token", columnList = "anonymousToken"))
+@Table(
+        name = "posts",
+        indexes = {
+                @Index(name = "idx_posts_created_at", columnList = "created_at"),
+                @Index(name = "idx_posts_owner_session_id", columnList = "owner_session_id")
+        }
+)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
@@ -16,19 +39,29 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String nickname; //유동 닉네임
+    @Column(nullable = false, length = 40)
+    private String nickname;
 
     @Column(nullable = false, columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "anonymous_token", nullable = false)
-    private String anonymousToken; //익명 검증 토큰
+    @Column(name = "owner_session_id", nullable = false, length = 80)
+    private String ownerSessionId;
 
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    @Builder.Default
+    @OrderBy("createdAt ASC")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+    }
+
+    public boolean isOwnedBy(String sessionId) {
+        return ownerSessionId != null && ownerSessionId.equals(sessionId);
     }
 }
