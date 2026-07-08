@@ -1,7 +1,7 @@
 .board-shell {
   width: min(100%, 1040px);
   margin: 0 auto;
-  padding: 32px 20px 132px;
+  padding: 32px 20px 220px;
   text-align: left;
 }
 
@@ -174,6 +174,161 @@ button:disabled {
   white-space: nowrap;
 }
 
+.image-attachment-fields {
+  display: grid;
+  gap: 10px;
+}
+
+.image-attachment-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  color: #486255;
+  font-size: 13px;
+}
+
+.image-attachment-summary strong,
+.image-attachment-summary span {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  border: 1px solid #bdd5c5;
+  border-radius: 8px;
+  background: #f3faef;
+  padding: 0 9px;
+}
+
+.image-attachment-summary strong {
+  color: #315b3e;
+}
+
+.image-attachment-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.file-pick-button {
+  display: inline-grid;
+  min-height: 40px;
+  place-items: center;
+  border: 1px solid #bdd5c5;
+  border-radius: 8px;
+  background: #fbfef8;
+  color: #315b3e;
+  padding: 0 12px;
+  cursor: pointer;
+}
+
+.file-pick-button:hover {
+  background: #edf8e9;
+  color: #12301f;
+}
+
+.file-pick-button.disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.file-pick-button input {
+  display: none;
+}
+
+.image-preview-toggle {
+  display: flex;
+  width: fit-content;
+  gap: 8px;
+  align-items: center;
+  color: #315b3e;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.image-preview-toggle input {
+  width: 16px;
+  min-height: 16px;
+  accent-color: #16a34a;
+}
+
+.image-attachment-preview-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 8px;
+}
+
+.image-attachment-preview,
+.post-image-frame {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #dcebd8;
+  border-radius: 8px;
+  background: #edf8e9;
+}
+
+.image-attachment-preview {
+  aspect-ratio: 1;
+}
+
+.image-attachment-preview img,
+.post-image-frame img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.image-remove-button {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  min-height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: rgba(18, 48, 31, 0.78);
+  padding: 0 8px;
+  font-size: 12px;
+}
+
+.image-remove-button:hover {
+  background: rgba(18, 48, 31, 0.92);
+}
+
+.post-image-gallery {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.list-image-gallery {
+  grid-template-columns: repeat(2, minmax(0, 112px));
+}
+
+.list-image-gallery .post-image-frame {
+  aspect-ratio: 1;
+  margin: 0;
+}
+
+.detail-image-gallery {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.detail-image-gallery .post-image-frame {
+  aspect-ratio: 4 / 3;
+  margin: 0;
+}
+
+.image-count-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(18, 48, 31, 0.58);
+  color: #ffffff;
+  font-size: 24px;
+  font-weight: 900;
+}
+
 .feed {
   display: grid;
   gap: 14px;
@@ -334,7 +489,8 @@ time {
 .action-menu summary:focus-visible,
 .back-button:focus-visible,
 .ghost-button:focus-visible,
-.text-button:focus-visible {
+.text-button:focus-visible,
+.file-pick-button:focus-within {
   outline: 3px solid rgba(34, 197, 94, 0.24);
   outline-offset: 3px;
 }
@@ -566,7 +722,7 @@ time {
 
 @media (max-width: 720px) {
   .board-shell {
-    padding: 20px 12px 120px;
+    padding: 20px 12px 240px;
   }
 
   .board-hero {
@@ -597,12 +753,15 @@ time {
 
   .composer-input-panel,
   .comment-form,
-  .comment-edit-form {
+  .comment-edit-form,
+  .image-attachment-controls {
     grid-template-columns: 1fr;
   }
 
   .composer-input-panel button,
-  .comment-form button {
+  .comment-form button,
+  .image-attachment-controls button,
+  .file-pick-button {
     width: 100%;
   }
 
@@ -617,5 +776,13 @@ time {
   .inline-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
+  }
+
+  .list-image-gallery {
+    grid-template-columns: repeat(2, minmax(0, 96px));
+  }
+
+  .detail-image-gallery {
+    grid-template-columns: 1fr;
   }
 }
