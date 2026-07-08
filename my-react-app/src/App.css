@@ -80,7 +80,9 @@
 }
 
 .composer form,
-.comment-form {
+.comment-form,
+.edit-form,
+.comment-edit-form {
   display: grid;
   gap: 12px;
 }
@@ -166,7 +168,8 @@ button:disabled {
 }
 
 .form-actions button,
-.comment-form button {
+.comment-form button,
+.inline-actions button {
   padding: 0 18px;
   white-space: nowrap;
 }
@@ -217,6 +220,18 @@ time {
   word-break: break-word;
 }
 
+.owner-actions,
+.inline-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.owner-actions.compact {
+  align-items: flex-start;
+}
+
 .ghost-button,
 .text-button {
   min-height: 34px;
@@ -231,6 +246,14 @@ time {
 .text-button:hover {
   background: #edf8e9;
   color: #12301f;
+}
+
+.edit-form {
+  margin: 14px 0 18px;
+}
+
+.edit-form textarea {
+  min-height: 110px;
 }
 
 .comments {
@@ -265,6 +288,12 @@ time {
 }
 
 .comment-form {
+  grid-template-columns: minmax(96px, 140px) minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.comment-edit-form {
+  grid-column: 1 / -1;
   grid-template-columns: minmax(96px, 140px) minmax(0, 1fr) auto;
   align-items: center;
 }
@@ -304,7 +333,8 @@ time {
     display: grid;
   }
 
-  .form-actions button {
+  .form-actions button,
+  .comment-form button {
     width: 100%;
   }
 
@@ -312,12 +342,18 @@ time {
     align-items: stretch;
   }
 
+  .owner-actions {
+    flex-wrap: wrap;
+  }
+
   .comment,
-  .comment-form {
+  .comment-form,
+  .comment-edit-form {
     grid-template-columns: 1fr;
   }
 
-  .comment-form button {
-    width: 100%;
+  .inline-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
   }
 }
