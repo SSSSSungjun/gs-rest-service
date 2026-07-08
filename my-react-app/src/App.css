@@ -246,6 +246,11 @@ time {
   font-size: 12px;
 }
 
+.edited-label {
+  margin-left: 5px;
+  color: #7b8c80;
+}
+
 .post-open-button {
   display: grid;
   width: 100%;
