@@ -5,12 +5,15 @@ export function resolveApiBaseUrl() {
     return import.meta.env.VITE_API_BASE_URL
   }
 
-  const { protocol, hostname } = window.location
-  return `${protocol}//${hostname}:8081/api`
+  return '/api'
 }
 
 export function resolveApiOrigin() {
-  return resolveApiBaseUrl().replace(/\/api\/?$/, '')
+  const baseUrl = resolveApiBaseUrl()
+  if (baseUrl.startsWith('/')) {
+    return ''
+  }
+  return baseUrl.replace(/\/api\/?$/, '')
 }
 
 const apiClient = axios.create({
