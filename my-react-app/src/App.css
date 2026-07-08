@@ -541,8 +541,8 @@ time {
 
 .toast {
   position: fixed;
+  top: 20px;
   right: 20px;
-  bottom: 20px;
   z-index: 40;
   max-width: min(360px, calc(100vw - 40px));
   padding: 12px 14px;
@@ -618,8 +618,8 @@ time {
   }
 
   .toast {
+    top: 12px;
     right: 12px;
-    bottom: 12px;
     max-width: calc(100vw - 24px);
   }
 }
