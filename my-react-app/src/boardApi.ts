@@ -1,5 +1,15 @@
 import apiClient from './apiClient'
 
+export type PostImageSourceType = 'URL' | 'UPLOAD'
+
+export interface PostImage {
+  id?: number
+  sourceType: PostImageSourceType
+  url: string
+  originalFilename?: string | null
+  imageOrder?: number
+}
+
 export interface Comment {
   id: number
   nickname: string
@@ -18,14 +28,18 @@ export interface Post {
   ownedByMe: boolean
   likeCount: number
   likedByMe: boolean
+  showImagesInContent: boolean
   createdAt: string
   updatedAt: string | null
+  images: PostImage[]
   comments: Comment[]
 }
 
 export interface BoardWritePayload {
   nickname: string
   content: string
+  images?: PostImage[]
+  showImagesInContent?: boolean
 }
 
 export const boardApi = {
@@ -36,6 +50,13 @@ export const boardApi = {
 
   async createPost(payload: BoardWritePayload) {
     const response = await apiClient.post<Post>('/posts', payload)
+    return response.data
+  },
+
+  async uploadPostImage(file: File) {
+    const formData = new FormData()
+    formData.append('file', file)
+    const response = await apiClient.post<PostImage>('/posts/images', formData)
     return response.data
   },
 

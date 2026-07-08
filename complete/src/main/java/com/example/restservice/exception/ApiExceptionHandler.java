@@ -30,4 +30,9 @@ public class ApiExceptionHandler {
     public ResponseEntity<Map<String, String>> handleForbidden(ForbiddenOperationException exception) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Map.of("message", exception.getMessage()));
     }
+
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<Map<String, String>> handleServerError(IllegalStateException exception) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("message", exception.getMessage()));
+    }
 }

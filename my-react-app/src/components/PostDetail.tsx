@@ -5,18 +5,24 @@ import { formatDate, handleTextareaKeyDown, preventEnterSubmit, wasEdited } from
 import { ActionMenu } from './ActionMenu'
 import { CommentEditForm } from './CommentEditForm'
 import { PostEditForm } from './PostEditForm'
+import { PostImageGallery } from './PostImageGallery'
 
 interface PostDetailProps {
   post: Post
   commentDraft: BoardDraft
   postEditDraft?: BoardDraft
   editingComments: Record<number, BoardDraft>
+  isUploadingImage: boolean
   onBack: () => void
   onStartEditPost: (post: Post) => void
   onRequestDeletePost: (postId: number) => void
   onTogglePostLike: (postId: number) => void
   onPostEditNicknameChange: (postId: number, nickname: string) => void
   onPostEditContentChange: (postId: number, content: string) => void
+  onPostEditAddImageUrl: (postId: number, url: string) => void
+  onPostEditUploadImages: (postId: number, files: File[]) => void
+  onPostEditRemoveImage: (postId: number, index: number) => void
+  onPostEditShowImagesInContentChange: (postId: number, showImagesInContent: boolean) => void
   onSubmitPostEdit: (event: FormEvent, postId: number) => void
   onCancelPostEdit: (postId: number) => void
   onStartEditComment: (comment: Post['comments'][number]) => void
@@ -36,12 +42,17 @@ export function PostDetail({
   commentDraft,
   postEditDraft,
   editingComments,
+  isUploadingImage,
   onBack,
   onStartEditPost,
   onRequestDeletePost,
   onTogglePostLike,
   onPostEditNicknameChange,
   onPostEditContentChange,
+  onPostEditAddImageUrl,
+  onPostEditUploadImages,
+  onPostEditRemoveImage,
+  onPostEditShowImagesInContentChange,
   onSubmitPostEdit,
   onCancelPostEdit,
   onStartEditComment,
@@ -55,6 +66,8 @@ export function PostDetail({
   onCommentContentChange,
   onSubmitComment,
 }: PostDetailProps) {
+  const postImages = post.images ?? []
+
   return (
     <article className="post-card detail-card" key={post.id}>
       <div className="detail-toolbar">
@@ -81,13 +94,21 @@ export function PostDetail({
         <PostEditForm
           postId={post.id}
           draft={postEditDraft}
+          isUploadingImage={isUploadingImage}
           onNicknameChange={onPostEditNicknameChange}
           onContentChange={onPostEditContentChange}
+          onAddImageUrl={onPostEditAddImageUrl}
+          onUploadImages={onPostEditUploadImages}
+          onRemoveImage={onPostEditRemoveImage}
+          onShowImagesInContentChange={onPostEditShowImagesInContentChange}
           onSubmit={onSubmitPostEdit}
           onCancel={onCancelPostEdit}
         />
       ) : (
-        <p className="detail-content">{post.content}</p>
+        <>
+          <p className="detail-content">{post.content}</p>
+          {post.showImagesInContent && <PostImageGallery images={postImages} variant="detail" />}
+        </>
       )}
 
       {!postEditDraft && (
@@ -101,6 +122,7 @@ export function PostDetail({
             좋아요 {post.likeCount}
           </button>
           <span className="meta-pill">댓글 {post.comments.length}</span>
+          {postImages.length > 0 && <span className="meta-pill">사진 {postImages.length}</span>}
         </div>
       )}
 

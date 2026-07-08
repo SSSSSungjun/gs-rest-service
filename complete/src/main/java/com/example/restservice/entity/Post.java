@@ -53,6 +53,9 @@ public class Post {
     @Column(name = "anonymous_token", nullable = false, length = 80)
     private String legacyAnonymousToken;
 
+    @Column(name = "show_images_in_content", nullable = false)
+    private boolean showImagesInContent;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -63,6 +66,11 @@ public class Post {
     @OrderBy("createdAt ASC")
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
+
+    @Builder.Default
+    @OrderBy("imageOrder ASC")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PostImage> images = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
@@ -83,8 +91,14 @@ public class Post {
         return ownerSessionId != null && ownerSessionId.equals(sessionId);
     }
 
-    public void update(String nickname, String content) {
+    public void update(String nickname, String content, boolean showImagesInContent) {
         this.nickname = nickname;
         this.content = content;
+        this.showImagesInContent = showImagesInContent;
+    }
+
+    public void replaceImages(List<PostImage> nextImages) {
+        this.images.clear();
+        this.images.addAll(nextImages);
     }
 }

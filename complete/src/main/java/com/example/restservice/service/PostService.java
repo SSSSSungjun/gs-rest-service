@@ -1,8 +1,10 @@
 package com.example.restservice.service;
 
+import com.example.restservice.dto.request.PostImageRequestDto;
 import com.example.restservice.dto.request.PostRequestDto;
 import com.example.restservice.dto.response.PostResponseDto;
 import com.example.restservice.entity.Post;
+import com.example.restservice.entity.PostImage;
 import com.example.restservice.exception.ForbiddenOperationException;
 import com.example.restservice.repository.CommentLikeRepository;
 import com.example.restservice.repository.LikeCountProjection;
@@ -12,16 +14,19 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PostService {
     private static final String DEFAULT_NICKNAME = "익명";
+    private static final int MAX_IMAGE_COUNT = 10;
 
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
@@ -61,12 +66,15 @@ public class PostService {
     @Transactional
     public PostResponseDto createPost(PostRequestDto requestDto, String sessionId) {
         validateContent(requestDto.getContent());
+        validateImages(requestDto.getImages());
 
         Post post = Post.builder()
                 .nickname(normalizeNickname(requestDto.getNickname()))
                 .content(requestDto.getContent().trim())
                 .ownerSessionId(sessionId)
+                .showImagesInContent(requestDto.isShowImagesInContent())
                 .build();
+        post.replaceImages(toPostImages(post, requestDto.getImages()));
 
         return PostResponseDto.from(postRepository.save(post), sessionId);
     }
@@ -74,12 +82,14 @@ public class PostService {
     @Transactional
     public PostResponseDto updatePost(Long id, PostRequestDto requestDto, String sessionId) {
         validateContent(requestDto.getContent());
+        validateImages(requestDto.getImages());
 
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
         validateOwner(post, sessionId);
 
-        post.update(normalizeNickname(requestDto.getNickname()), requestDto.getContent().trim());
+        post.update(normalizeNickname(requestDto.getNickname()), requestDto.getContent().trim(), requestDto.isShowImagesInContent());
+        post.replaceImages(toPostImages(post, requestDto.getImages()));
         return PostResponseDto.from(post, sessionId);
     }
 
@@ -120,6 +130,61 @@ public class PostService {
         if (content == null || content.isBlank()) {
             throw new IllegalArgumentException("내용을 입력해주세요.");
         }
+    }
+
+    private void validateImages(List<PostImageRequestDto> images) {
+        if (images == null || images.isEmpty()) {
+            return;
+        }
+        if (images.size() > MAX_IMAGE_COUNT) {
+            throw new IllegalArgumentException("이미지는 최대 10장까지 첨부할 수 있습니다.");
+        }
+        images.forEach(this::validateImage);
+    }
+
+    private void validateImage(PostImageRequestDto image) {
+        if (image == null || image.getSourceType() == null || image.getUrl() == null || image.getUrl().isBlank()) {
+            throw new IllegalArgumentException("이미지 정보가 올바르지 않습니다.");
+        }
+
+        String url = image.getUrl().trim();
+        if (image.getSourceType() == PostImage.SourceType.UPLOAD) {
+            if (!url.startsWith("/uploads/post-images/")) {
+                throw new IllegalArgumentException("업로드 이미지 경로가 올바르지 않습니다.");
+            }
+            return;
+        }
+
+        try {
+            URI uri = URI.create(url);
+            String scheme = uri.getScheme();
+            if (!"http".equalsIgnoreCase(scheme) && !"https".equalsIgnoreCase(scheme)) {
+                throw new IllegalArgumentException("이미지 URL은 http 또는 https로 시작해야 합니다.");
+            }
+        } catch (IllegalArgumentException exception) {
+            throw new IllegalArgumentException("이미지 URL 형식이 올바르지 않습니다.");
+        }
+    }
+
+    private List<PostImage> toPostImages(Post post, List<PostImageRequestDto> imageRequests) {
+        if (imageRequests == null || imageRequests.isEmpty()) {
+            return List.of();
+        }
+        return IntStream.range(0, imageRequests.size())
+                .mapToObj(index -> {
+                    PostImageRequestDto image = imageRequests.get(index);
+                    String originalFilename = image.getOriginalFilename() == null || image.getOriginalFilename().isBlank()
+                            ? null
+                            : image.getOriginalFilename().trim();
+                    return PostImage.of(
+                            post,
+                            image.getSourceType(),
+                            image.getUrl().trim(),
+                            originalFilename,
+                            index
+                    );
+                })
+                .toList();
     }
 
     private String normalizeNickname(String nickname) {

@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-function resolveApiBaseUrl() {
+export function resolveApiBaseUrl() {
   if (import.meta.env.VITE_API_BASE_URL) {
     return import.meta.env.VITE_API_BASE_URL
   }
@@ -9,12 +9,13 @@ function resolveApiBaseUrl() {
   return `${protocol}//${hostname}:8081/api`
 }
 
+export function resolveApiOrigin() {
+  return resolveApiBaseUrl().replace(/\/api\/?$/, '')
+}
+
 const apiClient = axios.create({
   baseURL: resolveApiBaseUrl(),
   withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 })
 
 export default apiClient

@@ -20,8 +20,10 @@ public class PostResponseDto {
     private boolean ownedByMe;
     private long likeCount;
     private boolean likedByMe;
+    private boolean showImagesInContent;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private List<PostImageResponseDto> images;
     private List<CommentResponseDto> comments;
 
     public static PostResponseDto from(Post post, String sessionId) {
@@ -43,8 +45,12 @@ public class PostResponseDto {
                 .ownedByMe(post.isOwnedBy(sessionId))
                 .likeCount(likeCount)
                 .likedByMe(likedByMe)
+                .showImagesInContent(post.isShowImagesInContent())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
+                .images(post.getImages().stream()
+                        .map(PostImageResponseDto::from)
+                        .toList())
                 .comments(post.getComments().stream()
                         .map(comment -> CommentResponseDto.from(
                                 comment,

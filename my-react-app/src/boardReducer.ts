@@ -1,8 +1,10 @@
-import type { Comment, Post } from './boardApi'
+import type { Comment, Post, PostImage } from './boardApi'
 
 export interface BoardDraft {
   nickname: string
   content: string
+  images?: PostImage[]
+  showImagesInContent?: boolean
 }
 
 export interface PendingDelete {
@@ -14,6 +16,8 @@ export interface BoardState {
   posts: Post[]
   nickname: string
   content: string
+  images: PostImage[]
+  showImagesInContent: boolean
   commentDrafts: Record<number, BoardDraft>
   editingPosts: Record<number, BoardDraft>
   editingComments: Record<number, BoardDraft>
@@ -34,6 +38,9 @@ export type BoardAction =
   | { type: 'posts/detailClosed' }
   | { type: 'composer/nicknameChanged'; payload: string }
   | { type: 'composer/contentChanged'; payload: string }
+  | { type: 'composer/imageAdded'; payload: PostImage }
+  | { type: 'composer/imageRemoved'; payload: number }
+  | { type: 'composer/showImagesChanged'; payload: boolean }
   | { type: 'composer/submitStarted' }
   | { type: 'composer/submitFinished' }
   | { type: 'composer/resetContent' }
@@ -43,6 +50,9 @@ export type BoardAction =
   | { type: 'posts/editStarted'; payload: Post }
   | { type: 'posts/editNicknameChanged'; payload: { postId: number; nickname: string } }
   | { type: 'posts/editContentChanged'; payload: { postId: number; content: string } }
+  | { type: 'posts/editImageAdded'; payload: { postId: number; image: PostImage } }
+  | { type: 'posts/editImageRemoved'; payload: { postId: number; index: number } }
+  | { type: 'posts/editShowImagesChanged'; payload: { postId: number; showImagesInContent: boolean } }
   | { type: 'posts/editCanceled'; payload: number }
   | { type: 'comments/editStarted'; payload: Comment }
   | { type: 'comments/editNicknameChanged'; payload: { commentId: number; nickname: string } }
@@ -59,6 +69,8 @@ export const initialBoardState: BoardState = {
   posts: [],
   nickname: '',
   content: '',
+  images: [],
+  showImagesInContent: true,
   commentDrafts: {},
   editingPosts: {},
   editingComments: {},
@@ -71,13 +83,17 @@ export const initialBoardState: BoardState = {
 }
 
 function getDraft(drafts: Record<number, BoardDraft>, id: number): BoardDraft {
-  return drafts[id] ?? { nickname: '', content: '' }
+  return drafts[id] ?? { nickname: '', content: '', images: [], showImagesInContent: true }
 }
 
 function removeDraft(drafts: Record<number, BoardDraft>, id: number): Record<number, BoardDraft> {
   const nextDrafts = { ...drafts }
   delete nextDrafts[id]
   return nextDrafts
+}
+
+function removeImage(images: PostImage[] | undefined, index: number): PostImage[] {
+  return (images ?? []).filter((_, imageIndex) => imageIndex !== index)
 }
 
 export function boardReducer(state: BoardState, action: BoardAction): BoardState {
@@ -107,12 +123,18 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
       return { ...state, nickname: action.payload }
     case 'composer/contentChanged':
       return { ...state, content: action.payload }
+    case 'composer/imageAdded':
+      return { ...state, images: [...state.images, action.payload] }
+    case 'composer/imageRemoved':
+      return { ...state, images: removeImage(state.images, action.payload) }
+    case 'composer/showImagesChanged':
+      return { ...state, showImagesInContent: action.payload }
     case 'composer/submitStarted':
       return { ...state, isSubmitting: true, errorMessage: '' }
     case 'composer/submitFinished':
       return { ...state, isSubmitting: false }
     case 'composer/resetContent':
-      return { ...state, content: '' }
+      return { ...state, content: '', images: [], showImagesInContent: true }
     case 'comments/nicknameChanged': {
       const currentDraft = getDraft(state.commentDrafts, action.payload.postId)
       return {
@@ -140,7 +162,12 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
         ...state,
         editingPosts: {
           ...state.editingPosts,
-          [action.payload.id]: { nickname: action.payload.nickname, content: action.payload.content },
+          [action.payload.id]: {
+            nickname: action.payload.nickname,
+            content: action.payload.content,
+            images: action.payload.images,
+            showImagesInContent: action.payload.showImagesInContent,
+          },
         },
       }
     case 'posts/editNicknameChanged': {
@@ -160,6 +187,45 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
         editingPosts: {
           ...state.editingPosts,
           [action.payload.postId]: { ...currentDraft, content: action.payload.content },
+        },
+      }
+    }
+    case 'posts/editImageAdded': {
+      const currentDraft = getDraft(state.editingPosts, action.payload.postId)
+      return {
+        ...state,
+        editingPosts: {
+          ...state.editingPosts,
+          [action.payload.postId]: {
+            ...currentDraft,
+            images: [...(currentDraft.images ?? []), action.payload.image],
+          },
+        },
+      }
+    }
+    case 'posts/editImageRemoved': {
+      const currentDraft = getDraft(state.editingPosts, action.payload.postId)
+      return {
+        ...state,
+        editingPosts: {
+          ...state.editingPosts,
+          [action.payload.postId]: {
+            ...currentDraft,
+            images: removeImage(currentDraft.images, action.payload.index),
+          },
+        },
+      }
+    }
+    case 'posts/editShowImagesChanged': {
+      const currentDraft = getDraft(state.editingPosts, action.payload.postId)
+      return {
+        ...state,
+        editingPosts: {
+          ...state.editingPosts,
+          [action.payload.postId]: {
+            ...currentDraft,
+            showImagesInContent: action.payload.showImagesInContent,
+          },
         },
       }
     }

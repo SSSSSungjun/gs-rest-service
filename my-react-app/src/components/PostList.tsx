@@ -4,16 +4,22 @@ import type { BoardDraft } from '../boardReducer'
 import { formatDate, isInteractiveClick, wasEdited } from '../boardUi'
 import { ActionMenu } from './ActionMenu'
 import { PostEditForm } from './PostEditForm'
+import { PostImageGallery } from './PostImageGallery'
 
 interface PostListProps {
   posts: Post[]
   editingPosts: Record<number, BoardDraft>
+  isUploadingImage: boolean
   onOpenPost: (postId: number) => void
   onStartEditPost: (post: Post) => void
   onRequestDeletePost: (postId: number) => void
   onTogglePostLike: (postId: number) => void
   onPostEditNicknameChange: (postId: number, nickname: string) => void
   onPostEditContentChange: (postId: number, content: string) => void
+  onPostEditAddImageUrl: (postId: number, url: string) => void
+  onPostEditUploadImages: (postId: number, files: File[]) => void
+  onPostEditRemoveImage: (postId: number, index: number) => void
+  onPostEditShowImagesInContentChange: (postId: number, showImagesInContent: boolean) => void
   onSubmitPostEdit: (event: FormEvent, postId: number) => void
   onCancelPostEdit: (postId: number) => void
 }
@@ -21,12 +27,17 @@ interface PostListProps {
 export function PostList({
   posts,
   editingPosts,
+  isUploadingImage,
   onOpenPost,
   onStartEditPost,
   onRequestDeletePost,
   onTogglePostLike,
   onPostEditNicknameChange,
   onPostEditContentChange,
+  onPostEditAddImageUrl,
+  onPostEditUploadImages,
+  onPostEditRemoveImage,
+  onPostEditShowImagesInContentChange,
   onSubmitPostEdit,
   onCancelPostEdit,
 }: PostListProps) {
@@ -39,6 +50,7 @@ export function PostList({
     <>
       {posts.map((post) => {
         const postEditDraft = editingPosts[post.id]
+        const postImages = post.images ?? []
 
         return (
           <article
@@ -67,14 +79,20 @@ export function PostList({
               <PostEditForm
                 postId={post.id}
                 draft={postEditDraft}
+                isUploadingImage={isUploadingImage}
                 onNicknameChange={onPostEditNicknameChange}
                 onContentChange={onPostEditContentChange}
+                onAddImageUrl={onPostEditAddImageUrl}
+                onUploadImages={onPostEditUploadImages}
+                onRemoveImage={onPostEditRemoveImage}
+                onShowImagesInContentChange={onPostEditShowImagesInContentChange}
                 onSubmit={onSubmitPostEdit}
                 onCancel={onCancelPostEdit}
               />
             ) : (
               <div className="post-open-button" aria-label="게시글 상세 보기">
                 <span className="post-content">{post.content}</span>
+                <PostImageGallery images={postImages} variant="list" />
               </div>
             )}
 
@@ -89,6 +107,7 @@ export function PostList({
                   좋아요 {post.likeCount}
                 </button>
                 <span className="meta-pill">댓글 {post.comments.length}</span>
+                {postImages.length > 0 && <span className="meta-pill">사진 {postImages.length}</span>}
               </div>
             )}
           </article>
