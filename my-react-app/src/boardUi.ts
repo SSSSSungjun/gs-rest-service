@@ -18,14 +18,31 @@ export function formatDate(value: string) {
 }
 
 export function preventEnterSubmit(event: KeyboardEvent<HTMLFormElement>) {
-  if (event.key === 'Enter') {
-    event.preventDefault()
-  }
+  if (event.key !== 'Enter') return
+  if (event.target instanceof HTMLTextAreaElement) return
+
+  event.preventDefault()
 }
 
 export function resizeTextarea(element: HTMLTextAreaElement) {
   element.style.height = 'auto'
   element.style.height = `${Math.min(element.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`
+}
+
+export function handleTextareaKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+  if (event.key !== 'Tab') return
+
+  event.preventDefault()
+  const element = event.currentTarget
+  const selectionStart = element.selectionStart
+  const selectionEnd = element.selectionEnd
+  const nextValue = `${element.value.slice(0, selectionStart)}\t${element.value.slice(selectionEnd)}`
+
+  element.value = nextValue
+  element.selectionStart = selectionStart + 1
+  element.selectionEnd = selectionStart + 1
+  element.dispatchEvent(new Event('input', { bubbles: true }))
+  resizeTextarea(element)
 }
 
 export function getPostIdFromHash() {
