@@ -18,6 +18,7 @@ public class CommentResponseDto {
     private long likeCount;
     private boolean likedByMe;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public static CommentResponseDto from(Comment comment, String sessionId) {
         return from(comment, sessionId, 0, false);
@@ -32,6 +33,7 @@ public class CommentResponseDto {
                 .likeCount(likeCount)
                 .likedByMe(likedByMe)
                 .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
                 .build();
     }
 }
