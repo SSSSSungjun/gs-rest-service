@@ -1,7 +1,7 @@
 .board-shell {
   width: min(100%, 1040px);
   margin: 0 auto;
-  padding: 32px 20px 56px;
+  padding: 32px 20px 112px;
   text-align: left;
 }
 
@@ -46,8 +46,15 @@
 }
 
 .composer {
-  padding: 18px;
-  margin-bottom: 18px;
+  padding: 12px;
+}
+
+.composer-bottom {
+  position: sticky;
+  bottom: 14px;
+  z-index: 20;
+  margin-top: 18px;
+  backdrop-filter: blur(10px);
 }
 
 .composer form,
@@ -56,6 +63,13 @@
 .comment-edit-form {
   display: grid;
   gap: 12px;
+}
+
+.composer-input-panel {
+  display: grid;
+  grid-template-columns: 116px minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: end;
 }
 
 label {
@@ -88,9 +102,23 @@ input {
 }
 
 textarea {
-  min-height: 132px;
-  padding: 12px;
-  resize: vertical;
+  min-height: 42px;
+  padding: 10px 12px;
+  resize: none;
+  overflow-y: auto;
+}
+
+.composer-textarea,
+.comment-form textarea,
+.comment-edit-form textarea {
+  max-height: 220px;
+  line-height: 1.55;
+}
+
+.composer-nickname-input,
+.comment-nickname-input {
+  min-width: 0;
+  font-size: 14px;
 }
 
 input:focus,
@@ -140,7 +168,8 @@ button:disabled {
 
 .form-actions button,
 .comment-form button,
-.inline-actions button {
+.inline-actions button,
+.composer-input-panel button {
   padding: 0 18px;
   white-space: nowrap;
 }
@@ -158,6 +187,12 @@ button:disabled {
 
 .post-card {
   padding: 18px;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.post-card.expanded {
+  border-color: #8fc99c;
+  box-shadow: 0 14px 34px rgba(21, 83, 45, 0.12);
 }
 
 .post-header {
@@ -182,20 +217,12 @@ time {
   font-size: 12px;
 }
 
-.post-content,
-.post-content-button {
-  margin: 14px 0 16px;
-  color: #213a2b;
-  font-size: 16px;
-  line-height: 1.7;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.post-content-button {
-  display: block;
+.post-open-button {
+  display: grid;
   width: 100%;
   min-height: 0;
+  gap: 12px;
+  margin: 14px 0 0;
   padding: 0;
   border: 0;
   background: transparent;
@@ -204,40 +231,55 @@ time {
   font-weight: 500;
 }
 
-.post-content-button:hover {
+.post-open-button:hover {
   background: transparent;
   color: #12301f;
 }
 
-.post-content-button:focus-visible,
-.comment-count-button:focus-visible,
-.ghost-button:focus-visible,
-.text-button:focus-visible {
-  outline: 3px solid rgba(34, 197, 94, 0.24);
-  outline-offset: 3px;
+.post-content {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #213a2b;
+  font-size: 16px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+  word-break: break-word;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
-.post-footer {
-  display: flex;
-  justify-content: flex-start;
-  padding-top: 2px;
+.post-card.expanded .post-content {
+  display: block;
+  overflow: visible;
+  -webkit-line-clamp: unset;
 }
 
-.comment-count-button {
-  min-height: 32px;
-  padding: 0 10px;
+.post-card-meta {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 30px;
+  align-items: center;
   border: 1px solid #bdd5c5;
+  border-radius: 8px;
   background: #f3faef;
   color: #315b3e;
+  padding: 0 10px;
   font-size: 13px;
   font-weight: 800;
 }
 
-.comment-count-button:hover,
-.comment-count-button[aria-expanded='true'] {
+.post-open-button[aria-expanded='true'] .post-card-meta,
+.post-open-button:hover .post-card-meta {
   border-color: #16a34a;
   background: #e6f7df;
   color: #12301f;
+}
+
+.post-open-button:focus-visible,
+.ghost-button:focus-visible,
+.text-button:focus-visible {
+  outline: 3px solid rgba(34, 197, 94, 0.24);
+  outline-offset: 3px;
 }
 
 .owner-actions,
@@ -287,11 +329,12 @@ time {
 }
 
 .edit-form {
-  margin: 14px 0 18px;
+  margin: 14px 0 0;
 }
 
 .edit-form textarea {
   min-height: 110px;
+  resize: vertical;
 }
 
 .comments {
@@ -327,18 +370,14 @@ time {
 }
 
 .comment-form {
-  grid-template-columns: minmax(96px, 140px) minmax(0, 1fr) auto;
-  align-items: center;
+  grid-template-columns: minmax(96px, 132px) minmax(0, 1fr) auto;
+  align-items: end;
 }
 
 .comment-edit-form {
   grid-column: 1 / -1;
-  grid-template-columns: minmax(96px, 140px) minmax(0, 1fr) auto;
-  align-items: center;
-}
-
-.comment-nickname-input {
-  min-width: 0;
+  grid-template-columns: minmax(96px, 132px) minmax(0, 1fr) auto;
+  align-items: end;
 }
 
 .pagination {
@@ -423,7 +462,7 @@ time {
 
 @media (max-width: 720px) {
   .board-shell {
-    padding: 20px 12px 40px;
+    padding: 20px 12px 120px;
   }
 
   .board-hero {
@@ -438,16 +477,25 @@ time {
     font-size: 15px;
   }
 
-  .composer,
   .post-card {
     padding: 14px;
   }
 
-  .form-actions {
-    display: grid;
+  .composer {
+    padding: 10px;
   }
 
-  .form-actions button,
+  .composer-bottom {
+    bottom: 10px;
+  }
+
+  .composer-input-panel,
+  .comment-form,
+  .comment-edit-form {
+    grid-template-columns: 1fr;
+  }
+
+  .composer-input-panel button,
   .comment-form button {
     width: 100%;
   }
@@ -460,9 +508,7 @@ time {
     flex-wrap: wrap;
   }
 
-  .comment,
-  .comment-form,
-  .comment-edit-form {
+  .comment {
     grid-template-columns: 1fr;
   }
 
