@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useMemo, useReducer } from 'react'
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 import './App.css'
 import { boardApi } from './boardApi'
+import type { PostImage } from './boardApi'
 import { boardReducer, initialBoardState } from './boardReducer'
 import { BoardComposer } from './components/BoardComposer'
 import { ConfirmDialog } from './components/ConfirmDialog'
@@ -10,12 +11,17 @@ import { PostDetail } from './components/PostDetail'
 import { PostList } from './components/PostList'
 import { getPostIdFromHash, POST_HASH_PREFIX, POSTS_PER_PAGE, resizeTextarea } from './boardUi'
 
+const MAX_IMAGE_COUNT = 10
+
 function App() {
   const [state, dispatch] = useReducer(boardReducer, initialBoardState)
+  const [isUploadingImage, setIsUploadingImage] = useState(false)
   const {
     posts,
     nickname,
     content,
+    images,
+    showImagesInContent,
     commentDrafts,
     editingPosts,
     editingComments,
@@ -91,6 +97,78 @@ function App() {
     resizeTextarea(event.currentTarget)
   }
 
+  const ensureCanAddImages = (currentCount: number, nextCount: number) => {
+    if (currentCount + nextCount > MAX_IMAGE_COUNT) {
+      showSystemMessage('이미지는 최대 10장까지 첨부할 수 있습니다.')
+      return false
+    }
+    return true
+  }
+
+  const createUrlImage = (url: string): PostImage | null => {
+    try {
+      const parsedUrl = new URL(url)
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        showSystemMessage('이미지 URL은 http 또는 https로 시작해야 합니다.')
+        return null
+      }
+      return { sourceType: 'URL', url: parsedUrl.toString(), originalFilename: null }
+    } catch {
+      showSystemMessage('이미지 URL 형식이 올바르지 않습니다.')
+      return null
+    }
+  }
+
+  const handleAddComposerImageUrl = (url: string) => {
+    if (!ensureCanAddImages(images.length, 1)) return
+    const image = createUrlImage(url)
+    if (image) {
+      dispatch({ type: 'composer/imageAdded', payload: image })
+    }
+  }
+
+  const handleUploadComposerImages = async (files: File[]) => {
+    if (!ensureCanAddImages(images.length, files.length)) return
+    setIsUploadingImage(true)
+    try {
+      for (const file of files) {
+        const image = await boardApi.uploadPostImage(file)
+        dispatch({ type: 'composer/imageAdded', payload: image })
+      }
+    } catch (error) {
+      showSystemMessage('이미지 업로드에 실패했습니다.')
+      console.error(error)
+    } finally {
+      setIsUploadingImage(false)
+    }
+  }
+
+  const handleAddPostEditImageUrl = (postId: number, url: string) => {
+    const currentImages = editingPosts[postId]?.images ?? []
+    if (!ensureCanAddImages(currentImages.length, 1)) return
+    const image = createUrlImage(url)
+    if (image) {
+      dispatch({ type: 'posts/editImageAdded', payload: { postId, image } })
+    }
+  }
+
+  const handleUploadPostEditImages = async (postId: number, files: File[]) => {
+    const currentImages = editingPosts[postId]?.images ?? []
+    if (!ensureCanAddImages(currentImages.length, files.length)) return
+    setIsUploadingImage(true)
+    try {
+      for (const file of files) {
+        const image = await boardApi.uploadPostImage(file)
+        dispatch({ type: 'posts/editImageAdded', payload: { postId, image } })
+      }
+    } catch (error) {
+      showSystemMessage('이미지 업로드에 실패했습니다.')
+      console.error(error)
+    } finally {
+      setIsUploadingImage(false)
+    }
+  }
+
   const handleTogglePostLike = async (postId: number) => {
     try {
       await boardApi.togglePostLike(postId)
@@ -121,7 +199,7 @@ function App() {
 
     dispatch({ type: 'composer/submitStarted' })
     try {
-      await boardApi.createPost({ nickname, content })
+      await boardApi.createPost({ nickname, content, images, showImagesInContent })
       dispatch({ type: 'composer/resetContent' })
       dispatch({ type: 'pagination/pageChanged', payload: 1 })
       showSystemMessage('게시글을 등록했습니다.')
@@ -147,7 +225,12 @@ function App() {
 
     dispatch({ type: 'error/clear' })
     try {
-      await boardApi.updatePost(postId, draft)
+      await boardApi.updatePost(postId, {
+        nickname: draft.nickname,
+        content: draft.content,
+        images: draft.images ?? [],
+        showImagesInContent: draft.showImagesInContent ?? true,
+      })
       dispatch({ type: 'posts/editCanceled', payload: postId })
       showSystemMessage('게시글을 수정했습니다.')
       await fetchPosts(false)
@@ -279,6 +362,7 @@ function App() {
             commentDraft={commentDrafts[selectedPost.id] ?? { nickname: '', content: '' }}
             postEditDraft={editingPosts[selectedPost.id]}
             editingComments={editingComments}
+            isUploadingImage={isUploadingImage}
             onBack={closePostDetail}
             onStartEditPost={(post) => dispatch({ type: 'posts/editStarted', payload: post })}
             onRequestDeletePost={(postId) => dispatch({ type: 'delete/requested', payload: { target: 'post', id: postId } })}
@@ -290,6 +374,16 @@ function App() {
             onPostEditContentChange={(postId, nextContent) => dispatch({
               type: 'posts/editContentChanged',
               payload: { postId, content: nextContent },
+            })}
+            onPostEditAddImageUrl={handleAddPostEditImageUrl}
+            onPostEditUploadImages={handleUploadPostEditImages}
+            onPostEditRemoveImage={(postId, index) => dispatch({
+              type: 'posts/editImageRemoved',
+              payload: { postId, index },
+            })}
+            onPostEditShowImagesInContentChange={(postId, nextShowImagesInContent) => dispatch({
+              type: 'posts/editShowImagesChanged',
+              payload: { postId, showImagesInContent: nextShowImagesInContent },
             })}
             onSubmitPostEdit={handleUpdatePost}
             onCancelPostEdit={(postId) => dispatch({ type: 'posts/editCanceled', payload: postId })}
@@ -317,6 +411,7 @@ function App() {
           <PostList
             posts={visiblePosts}
             editingPosts={editingPosts}
+            isUploadingImage={isUploadingImage}
             onOpenPost={openPostDetail}
             onStartEditPost={(post) => dispatch({ type: 'posts/editStarted', payload: post })}
             onRequestDeletePost={(postId) => dispatch({ type: 'delete/requested', payload: { target: 'post', id: postId } })}
@@ -328,6 +423,16 @@ function App() {
             onPostEditContentChange={(postId, nextContent) => dispatch({
               type: 'posts/editContentChanged',
               payload: { postId, content: nextContent },
+            })}
+            onPostEditAddImageUrl={handleAddPostEditImageUrl}
+            onPostEditUploadImages={handleUploadPostEditImages}
+            onPostEditRemoveImage={(postId, index) => dispatch({
+              type: 'posts/editImageRemoved',
+              payload: { postId, index },
+            })}
+            onPostEditShowImagesInContentChange={(postId, nextShowImagesInContent) => dispatch({
+              type: 'posts/editShowImagesChanged',
+              payload: { postId, showImagesInContent: nextShowImagesInContent },
             })}
             onSubmitPostEdit={handleUpdatePost}
             onCancelPostEdit={(postId) => dispatch({ type: 'posts/editCanceled', payload: postId })}
@@ -347,10 +452,20 @@ function App() {
         <BoardComposer
           nickname={nickname}
           content={content}
+          images={images}
+          showImagesInContent={showImagesInContent}
           isSubmitting={isSubmitting}
+          isUploadingImage={isUploadingImage}
           errorMessage={errorMessage}
           onNicknameChange={(nextNickname) => dispatch({ type: 'composer/nicknameChanged', payload: nextNickname })}
           onContentChange={handleComposerChange}
+          onAddImageUrl={handleAddComposerImageUrl}
+          onUploadImages={handleUploadComposerImages}
+          onRemoveImage={(index) => dispatch({ type: 'composer/imageRemoved', payload: index })}
+          onShowImagesInContentChange={(nextShowImagesInContent) => dispatch({
+            type: 'composer/showImagesChanged',
+            payload: nextShowImagesInContent,
+          })}
           onSubmit={handleSubmit}
         />
       )}
