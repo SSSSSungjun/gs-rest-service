@@ -3,6 +3,7 @@ package com.example.restservice.service;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +16,12 @@ import java.util.UUID;
 public class AnonymousSessionService {
     public static final String COOKIE_NAME = "anonymous_session_id";
     private static final Duration COOKIE_MAX_AGE = Duration.ofDays(30);
+
+    private final boolean secureCookie;
+
+    public AnonymousSessionService(@Value("${app.cookie.secure:false}") boolean secureCookie) {
+        this.secureCookie = secureCookie;
+    }
 
     public String getOrCreateSessionId(HttpServletRequest request, HttpServletResponse response) {
         return findSessionId(request).orElseGet(() -> issueSessionCookie(response));
@@ -37,7 +44,7 @@ public class AnonymousSessionService {
         String sessionId = UUID.randomUUID().toString();
         ResponseCookie cookie = ResponseCookie.from(COOKIE_NAME, sessionId)
                 .httpOnly(true)
-                .secure(false)
+                .secure(secureCookie)
                 .sameSite("Lax")
                 .path("/")
                 .maxAge(COOKIE_MAX_AGE)
