@@ -4,6 +4,7 @@ import com.example.restservice.dto.request.CommentRequestDto;
 import com.example.restservice.dto.response.CommentResponseDto;
 import com.example.restservice.service.AnonymousSessionService;
 import com.example.restservice.service.CommentService;
+import com.example.restservice.service.LikeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class CommentController {
 
     private final CommentService commentService;
+    private final LikeService likeService;
     private final AnonymousSessionService anonymousSessionService;
 
     @PostMapping("/posts/{postId}/comments")
@@ -55,6 +57,17 @@ public class CommentController {
     ) {
         String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
         commentService.deleteComment(commentId, sessionId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/comments/{commentId}/likes")
+    public ResponseEntity<Void> toggleCommentLike(
+            @PathVariable Long commentId,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
+        likeService.toggleCommentLike(commentId, sessionId);
         return ResponseEntity.noContent().build();
     }
 }
