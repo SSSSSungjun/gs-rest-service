@@ -89,7 +89,7 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
         validateOwner(post, sessionId);
 
-        commentLikeRepository.deleteByCommentPostId(id);
+        commentLikeRepository.deleteByPostId(id);
         postLikeRepository.deleteByPostId(id);
         postRepository.delete(post);
     }
