@@ -222,6 +222,7 @@ function App() {
       await boardApi.createPost({ nickname, content, images, showImagesInContent })
       dispatch({ type: 'composer/resetContent' })
       dispatch({ type: 'pagination/pageChanged', payload: 1 })
+      setActiveFeedTab('all')
       showSystemMessage('게시글을 등록했습니다.')
       await fetchPosts(false)
     } catch (error) {
