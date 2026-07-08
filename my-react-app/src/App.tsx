@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer } from 'react'
-import type { ChangeEvent, FormEvent, KeyboardEvent } from 'react'
+import type { ChangeEvent, FormEvent, KeyboardEvent, MouseEvent } from 'react'
 import './App.css'
 import { boardApi } from './boardApi'
 import { boardReducer, initialBoardState } from './boardReducer'
@@ -7,6 +7,7 @@ import { boardReducer, initialBoardState } from './boardReducer'
 const POSTS_PER_PAGE = 8
 const TOAST_DURATION_MS = 2400
 const MAX_TEXTAREA_HEIGHT = 220
+const POST_HASH_PREFIX = '#post-'
 
 function formatDate(value: string) {
   if (!value) return ''
@@ -32,6 +33,18 @@ function preventEnterSubmit(event: KeyboardEvent<HTMLFormElement>) {
 function resizeTextarea(element: HTMLTextAreaElement) {
   element.style.height = 'auto'
   element.style.height = `${Math.min(element.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`
+}
+
+function getPostIdFromHash() {
+  if (!window.location.hash.startsWith(POST_HASH_PREFIX)) return null
+
+  const postId = Number(window.location.hash.replace(POST_HASH_PREFIX, ''))
+  return Number.isInteger(postId) && postId > 0 ? postId : null
+}
+
+function isInteractiveClick(event: MouseEvent<HTMLElement>) {
+  const target = event.target
+  return target instanceof Element && target.closest('button, a, input, textarea, details, form') !== null
 }
 
 function App() {
@@ -67,6 +80,22 @@ function App() {
     dispatch({ type: 'toast/show', payload: { message, tone } })
   }, [])
 
+  const openPostDetail = useCallback((postId: number) => {
+    const nextHash = `${POST_HASH_PREFIX}${postId}`
+    if (window.location.hash !== nextHash) {
+      window.history.pushState({ postId }, '', nextHash)
+    }
+    dispatch({ type: 'posts/detailOpened', payload: postId })
+  }, [])
+
+  const closePostDetail = useCallback(() => {
+    if (window.location.hash.startsWith(POST_HASH_PREFIX)) {
+      window.history.back()
+      return
+    }
+    dispatch({ type: 'posts/detailClosed' })
+  }, [])
+
   const fetchPosts = useCallback(async () => {
     dispatch({ type: 'posts/loadStarted' })
     try {
@@ -91,6 +120,11 @@ function App() {
       payload: { postId, content: event.target.value },
     })
     resizeTextarea(event.currentTarget)
+  }
+
+  const handlePostCardClick = (event: MouseEvent<HTMLElement>, postId: number) => {
+    if (isInteractiveClick(event)) return
+    openPostDetail(postId)
   }
 
   const handleTogglePostLike = async (postId: number) => {
@@ -214,6 +248,9 @@ function App() {
       if (pendingDelete.target === 'post') {
         await boardApi.deletePost(pendingDelete.id)
         dispatch({ type: 'posts/deleted', payload: pendingDelete.id })
+        if (window.location.hash === `${POST_HASH_PREFIX}${pendingDelete.id}`) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search)
+        }
         showToast('게시글을 삭제했습니다.', 'success')
         return
       }
@@ -236,6 +273,21 @@ function App() {
   useEffect(() => {
     fetchPosts()
   }, [fetchPosts])
+
+  useEffect(() => {
+    const syncDetailFromHash = () => {
+      const postId = getPostIdFromHash()
+      if (postId === null) {
+        dispatch({ type: 'posts/detailClosed' })
+        return
+      }
+      dispatch({ type: 'posts/detailOpened', payload: postId })
+    }
+
+    syncDetailFromHash()
+    window.addEventListener('popstate', syncDetailFromHash)
+    return () => window.removeEventListener('popstate', syncDetailFromHash)
+  }, [])
 
   useEffect(() => {
     if (currentPage > pageCount) {
@@ -275,7 +327,7 @@ function App() {
           return (
             <article className="post-card detail-card" key={post.id}>
               <div className="detail-toolbar">
-                <button className="back-button" type="button" onClick={() => dispatch({ type: 'posts/toggled', payload: post.id })}>
+                <button className="back-button" type="button" onClick={closePostDetail}>
                   목록
                 </button>
               </div>
@@ -452,7 +504,11 @@ function App() {
           const postEditDraft = editingPosts[post.id]
 
           return (
-            <article className="post-card" key={post.id}>
+            <article
+              className={`post-card ${postEditDraft ? '' : 'clickable-card'}`}
+              key={post.id}
+              onClick={(event) => handlePostCardClick(event, post.id)}
+            >
               <header className="post-header">
                 <div>
                   <strong>{post.nickname || '익명'}</strong>
@@ -506,14 +562,9 @@ function App() {
                   </div>
                 </form>
               ) : (
-                <button
-                  className="post-open-button"
-                  type="button"
-                  aria-label="게시글 상세 보기"
-                  onClick={() => dispatch({ type: 'posts/toggled', payload: post.id })}
-                >
+                <div className="post-open-button" aria-label="게시글 상세 보기">
                   <span className="post-content">{post.content}</span>
-                </button>
+                </div>
               )}
 
               {!postEditDraft && (
