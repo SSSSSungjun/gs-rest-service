@@ -6,9 +6,9 @@ import com.example.restservice.service.AnonymousSessionService;
 import com.example.restservice.service.CommentService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
-@CrossOrigin(origins = {"http://localhost:5173", "http://127.0.0.1:5173"}, allowCredentials = "true")
 public class CommentController {
 
     private final CommentService commentService;
@@ -28,7 +27,7 @@ public class CommentController {
     @PostMapping("/posts/{postId}/comments")
     public ResponseEntity<CommentResponseDto> createComment(
             @PathVariable Long postId,
-            @RequestBody CommentRequestDto requestDto,
+            @Valid @RequestBody CommentRequestDto requestDto,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
