@@ -66,6 +66,8 @@ export function PostDetail({
   onCommentContentChange,
   onSubmitComment,
 }: PostDetailProps) {
+  const postImages = post.images ?? []
+
   return (
     <article className="post-card detail-card" key={post.id}>
       <div className="detail-toolbar">
@@ -105,7 +107,7 @@ export function PostDetail({
       ) : (
         <>
           <p className="detail-content">{post.content}</p>
-          {post.showImagesInContent && <PostImageGallery images={post.images ?? []} variant="detail" />}
+          {post.showImagesInContent && <PostImageGallery images={postImages} variant="detail" />}
         </>
       )}
 
@@ -120,7 +122,7 @@ export function PostDetail({
             좋아요 {post.likeCount}
           </button>
           <span className="meta-pill">댓글 {post.comments.length}</span>
-          {post.images.length > 0 && <span className="meta-pill">사진 {post.images.length}</span>}
+          {postImages.length > 0 && <span className="meta-pill">사진 {postImages.length}</span>}
         </div>
       )}
 
