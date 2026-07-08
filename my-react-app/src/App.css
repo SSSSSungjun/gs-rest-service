@@ -564,29 +564,6 @@ time {
   line-height: 1.6;
 }
 
-.toast {
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  z-index: 40;
-  max-width: min(360px, calc(100vw - 40px));
-  padding: 12px 14px;
-  border-radius: 8px;
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 800;
-  line-height: 1.45;
-  box-shadow: 0 14px 34px rgba(18, 48, 31, 0.22);
-}
-
-.toast-success {
-  background: #15803d;
-}
-
-.toast-error {
-  background: #b91c1c;
-}
-
 @media (max-width: 720px) {
   .board-shell {
     padding: 20px 12px 120px;
@@ -640,11 +617,5 @@ time {
   .inline-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
-  }
-
-  .toast {
-    top: 12px;
-    right: 12px;
-    max-width: calc(100vw - 24px);
   }
 }
