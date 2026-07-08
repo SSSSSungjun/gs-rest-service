@@ -9,7 +9,6 @@ import com.example.restservice.repository.CommentRepository;
 import com.example.restservice.repository.PostLikeRepository;
 import com.example.restservice.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,26 +43,18 @@ public class LikeService {
     private void createPostLike(Long postId, String sessionId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
-        try {
-            postLikeRepository.save(PostLike.builder()
-                    .post(post)
-                    .ownerSessionId(sessionId)
-                    .build());
-        } catch (DataIntegrityViolationException ignored) {
-            // Unique constraint keeps rapid duplicate clicks idempotent for the same session.
-        }
+        postLikeRepository.save(PostLike.builder()
+                .post(post)
+                .ownerSessionId(sessionId)
+                .build());
     }
 
     private void createCommentLike(Long commentId, String sessionId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
-        try {
-            commentLikeRepository.save(CommentLike.builder()
-                    .comment(comment)
-                    .ownerSessionId(sessionId)
-                    .build());
-        } catch (DataIntegrityViolationException ignored) {
-            // Unique constraint keeps rapid duplicate clicks idempotent for the same session.
-        }
+        commentLikeRepository.save(CommentLike.builder()
+                .comment(comment)
+                .ownerSessionId(sessionId)
+                .build());
     }
 }
