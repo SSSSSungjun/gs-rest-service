@@ -12,6 +12,7 @@ export interface BoardState {
   commentDrafts: Record<number, BoardDraft>
   editingPosts: Record<number, BoardDraft>
   editingComments: Record<number, BoardDraft>
+  currentPage: number
   isLoading: boolean
   isSubmitting: boolean
   errorMessage: string
@@ -37,6 +38,7 @@ export type BoardAction =
   | { type: 'comments/editNicknameChanged'; payload: { commentId: number; nickname: string } }
   | { type: 'comments/editContentChanged'; payload: { commentId: number; content: string } }
   | { type: 'comments/editCanceled'; payload: number }
+  | { type: 'pagination/pageChanged'; payload: number }
   | { type: 'posts/deleted'; payload: number }
   | { type: 'error/set'; payload: string }
   | { type: 'error/clear' }
@@ -48,6 +50,7 @@ export const initialBoardState: BoardState = {
   commentDrafts: {},
   editingPosts: {},
   editingComments: {},
+  currentPage: 1,
   isLoading: true,
   isSubmitting: false,
   errorMessage: '',
@@ -163,6 +166,8 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
     }
     case 'comments/editCanceled':
       return { ...state, editingComments: removeDraft(state.editingComments, action.payload) }
+    case 'pagination/pageChanged':
+      return { ...state, currentPage: action.payload }
     case 'posts/deleted':
       return { ...state, posts: state.posts.filter((post) => post.id !== action.payload) }
     case 'error/set':
