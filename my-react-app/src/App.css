@@ -1,7 +1,7 @@
 .board-shell {
   width: min(100%, 1040px);
   margin: 0 auto;
-  padding: 32px 20px 112px;
+  padding: 32px 20px 132px;
   text-align: left;
 }
 
@@ -50,10 +50,11 @@
 }
 
 .composer-bottom {
-  position: sticky;
+  position: fixed;
+  right: max(12px, calc((100vw - 1040px) / 2 + 20px));
   bottom: 14px;
+  left: max(12px, calc((100vw - 1040px) / 2 + 20px));
   z-index: 20;
-  margin-top: 18px;
   backdrop-filter: blur(10px);
 }
 
@@ -182,9 +183,29 @@ button:disabled {
   transition: border-color 160ms ease, box-shadow 160ms ease;
 }
 
-.post-card.expanded {
+.detail-card {
+  min-height: 52vh;
   border-color: #8fc99c;
   box-shadow: 0 14px 34px rgba(21, 83, 45, 0.12);
+}
+
+.detail-toolbar {
+  display: flex;
+  margin-bottom: 14px;
+}
+
+.back-button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #bdd5c5;
+  background: #fbfef8;
+  color: #315b3e;
+  font-size: 13px;
+}
+
+.back-button:hover {
+  background: #edf8e9;
+  color: #12301f;
 }
 
 .post-header {
@@ -227,22 +248,24 @@ time {
   color: #12301f;
 }
 
-.post-content {
-  display: -webkit-box;
-  overflow: hidden;
+.post-content,
+.detail-content {
   color: #213a2b;
   font-size: 16px;
   line-height: 1.7;
   white-space: pre-wrap;
   word-break: break-word;
+}
+
+.post-content {
+  display: -webkit-box;
+  overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
 }
 
-.post-card.expanded .post-content {
-  display: block;
-  overflow: visible;
-  -webkit-line-clamp: unset;
+.detail-content {
+  margin: 18px 0 0;
 }
 
 .post-card-meta-row {
@@ -288,6 +311,7 @@ time {
 .post-open-button:focus-visible,
 .like-button:focus-visible,
 .action-menu summary:focus-visible,
+.back-button:focus-visible,
 .ghost-button:focus-visible,
 .text-button:focus-visible {
   outline: 3px solid rgba(34, 197, 94, 0.24);
@@ -555,7 +579,9 @@ time {
   }
 
   .composer-bottom {
+    right: 10px;
     bottom: 10px;
+    left: 10px;
   }
 
   .composer-input-panel,
