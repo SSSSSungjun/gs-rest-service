@@ -3,6 +3,7 @@ package com.example.restservice.controller;
 import com.example.restservice.dto.request.PostRequestDto;
 import com.example.restservice.dto.response.PostResponseDto;
 import com.example.restservice.service.AnonymousSessionService;
+import com.example.restservice.service.LikeService;
 import com.example.restservice.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -26,6 +27,7 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
+    private final LikeService likeService;
     private final AnonymousSessionService anonymousSessionService;
 
     @GetMapping
@@ -66,6 +68,17 @@ public class PostController {
     ) {
         String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
         postService.deletePost(id, sessionId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/likes")
+    public ResponseEntity<Void> togglePostLike(
+            @PathVariable Long id,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
+        likeService.togglePostLike(id, sessionId);
         return ResponseEntity.noContent().build();
     }
 }

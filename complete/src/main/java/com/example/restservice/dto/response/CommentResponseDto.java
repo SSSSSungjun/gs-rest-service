@@ -15,14 +15,22 @@ public class CommentResponseDto {
     private String nickname;
     private String content;
     private boolean ownedByMe;
+    private long likeCount;
+    private boolean likedByMe;
     private LocalDateTime createdAt;
 
     public static CommentResponseDto from(Comment comment, String sessionId) {
+        return from(comment, sessionId, 0, false);
+    }
+
+    public static CommentResponseDto from(Comment comment, String sessionId, long likeCount, boolean likedByMe) {
         return CommentResponseDto.builder()
                 .id(comment.getId())
                 .nickname(comment.getNickname())
                 .content(comment.getContent())
                 .ownedByMe(comment.isOwnedBy(sessionId))
+                .likeCount(likeCount)
+                .likedByMe(likedByMe)
                 .createdAt(comment.getCreatedAt())
                 .build();
     }

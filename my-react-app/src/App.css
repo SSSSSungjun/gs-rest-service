@@ -128,13 +128,6 @@ textarea:focus {
   box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
 }
 
-.form-actions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
 .form-error {
   margin: 0;
   color: #b91c1c;
@@ -166,7 +159,6 @@ button:disabled {
   opacity: 0.65;
 }
 
-.form-actions button,
 .comment-form button,
 .inline-actions button,
 .composer-input-panel button {
@@ -221,7 +213,6 @@ time {
   display: grid;
   width: 100%;
   min-height: 0;
-  gap: 12px;
   margin: 14px 0 0;
   padding: 0;
   border: 0;
@@ -254,9 +245,17 @@ time {
   -webkit-line-clamp: unset;
 }
 
-.post-card-meta {
+.post-card-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.meta-pill,
+.like-button {
   display: inline-flex;
-  width: fit-content;
   min-height: 30px;
   align-items: center;
   border: 1px solid #bdd5c5;
@@ -268,30 +267,105 @@ time {
   font-weight: 800;
 }
 
-.post-open-button[aria-expanded='true'] .post-card-meta,
-.post-open-button:hover .post-card-meta {
+.like-button {
+  cursor: pointer;
+}
+
+.like-button:hover,
+.like-button.active {
   border-color: #16a34a;
-  background: #e6f7df;
-  color: #12301f;
+  background: #16a34a;
+  color: #ffffff;
+}
+
+.compact-like {
+  min-height: 28px;
+  width: fit-content;
+  padding: 0 9px;
+  font-size: 12px;
 }
 
 .post-open-button:focus-visible,
+.like-button:focus-visible,
+.action-menu summary:focus-visible,
 .ghost-button:focus-visible,
 .text-button:focus-visible {
   outline: 3px solid rgba(34, 197, 94, 0.24);
   outline-offset: 3px;
 }
 
-.owner-actions,
+.action-menu {
+  position: relative;
+}
+
+.action-menu summary {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid #bdd5c5;
+  border-radius: 8px;
+  background: #fbfef8;
+  color: #315b3e;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 1;
+  list-style: none;
+}
+
+.action-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.action-menu summary:hover {
+  background: #edf8e9;
+  color: #12301f;
+}
+
+.action-menu-panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 10;
+  display: grid;
+  min-width: 104px;
+  overflow: hidden;
+  border: 1px solid #c8dfcf;
+  border-radius: 8px;
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(18, 48, 31, 0.14);
+}
+
+.action-menu-panel button {
+  min-height: 38px;
+  border-radius: 0;
+  background: #ffffff;
+  color: #315b3e;
+  padding: 0 14px;
+  text-align: left;
+  font-size: 13px;
+}
+
+.action-menu-panel button:hover {
+  background: #edf8e9;
+  color: #12301f;
+}
+
+.action-menu-panel .danger-menu-button {
+  color: #b91c1c;
+}
+
+.action-menu-panel .danger-menu-button:hover {
+  background: #fff1f1;
+  color: #991b1b;
+}
+
 .inline-actions {
   display: flex;
   gap: 8px;
   align-items: center;
   justify-content: flex-end;
-}
-
-.owner-actions.compact {
-  align-items: flex-start;
 }
 
 .ghost-button,
@@ -308,16 +382,6 @@ time {
 .text-button:hover {
   background: #edf8e9;
   color: #12301f;
-}
-
-.danger-button {
-  border-color: #f3b5b5;
-  color: #b91c1c;
-}
-
-.danger-button:hover {
-  background: #fff1f1;
-  color: #991b1b;
 }
 
 .danger-solid-button {
@@ -353,11 +417,16 @@ time {
 
 .comment {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px;
+  gap: 8px;
   padding: 12px;
   border-radius: 8px;
   background: #f3faef;
+}
+
+.comment-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
 }
 
 .comment p {
@@ -504,12 +573,8 @@ time {
     align-items: stretch;
   }
 
-  .owner-actions {
-    flex-wrap: wrap;
-  }
-
-  .comment {
-    grid-template-columns: 1fr;
+  .comment-body {
+    grid-template-columns: 1fr auto;
   }
 
   .inline-actions {

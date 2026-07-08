@@ -88,6 +88,26 @@ function App() {
     resizeTextarea(event.currentTarget)
   }
 
+  const handleTogglePostLike = async (postId: number) => {
+    try {
+      await boardApi.togglePostLike(postId)
+      await fetchPosts()
+    } catch (error) {
+      showToast('좋아요 처리에 실패했습니다.', 'error')
+      console.error(error)
+    }
+  }
+
+  const handleToggleCommentLike = async (commentId: number) => {
+    try {
+      await boardApi.toggleCommentLike(commentId)
+      await fetchPosts()
+    } catch (error) {
+      showToast('댓글 좋아요 처리에 실패했습니다.', 'error')
+      console.error(error)
+    }
+  }
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     if (!content.trim()) {
@@ -255,18 +275,21 @@ function App() {
                   <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
                 </div>
                 {post.ownedByMe && !postEditDraft && (
-                  <div className="owner-actions">
-                    <button className="ghost-button" onClick={() => dispatch({ type: 'posts/editStarted', payload: post })} type="button">
-                      수정
-                    </button>
-                    <button
-                      className="ghost-button danger-button"
-                      onClick={() => dispatch({ type: 'delete/requested', payload: { target: 'post', id: post.id } })}
-                      type="button"
-                    >
-                      삭제
-                    </button>
-                  </div>
+                  <details className="action-menu">
+                    <summary aria-label="게시글 메뉴">⋮</summary>
+                    <div className="action-menu-panel">
+                      <button onClick={() => dispatch({ type: 'posts/editStarted', payload: post })} type="button">
+                        수정
+                      </button>
+                      <button
+                        className="danger-menu-button"
+                        onClick={() => dispatch({ type: 'delete/requested', payload: { target: 'post', id: post.id } })}
+                        type="button"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  </details>
                 )}
               </header>
 
@@ -306,8 +329,21 @@ function App() {
                   onClick={() => dispatch({ type: 'posts/toggled', payload: post.id })}
                 >
                   <span className="post-content">{post.content}</span>
-                  <span className="post-card-meta">댓글 {post.comments.length}</span>
                 </button>
+              )}
+
+              {!postEditDraft && (
+                <div className="post-card-meta-row">
+                  <button
+                    className={`like-button ${post.likedByMe ? 'active' : ''}`}
+                    type="button"
+                    aria-pressed={post.likedByMe}
+                    onClick={() => handleTogglePostLike(post.id)}
+                  >
+                    좋아요 {post.likeCount}
+                  </button>
+                  <span className="meta-pill">댓글 {post.comments.length}</span>
+                </div>
               )}
 
               {isExpanded && (
@@ -348,25 +384,38 @@ function App() {
                           </form>
                         ) : (
                           <>
-                            <div>
-                              <strong>{comment.nickname || '익명'}</strong>
-                              <time dateTime={comment.createdAt}>{formatDate(comment.createdAt)}</time>
-                              <p>{comment.content}</p>
-                            </div>
-                            {comment.ownedByMe && (
-                              <div className="owner-actions compact">
-                                <button className="text-button" onClick={() => dispatch({ type: 'comments/editStarted', payload: comment })} type="button">
-                                  수정
-                                </button>
-                                <button
-                                  className="text-button danger-button"
-                                  onClick={() => dispatch({ type: 'delete/requested', payload: { target: 'comment', id: comment.id } })}
-                                  type="button"
-                                >
-                                  삭제
-                                </button>
+                            <div className="comment-body">
+                              <div>
+                                <strong>{comment.nickname || '익명'}</strong>
+                                <time dateTime={comment.createdAt}>{formatDate(comment.createdAt)}</time>
+                                <p>{comment.content}</p>
                               </div>
-                            )}
+                              {comment.ownedByMe && (
+                                <details className="action-menu compact">
+                                  <summary aria-label="댓글 메뉴">⋮</summary>
+                                  <div className="action-menu-panel">
+                                    <button onClick={() => dispatch({ type: 'comments/editStarted', payload: comment })} type="button">
+                                      수정
+                                    </button>
+                                    <button
+                                      className="danger-menu-button"
+                                      onClick={() => dispatch({ type: 'delete/requested', payload: { target: 'comment', id: comment.id } })}
+                                      type="button"
+                                    >
+                                      삭제
+                                    </button>
+                                  </div>
+                                </details>
+                              )}
+                            </div>
+                            <button
+                              className={`like-button compact-like ${comment.likedByMe ? 'active' : ''}`}
+                              type="button"
+                              aria-pressed={comment.likedByMe}
+                              onClick={() => handleToggleCommentLike(comment.id)}
+                            >
+                              좋아요 {comment.likeCount}
+                            </button>
                           </>
                         )}
                       </div>

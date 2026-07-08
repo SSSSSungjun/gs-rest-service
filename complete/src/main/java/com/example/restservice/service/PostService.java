@@ -4,12 +4,18 @@ import com.example.restservice.dto.request.PostRequestDto;
 import com.example.restservice.dto.response.PostResponseDto;
 import com.example.restservice.entity.Post;
 import com.example.restservice.exception.ForbiddenOperationException;
+import com.example.restservice.repository.CommentLikeRepository;
+import com.example.restservice.repository.LikeCountProjection;
+import com.example.restservice.repository.PostLikeRepository;
 import com.example.restservice.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -18,10 +24,37 @@ public class PostService {
     private static final String DEFAULT_NICKNAME = "익명";
 
     private final PostRepository postRepository;
+    private final PostLikeRepository postLikeRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
     public List<PostResponseDto> getAllPosts(String sessionId) {
-        return postRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(post -> PostResponseDto.from(post, sessionId))
+        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc();
+        List<Long> postIds = posts.stream()
+                .map(Post::getId)
+                .toList();
+        List<Long> commentIds = posts.stream()
+                .flatMap(post -> post.getComments().stream())
+                .map(comment -> comment.getId())
+                .toList();
+
+        Map<Long, Long> postLikeCounts = getPostLikeCounts(postIds);
+        Set<Long> likedPostIds = postIds.isEmpty()
+                ? Set.of()
+                : Set.copyOf(postLikeRepository.findLikedPostIds(sessionId, postIds));
+        Map<Long, Long> commentLikeCounts = getCommentLikeCounts(commentIds);
+        Set<Long> likedCommentIds = commentIds.isEmpty()
+                ? Set.of()
+                : Set.copyOf(commentLikeRepository.findLikedCommentIds(sessionId, commentIds));
+
+        return posts.stream()
+                .map(post -> PostResponseDto.from(
+                        post,
+                        sessionId,
+                        postLikeCounts.getOrDefault(post.getId(), 0L),
+                        likedPostIds.contains(post.getId()),
+                        commentLikeCounts,
+                        likedCommentIds
+                ))
                 .toList();
     }
 
@@ -56,7 +89,25 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
         validateOwner(post, sessionId);
 
+        commentLikeRepository.deleteByPostId(id);
+        postLikeRepository.deleteByPostId(id);
         postRepository.delete(post);
+    }
+
+    private Map<Long, Long> getPostLikeCounts(List<Long> postIds) {
+        if (postIds.isEmpty()) {
+            return Map.of();
+        }
+        return postLikeRepository.countByPostIds(postIds).stream()
+                .collect(Collectors.toMap(LikeCountProjection::getTargetId, LikeCountProjection::getLikeCount));
+    }
+
+    private Map<Long, Long> getCommentLikeCounts(List<Long> commentIds) {
+        if (commentIds.isEmpty()) {
+            return Map.of();
+        }
+        return commentLikeRepository.countByCommentIds(commentIds).stream()
+                .collect(Collectors.toMap(LikeCountProjection::getTargetId, LikeCountProjection::getLikeCount));
     }
 
     private void validateOwner(Post post, String sessionId) {
