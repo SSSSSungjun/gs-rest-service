@@ -1,7 +1,7 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import type { Post } from '../boardApi'
 import type { BoardDraft } from '../boardReducer'
-import { formatDate, handleTextareaKeyDown, preventEnterSubmit } from '../boardUi'
+import { formatDate, handleTextareaKeyDown, preventEnterSubmit, wasEdited } from '../boardUi'
 import { ActionMenu } from './ActionMenu'
 import { CommentEditForm } from './CommentEditForm'
 import { PostEditForm } from './PostEditForm'
@@ -63,7 +63,10 @@ export function PostDetail({
       <header className="post-header">
         <div>
           <strong>{post.nickname || '익명'}</strong>
-          <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
+          <time dateTime={post.createdAt}>
+            {formatDate(post.createdAt)}
+            {wasEdited(post.createdAt, post.updatedAt) && <span className="edited-label">(수정됨)</span>}
+          </time>
         </div>
         {post.ownedByMe && !postEditDraft && (
           <ActionMenu
@@ -122,7 +125,10 @@ export function PostDetail({
                   <div className="comment-body">
                     <div>
                       <strong>{comment.nickname || '익명'}</strong>
-                      <time dateTime={comment.createdAt}>{formatDate(comment.createdAt)}</time>
+                      <time dateTime={comment.createdAt}>
+                        {formatDate(comment.createdAt)}
+                        {wasEdited(comment.createdAt, comment.updatedAt) && <span className="edited-label">(수정됨)</span>}
+                      </time>
                       <p>{comment.content}</p>
                     </div>
                     {comment.ownedByMe && (
