@@ -48,6 +48,9 @@ public class Post {
     @Column(name = "owner_session_id", nullable = false, length = 80)
     private String ownerSessionId;
 
+    @Column(name = "anonymous_token", nullable = false, length = 80)
+    private String legacyAnonymousToken;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -59,6 +62,9 @@ public class Post {
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
+        if (this.legacyAnonymousToken == null || this.legacyAnonymousToken.isBlank()) {
+            this.legacyAnonymousToken = this.ownerSessionId;
+        }
     }
 
     public boolean isOwnedBy(String sessionId) {
