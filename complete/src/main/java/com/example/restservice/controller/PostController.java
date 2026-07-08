@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,6 +45,17 @@ public class PostController {
     ) {
         String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
         return ResponseEntity.ok(postService.createPost(requestDto, sessionId));
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<PostResponseDto> updatePost(
+            @PathVariable Long id,
+            @Valid @RequestBody PostRequestDto requestDto,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
+        return ResponseEntity.ok(postService.updatePost(id, requestDto, sessionId));
     }
 
     @DeleteMapping("/{id}")
