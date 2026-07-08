@@ -8,8 +8,7 @@ import { ConfirmDialog } from './components/ConfirmDialog'
 import { Pagination } from './components/Pagination'
 import { PostDetail } from './components/PostDetail'
 import { PostList } from './components/PostList'
-import { Toast } from './components/Toast'
-import { getPostIdFromHash, POST_HASH_PREFIX, POSTS_PER_PAGE, resizeTextarea, TOAST_DURATION_MS } from './boardUi'
+import { getPostIdFromHash, POST_HASH_PREFIX, POSTS_PER_PAGE, resizeTextarea } from './boardUi'
 
 function App() {
   const [state, dispatch] = useReducer(boardReducer, initialBoardState)
@@ -22,7 +21,6 @@ function App() {
     editingComments,
     expandedPostId,
     pendingDelete,
-    toast,
     currentPage,
     isLoading,
     isSubmitting,
@@ -41,8 +39,8 @@ function App() {
     return posts.slice(startIndex, startIndex + POSTS_PER_PAGE)
   }, [currentPage, posts])
 
-  const showToast = useCallback((message: string, tone: 'success' | 'error') => {
-    dispatch({ type: 'toast/show', payload: { message, tone } })
+  const showSystemMessage = useCallback((message: string) => {
+    window.alert(message)
   }, [])
 
   const fetchPosts = useCallback(async (showLoading = true) => {
@@ -60,10 +58,10 @@ function App() {
       } else {
         dispatch({ type: 'error/set', payload: message })
       }
-      showToast(message, 'error')
+      showSystemMessage(message)
       console.error(error)
     }
-  }, [showToast])
+  }, [showSystemMessage])
 
   const openPostDetail = useCallback((postId: number) => {
     const nextHash = `${POST_HASH_PREFIX}${postId}`
@@ -98,7 +96,7 @@ function App() {
       await boardApi.togglePostLike(postId)
       await fetchPosts(false)
     } catch (error) {
-      showToast('좋아요 처리에 실패했습니다.', 'error')
+      showSystemMessage('좋아요 처리에 실패했습니다.')
       console.error(error)
     }
   }
@@ -108,7 +106,7 @@ function App() {
       await boardApi.toggleCommentLike(commentId)
       await fetchPosts(false)
     } catch (error) {
-      showToast('댓글 좋아요 처리에 실패했습니다.', 'error')
+      showSystemMessage('댓글 좋아요 처리에 실패했습니다.')
       console.error(error)
     }
   }
@@ -117,7 +115,7 @@ function App() {
     event.preventDefault()
     if (!content.trim()) {
       dispatch({ type: 'error/set', payload: '내용을 입력해주세요.' })
-      showToast('내용을 입력해주세요.', 'error')
+      showSystemMessage('내용을 입력해주세요.')
       return
     }
 
@@ -126,12 +124,12 @@ function App() {
       await boardApi.createPost({ nickname, content })
       dispatch({ type: 'composer/resetContent' })
       dispatch({ type: 'pagination/pageChanged', payload: 1 })
-      showToast('게시글을 등록했습니다.', 'success')
+      showSystemMessage('게시글을 등록했습니다.')
       await fetchPosts(false)
     } catch (error) {
       const message = '게시글 등록에 실패했습니다.'
       dispatch({ type: 'error/set', payload: message })
-      showToast(message, 'error')
+      showSystemMessage(message)
       console.error(error)
     } finally {
       dispatch({ type: 'composer/submitFinished' })
@@ -143,7 +141,7 @@ function App() {
     const draft = editingPosts[postId]
     if (!draft?.content.trim()) {
       dispatch({ type: 'error/set', payload: '내용을 입력해주세요.' })
-      showToast('내용을 입력해주세요.', 'error')
+      showSystemMessage('내용을 입력해주세요.')
       return
     }
 
@@ -151,12 +149,12 @@ function App() {
     try {
       await boardApi.updatePost(postId, draft)
       dispatch({ type: 'posts/editCanceled', payload: postId })
-      showToast('게시글을 수정했습니다.', 'success')
+      showSystemMessage('게시글을 수정했습니다.')
       await fetchPosts(false)
     } catch (error) {
       const message = '내가 작성한 글만 수정할 수 있습니다.'
       dispatch({ type: 'error/set', payload: message })
-      showToast(message, 'error')
+      showSystemMessage(message)
       console.error(error)
     }
   }
@@ -165,7 +163,7 @@ function App() {
     event.preventDefault()
     const draft = commentDrafts[postId] ?? { nickname: '', content: '' }
     if (!draft.content.trim()) {
-      showToast('댓글 내용을 입력해주세요.', 'error')
+      showSystemMessage('댓글 내용을 입력해주세요.')
       return
     }
 
@@ -173,12 +171,12 @@ function App() {
     try {
       await boardApi.createComment(postId, { nickname: draft.nickname, content: draft.content })
       dispatch({ type: 'comments/draftCleared', payload: postId })
-      showToast('댓글을 등록했습니다.', 'success')
+      showSystemMessage('댓글을 등록했습니다.')
       await fetchPosts(false)
     } catch (error) {
       const message = '댓글 등록에 실패했습니다.'
       dispatch({ type: 'error/set', payload: message })
-      showToast(message, 'error')
+      showSystemMessage(message)
       console.error(error)
     }
   }
@@ -188,7 +186,7 @@ function App() {
     const draft = editingComments[commentId]
     if (!draft?.content.trim()) {
       dispatch({ type: 'error/set', payload: '댓글 내용을 입력해주세요.' })
-      showToast('댓글 내용을 입력해주세요.', 'error')
+      showSystemMessage('댓글 내용을 입력해주세요.')
       return
     }
 
@@ -196,12 +194,12 @@ function App() {
     try {
       await boardApi.updateComment(commentId, draft)
       dispatch({ type: 'comments/editCanceled', payload: commentId })
-      showToast('댓글을 수정했습니다.', 'success')
+      showSystemMessage('댓글을 수정했습니다.')
       await fetchPosts(false)
     } catch (error) {
       const message = '내가 작성한 댓글만 수정할 수 있습니다.'
       dispatch({ type: 'error/set', payload: message })
-      showToast(message, 'error')
+      showSystemMessage(message)
       console.error(error)
     }
   }
@@ -217,13 +215,13 @@ function App() {
         if (window.location.hash === `${POST_HASH_PREFIX}${pendingDelete.id}`) {
           window.history.replaceState(null, '', window.location.pathname + window.location.search)
         }
-        showToast('게시글을 삭제했습니다.', 'success')
+        showSystemMessage('게시글을 삭제했습니다.')
         return
       }
 
       await boardApi.deleteComment(pendingDelete.id)
       dispatch({ type: 'delete/canceled' })
-      showToast('댓글을 삭제했습니다.', 'success')
+      showSystemMessage('댓글을 삭제했습니다.')
       await fetchPosts(false)
     } catch (error) {
       const message = pendingDelete.target === 'post'
@@ -231,7 +229,7 @@ function App() {
         : '내가 작성한 댓글만 삭제할 수 있습니다.'
       dispatch({ type: 'error/set', payload: message })
       dispatch({ type: 'delete/canceled' })
-      showToast(message, 'error')
+      showSystemMessage(message)
       console.error(error)
     }
   }
@@ -260,16 +258,6 @@ function App() {
       dispatch({ type: 'pagination/pageChanged', payload: pageCount })
     }
   }, [currentPage, pageCount])
-
-  useEffect(() => {
-    if (!toast) return undefined
-
-    const timeoutId = window.setTimeout(() => {
-      dispatch({ type: 'toast/hidden' })
-    }, TOAST_DURATION_MS)
-
-    return () => window.clearTimeout(timeoutId)
-  }, [toast])
 
   return (
     <main className="board-shell">
@@ -372,7 +360,6 @@ function App() {
         onConfirm={handleConfirmDelete}
         onCancel={() => dispatch({ type: 'delete/canceled' })}
       />
-      <Toast toast={toast} />
     </main>
   )
 }
