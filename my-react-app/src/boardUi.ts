@@ -18,12 +18,9 @@ export function formatDate(value: string) {
 }
 
 export function preventEnterSubmit(event: KeyboardEvent<HTMLFormElement>) {
-  if (event.key !== 'Enter') return
-
-  const target = event.target
-  if (target instanceof HTMLTextAreaElement) return
-
-  event.preventDefault()
+  if (event.key === 'Enter') {
+    event.preventDefault()
+  }
 }
 
 export function resizeTextarea(element: HTMLTextAreaElement) {
