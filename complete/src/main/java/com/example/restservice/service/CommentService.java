@@ -5,6 +5,7 @@ import com.example.restservice.dto.response.CommentResponseDto;
 import com.example.restservice.entity.Comment;
 import com.example.restservice.entity.Post;
 import com.example.restservice.exception.ForbiddenOperationException;
+import com.example.restservice.repository.CommentLikeRepository;
 import com.example.restservice.repository.CommentRepository;
 import com.example.restservice.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class CommentService {
 
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
+    private final CommentLikeRepository commentLikeRepository;
 
     @Transactional
     public CommentResponseDto createComment(Long postId, CommentRequestDto requestDto, String sessionId) {
@@ -55,6 +57,7 @@ public class CommentService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
         validateOwner(comment, sessionId);
 
+        commentLikeRepository.deleteByCommentId(commentId);
         commentRepository.delete(comment);
     }
 
