@@ -11,6 +11,7 @@ import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -55,6 +56,9 @@ public class Post {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at", nullable = false)
+    private LocalDateTime updatedAt;
+
     @Builder.Default
     @OrderBy("createdAt ASC")
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -62,10 +66,17 @@ public class Post {
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = SeoulTime.now();
+        LocalDateTime now = SeoulTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
         if (this.legacyAnonymousToken == null || this.legacyAnonymousToken.isBlank()) {
             this.legacyAnonymousToken = this.ownerSessionId;
         }
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.updatedAt = SeoulTime.now();
     }
 
     public boolean isOwnedBy(String sessionId) {
