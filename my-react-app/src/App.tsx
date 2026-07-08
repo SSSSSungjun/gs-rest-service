@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useReducer } from 'react'
 import type { FormEvent } from 'react'
 import './App.css'
-import { boardApi, type Post } from './boardApi'
-
-type Drafts = Record<number, string>
+import { boardApi } from './boardApi'
+import { boardReducer, initialBoardState } from './boardReducer'
 
 function formatDate(value: string) {
   if (!value) return ''
@@ -17,13 +16,8 @@ function formatDate(value: string) {
 }
 
 function App() {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [nickname, setNickname] = useState('')
-  const [content, setContent] = useState('')
-  const [commentDrafts, setCommentDrafts] = useState<Drafts>({})
-  const [isLoading, setIsLoading] = useState(true)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [errorMessage, setErrorMessage] = useState('')
+  const [state, dispatch] = useReducer(boardReducer, initialBoardState)
+  const { posts, nickname, content, commentDrafts, isLoading, isSubmitting, errorMessage } = state
 
   const totalComments = useMemo(
     () => posts.reduce((total, post) => total + post.comments.length, 0),
@@ -31,46 +25,43 @@ function App() {
   )
 
   const fetchPosts = async () => {
+    dispatch({ type: 'posts/loadStarted' })
     try {
-      setErrorMessage('')
       const data = await boardApi.getPosts()
-      setPosts(data)
+      dispatch({ type: 'posts/loadSucceeded', payload: data })
     } catch (error) {
-      setErrorMessage('게시글을 불러오지 못했습니다.')
+      dispatch({ type: 'posts/loadFailed', payload: '게시글을 불러오지 못했습니다.' })
       console.error(error)
-    } finally {
-      setIsLoading(false)
     }
   }
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     if (!content.trim()) {
-      setErrorMessage('내용을 입력해주세요.')
+      dispatch({ type: 'error/set', payload: '내용을 입력해주세요.' })
       return
     }
 
+    dispatch({ type: 'composer/submitStarted' })
     try {
-      setIsSubmitting(true)
-      setErrorMessage('')
       await boardApi.createPost({ nickname, content })
-      setContent('')
+      dispatch({ type: 'composer/resetContent' })
       await fetchPosts()
     } catch (error) {
-      setErrorMessage('게시글 등록에 실패했습니다.')
+      dispatch({ type: 'error/set', payload: '게시글 등록에 실패했습니다.' })
       console.error(error)
     } finally {
-      setIsSubmitting(false)
+      dispatch({ type: 'composer/submitFinished' })
     }
   }
 
   const handleDeletePost = async (postId: number) => {
+    dispatch({ type: 'error/clear' })
     try {
-      setErrorMessage('')
       await boardApi.deletePost(postId)
-      setPosts((current) => current.filter((post) => post.id !== postId))
+      dispatch({ type: 'posts/deleted', payload: postId })
     } catch (error) {
-      setErrorMessage('내가 작성한 글만 삭제할 수 있습니다.')
+      dispatch({ type: 'error/set', payload: '내가 작성한 글만 삭제할 수 있습니다.' })
       console.error(error)
     }
   }
@@ -80,24 +71,24 @@ function App() {
     const draft = commentDrafts[postId] ?? ''
     if (!draft.trim()) return
 
+    dispatch({ type: 'error/clear' })
     try {
-      setErrorMessage('')
       await boardApi.createComment(postId, { nickname, content: draft })
-      setCommentDrafts((current) => ({ ...current, [postId]: '' }))
+      dispatch({ type: 'comments/draftCleared', payload: postId })
       await fetchPosts()
     } catch (error) {
-      setErrorMessage('댓글 등록에 실패했습니다.')
+      dispatch({ type: 'error/set', payload: '댓글 등록에 실패했습니다.' })
       console.error(error)
     }
   }
 
   const handleDeleteComment = async (commentId: number) => {
+    dispatch({ type: 'error/clear' })
     try {
-      setErrorMessage('')
       await boardApi.deleteComment(commentId)
       await fetchPosts()
     } catch (error) {
-      setErrorMessage('내가 작성한 댓글만 삭제할 수 있습니다.')
+      dispatch({ type: 'error/set', payload: '내가 작성한 댓글만 삭제할 수 있습니다.' })
       console.error(error)
     }
   }
@@ -133,7 +124,7 @@ function App() {
               <span>닉네임</span>
               <input
                 value={nickname}
-                onChange={(event) => setNickname(event.target.value)}
+                onChange={(event) => dispatch({ type: 'composer/nicknameChanged', payload: event.target.value })}
                 maxLength={40}
                 placeholder="익명"
               />
@@ -143,7 +134,7 @@ function App() {
             <span>내용</span>
             <textarea
               value={content}
-              onChange={(event) => setContent(event.target.value)}
+              onChange={(event) => dispatch({ type: 'composer/contentChanged', payload: event.target.value })}
               rows={5}
               placeholder="오늘 나누고 싶은 이야기를 적어주세요."
             />
@@ -195,7 +186,10 @@ function App() {
               <form className="comment-form" onSubmit={(event) => handleCreateComment(event, post.id)}>
                 <input
                   value={commentDrafts[post.id] ?? ''}
-                  onChange={(event) => setCommentDrafts((current) => ({ ...current, [post.id]: event.target.value }))}
+                  onChange={(event) => dispatch({
+                    type: 'comments/draftChanged',
+                    payload: { postId: post.id, content: event.target.value },
+                  })}
                   placeholder="댓글을 남겨보세요"
                 />
                 <button type="submit">등록</button>
