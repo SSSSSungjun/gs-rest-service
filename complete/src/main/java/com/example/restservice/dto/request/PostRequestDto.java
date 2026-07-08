@@ -1,14 +1,17 @@
 package com.example.restservice.dto.request;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
-@Setter 
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class PostRequestDto {
     private String nickname;
     private String content;
-    private String anonymousToken;
 }
