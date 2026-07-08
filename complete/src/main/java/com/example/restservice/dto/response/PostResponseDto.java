@@ -21,6 +21,7 @@ public class PostResponseDto {
     private long likeCount;
     private boolean likedByMe;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private List<CommentResponseDto> comments;
 
     public static PostResponseDto from(Post post, String sessionId) {
@@ -43,6 +44,7 @@ public class PostResponseDto {
                 .likeCount(likeCount)
                 .likedByMe(likedByMe)
                 .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
                 .comments(post.getComments().stream()
                         .map(comment -> CommentResponseDto.from(
                                 comment,

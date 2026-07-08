@@ -1,7 +1,6 @@
 import type { KeyboardEvent, MouseEvent } from 'react'
 
 export const POSTS_PER_PAGE = 8
-export const TOAST_DURATION_MS = 2400
 export const MAX_TEXTAREA_HEIGHT = 220
 export const POST_HASH_PREFIX = '#post-'
 
@@ -15,6 +14,12 @@ export function formatDate(value: string) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(value))
+}
+
+export function wasEdited(createdAt: string, updatedAt: string | null) {
+  if (!createdAt || !updatedAt) return false
+
+  return new Date(updatedAt).getTime() > new Date(createdAt).getTime()
 }
 
 export function preventEnterSubmit(event: KeyboardEvent<HTMLFormElement>) {

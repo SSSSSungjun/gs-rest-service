@@ -1,7 +1,7 @@
 import type { FormEvent, MouseEvent } from 'react'
 import type { Post } from '../boardApi'
 import type { BoardDraft } from '../boardReducer'
-import { formatDate, isInteractiveClick } from '../boardUi'
+import { formatDate, isInteractiveClick, wasEdited } from '../boardUi'
 import { ActionMenu } from './ActionMenu'
 import { PostEditForm } from './PostEditForm'
 
@@ -49,7 +49,10 @@ export function PostList({
             <header className="post-header">
               <div>
                 <strong>{post.nickname || '익명'}</strong>
-                <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
+                <time dateTime={post.createdAt}>
+                  {formatDate(post.createdAt)}
+                  {wasEdited(post.createdAt, post.updatedAt) && <span className="edited-label">(수정됨)</span>}
+                </time>
               </div>
               {post.ownedByMe && !postEditDraft && (
                 <ActionMenu
