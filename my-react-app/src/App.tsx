@@ -5,6 +5,7 @@ import { boardApi } from './boardApi'
 import { boardReducer, initialBoardState } from './boardReducer'
 
 const POSTS_PER_PAGE = 8
+const TOAST_DURATION_MS = 2400
 
 function formatDate(value: string) {
   if (!value) return ''
@@ -26,6 +27,9 @@ function App() {
     commentDrafts,
     editingPosts,
     editingComments,
+    expandedPostId,
+    pendingDelete,
+    toast,
     currentPage,
     isLoading,
     isSubmitting,
@@ -38,21 +42,28 @@ function App() {
     return posts.slice(startIndex, startIndex + POSTS_PER_PAGE)
   }, [currentPage, posts])
 
+  const showToast = useCallback((message: string, tone: 'success' | 'error') => {
+    dispatch({ type: 'toast/show', payload: { message, tone } })
+  }, [])
+
   const fetchPosts = useCallback(async () => {
     dispatch({ type: 'posts/loadStarted' })
     try {
       const data = await boardApi.getPosts()
       dispatch({ type: 'posts/loadSucceeded', payload: data })
     } catch (error) {
-      dispatch({ type: 'posts/loadFailed', payload: '게시글을 불러오지 못했습니다.' })
+      const message = '게시글을 불러오지 못했습니다.'
+      dispatch({ type: 'posts/loadFailed', payload: message })
+      showToast(message, 'error')
       console.error(error)
     }
-  }, [])
+  }, [showToast])
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
     if (!content.trim()) {
       dispatch({ type: 'error/set', payload: '내용을 입력해주세요.' })
+      showToast('내용을 입력해주세요.', 'error')
       return
     }
 
@@ -61,9 +72,12 @@ function App() {
       await boardApi.createPost({ nickname, content })
       dispatch({ type: 'composer/resetContent' })
       dispatch({ type: 'pagination/pageChanged', payload: 1 })
+      showToast('게시글을 등록했습니다.', 'success')
       await fetchPosts()
     } catch (error) {
-      dispatch({ type: 'error/set', payload: '게시글 등록에 실패했습니다.' })
+      const message = '게시글 등록에 실패했습니다.'
+      dispatch({ type: 'error/set', payload: message })
+      showToast(message, 'error')
       console.error(error)
     } finally {
       dispatch({ type: 'composer/submitFinished' })
@@ -75,6 +89,7 @@ function App() {
     const draft = editingPosts[postId]
     if (!draft?.content.trim()) {
       dispatch({ type: 'error/set', payload: '내용을 입력해주세요.' })
+      showToast('내용을 입력해주세요.', 'error')
       return
     }
 
@@ -82,20 +97,12 @@ function App() {
     try {
       await boardApi.updatePost(postId, draft)
       dispatch({ type: 'posts/editCanceled', payload: postId })
+      showToast('게시글을 수정했습니다.', 'success')
       await fetchPosts()
     } catch (error) {
-      dispatch({ type: 'error/set', payload: '내가 작성한 글만 수정할 수 있습니다.' })
-      console.error(error)
-    }
-  }
-
-  const handleDeletePost = async (postId: number) => {
-    dispatch({ type: 'error/clear' })
-    try {
-      await boardApi.deletePost(postId)
-      dispatch({ type: 'posts/deleted', payload: postId })
-    } catch (error) {
-      dispatch({ type: 'error/set', payload: '내가 작성한 글만 삭제할 수 있습니다.' })
+      const message = '내가 작성한 글만 수정할 수 있습니다.'
+      dispatch({ type: 'error/set', payload: message })
+      showToast(message, 'error')
       console.error(error)
     }
   }
@@ -103,15 +110,21 @@ function App() {
   const handleCreateComment = async (event: FormEvent, postId: number) => {
     event.preventDefault()
     const draft = commentDrafts[postId] ?? { nickname: '', content: '' }
-    if (!draft.content.trim()) return
+    if (!draft.content.trim()) {
+      showToast('댓글 내용을 입력해주세요.', 'error')
+      return
+    }
 
     dispatch({ type: 'error/clear' })
     try {
       await boardApi.createComment(postId, { nickname: draft.nickname, content: draft.content })
       dispatch({ type: 'comments/draftCleared', payload: postId })
+      showToast('댓글을 등록했습니다.', 'success')
       await fetchPosts()
     } catch (error) {
-      dispatch({ type: 'error/set', payload: '댓글 등록에 실패했습니다.' })
+      const message = '댓글 등록에 실패했습니다.'
+      dispatch({ type: 'error/set', payload: message })
+      showToast(message, 'error')
       console.error(error)
     }
   }
@@ -121,6 +134,7 @@ function App() {
     const draft = editingComments[commentId]
     if (!draft?.content.trim()) {
       dispatch({ type: 'error/set', payload: '댓글 내용을 입력해주세요.' })
+      showToast('댓글 내용을 입력해주세요.', 'error')
       return
     }
 
@@ -128,20 +142,39 @@ function App() {
     try {
       await boardApi.updateComment(commentId, draft)
       dispatch({ type: 'comments/editCanceled', payload: commentId })
+      showToast('댓글을 수정했습니다.', 'success')
       await fetchPosts()
     } catch (error) {
-      dispatch({ type: 'error/set', payload: '내가 작성한 댓글만 수정할 수 있습니다.' })
+      const message = '내가 작성한 댓글만 수정할 수 있습니다.'
+      dispatch({ type: 'error/set', payload: message })
+      showToast(message, 'error')
       console.error(error)
     }
   }
 
-  const handleDeleteComment = async (commentId: number) => {
+  const handleConfirmDelete = async () => {
+    if (!pendingDelete) return
+
     dispatch({ type: 'error/clear' })
     try {
-      await boardApi.deleteComment(commentId)
+      if (pendingDelete.target === 'post') {
+        await boardApi.deletePost(pendingDelete.id)
+        dispatch({ type: 'posts/deleted', payload: pendingDelete.id })
+        showToast('게시글을 삭제했습니다.', 'success')
+        return
+      }
+
+      await boardApi.deleteComment(pendingDelete.id)
+      dispatch({ type: 'delete/canceled' })
+      showToast('댓글을 삭제했습니다.', 'success')
       await fetchPosts()
     } catch (error) {
-      dispatch({ type: 'error/set', payload: '내가 작성한 댓글만 삭제할 수 있습니다.' })
+      const message = pendingDelete.target === 'post'
+        ? '내가 작성한 글만 삭제할 수 있습니다.'
+        : '내가 작성한 댓글만 삭제할 수 있습니다.'
+      dispatch({ type: 'error/set', payload: message })
+      dispatch({ type: 'delete/canceled' })
+      showToast(message, 'error')
       console.error(error)
     }
   }
@@ -155,6 +188,16 @@ function App() {
       dispatch({ type: 'pagination/pageChanged', payload: pageCount })
     }
   }, [currentPage, pageCount])
+
+  useEffect(() => {
+    if (!toast) return undefined
+
+    const timeoutId = window.setTimeout(() => {
+      dispatch({ type: 'toast/hidden' })
+    }, TOAST_DURATION_MS)
+
+    return () => window.clearTimeout(timeoutId)
+  }, [toast])
 
   return (
     <main className="board-shell">
@@ -202,6 +245,7 @@ function App() {
         {visiblePosts.map((post) => {
           const commentDraft = commentDrafts[post.id] ?? { nickname: '', content: '' }
           const postEditDraft = editingPosts[post.id]
+          const isExpanded = expandedPostId === post.id
 
           return (
             <article className="post-card" key={post.id}>
@@ -215,7 +259,11 @@ function App() {
                     <button className="ghost-button" onClick={() => dispatch({ type: 'posts/editStarted', payload: post })} type="button">
                       수정
                     </button>
-                    <button className="ghost-button" onClick={() => handleDeletePost(post.id)} type="button">
+                    <button
+                      className="ghost-button danger-button"
+                      onClick={() => dispatch({ type: 'delete/requested', payload: { target: 'post', id: post.id } })}
+                      type="button"
+                    >
                       삭제
                     </button>
                   </div>
@@ -251,90 +299,114 @@ function App() {
                   </div>
                 </form>
               ) : (
-                <p className="post-content">{post.content}</p>
+                <button
+                  className="post-content-button"
+                  type="button"
+                  aria-expanded={isExpanded}
+                  onClick={() => dispatch({ type: 'posts/toggled', payload: post.id })}
+                >
+                  {post.content}
+                </button>
               )}
 
-              <div className="comments">
-                <div className="comments-title">댓글 {post.comments.length}</div>
-                {post.comments.map((comment) => {
-                  const commentEditDraft = editingComments[comment.id]
+              <div className="post-footer">
+                <button
+                  className="comment-count-button"
+                  type="button"
+                  aria-expanded={isExpanded}
+                  onClick={() => dispatch({ type: 'posts/toggled', payload: post.id })}
+                >
+                  댓글 {post.comments.length}
+                </button>
+              </div>
 
-                  return (
-                    <div className="comment" key={comment.id}>
-                      {commentEditDraft ? (
-                        <form className="comment-edit-form" onSubmit={(event) => handleUpdateComment(event, comment.id)}>
-                          <input
-                            value={commentEditDraft.nickname}
-                            onChange={(event) => dispatch({
-                              type: 'comments/editNicknameChanged',
-                              payload: { commentId: comment.id, nickname: event.target.value },
-                            })}
-                            maxLength={40}
-                            placeholder="익명"
-                            aria-label="댓글 수정 닉네임"
-                          />
-                          <input
-                            value={commentEditDraft.content}
-                            onChange={(event) => dispatch({
-                              type: 'comments/editContentChanged',
-                              payload: { commentId: comment.id, content: event.target.value },
-                            })}
-                            aria-label="댓글 수정 내용"
-                          />
-                          <div className="inline-actions">
-                            <button type="submit">저장</button>
-                            <button className="ghost-button" type="button" onClick={() => dispatch({ type: 'comments/editCanceled', payload: comment.id })}>
-                              취소
-                            </button>
-                          </div>
-                        </form>
-                      ) : (
-                        <>
-                          <div>
-                            <strong>{comment.nickname || '익명'}</strong>
-                            <time dateTime={comment.createdAt}>{formatDate(comment.createdAt)}</time>
-                            <p>{comment.content}</p>
-                          </div>
-                          {comment.ownedByMe && (
-                            <div className="owner-actions compact">
-                              <button className="text-button" onClick={() => dispatch({ type: 'comments/editStarted', payload: comment })} type="button">
-                                수정
-                              </button>
-                              <button className="text-button" onClick={() => handleDeleteComment(comment.id)} type="button">
-                                삭제
+              {isExpanded && (
+                <div className="comments">
+                  <div className="comments-title">댓글 {post.comments.length}</div>
+                  {post.comments.map((comment) => {
+                    const commentEditDraft = editingComments[comment.id]
+
+                    return (
+                      <div className="comment" key={comment.id}>
+                        {commentEditDraft ? (
+                          <form className="comment-edit-form" onSubmit={(event) => handleUpdateComment(event, comment.id)}>
+                            <input
+                              value={commentEditDraft.nickname}
+                              onChange={(event) => dispatch({
+                                type: 'comments/editNicknameChanged',
+                                payload: { commentId: comment.id, nickname: event.target.value },
+                              })}
+                              maxLength={40}
+                              placeholder="익명"
+                              aria-label="댓글 수정 닉네임"
+                            />
+                            <input
+                              value={commentEditDraft.content}
+                              onChange={(event) => dispatch({
+                                type: 'comments/editContentChanged',
+                                payload: { commentId: comment.id, content: event.target.value },
+                              })}
+                              aria-label="댓글 수정 내용"
+                            />
+                            <div className="inline-actions">
+                              <button type="submit">저장</button>
+                              <button className="ghost-button" type="button" onClick={() => dispatch({ type: 'comments/editCanceled', payload: comment.id })}>
+                                취소
                               </button>
                             </div>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  )
-                })}
+                          </form>
+                        ) : (
+                          <>
+                            <div>
+                              <strong>{comment.nickname || '익명'}</strong>
+                              <time dateTime={comment.createdAt}>{formatDate(comment.createdAt)}</time>
+                              <p>{comment.content}</p>
+                            </div>
+                            {comment.ownedByMe && (
+                              <div className="owner-actions compact">
+                                <button className="text-button" onClick={() => dispatch({ type: 'comments/editStarted', payload: comment })} type="button">
+                                  수정
+                                </button>
+                                <button
+                                  className="text-button danger-button"
+                                  onClick={() => dispatch({ type: 'delete/requested', payload: { target: 'comment', id: comment.id } })}
+                                  type="button"
+                                >
+                                  삭제
+                                </button>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )
+                  })}
 
-                <form className="comment-form" onSubmit={(event) => handleCreateComment(event, post.id)}>
-                  <input
-                    className="comment-nickname-input"
-                    value={commentDraft.nickname}
-                    onChange={(event) => dispatch({
-                      type: 'comments/nicknameChanged',
-                      payload: { postId: post.id, nickname: event.target.value },
-                    })}
-                    maxLength={40}
-                    placeholder="익명"
-                    aria-label="댓글 닉네임"
-                  />
-                  <input
-                    value={commentDraft.content}
-                    onChange={(event) => dispatch({
-                      type: 'comments/contentChanged',
-                      payload: { postId: post.id, content: event.target.value },
-                    })}
-                    placeholder="댓글을 남겨보세요"
-                    aria-label="댓글 내용"
-                  />
-                  <button type="submit">등록</button>
-                </form>
-              </div>
+                  <form className="comment-form" onSubmit={(event) => handleCreateComment(event, post.id)}>
+                    <input
+                      className="comment-nickname-input"
+                      value={commentDraft.nickname}
+                      onChange={(event) => dispatch({
+                        type: 'comments/nicknameChanged',
+                        payload: { postId: post.id, nickname: event.target.value },
+                      })}
+                      maxLength={40}
+                      placeholder="익명"
+                      aria-label="댓글 닉네임"
+                    />
+                    <input
+                      value={commentDraft.content}
+                      onChange={(event) => dispatch({
+                        type: 'comments/contentChanged',
+                        payload: { postId: post.id, content: event.target.value },
+                      })}
+                      placeholder="댓글을 남겨보세요"
+                      aria-label="댓글 내용"
+                    />
+                    <button type="submit">등록</button>
+                  </form>
+                </div>
+              )}
             </article>
           )
         })}
@@ -355,6 +427,25 @@ function App() {
           </nav>
         )}
       </section>
+
+      {pendingDelete && (
+        <div className="modal-backdrop">
+          <section className="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-dialog-title">
+            <h2 id="delete-dialog-title">삭제할까요?</h2>
+            <p>{pendingDelete.target === 'post' ? '이 글과 댓글이 함께 삭제됩니다.' : '이 댓글을 삭제합니다.'}</p>
+            <div className="inline-actions">
+              <button className="danger-solid-button" type="button" onClick={handleConfirmDelete}>삭제</button>
+              <button className="ghost-button" type="button" onClick={() => dispatch({ type: 'delete/canceled' })}>취소</button>
+            </div>
+          </section>
+        </div>
+      )}
+
+      {toast && (
+        <div className={`toast toast-${toast.tone}`} role="status" aria-live="polite">
+          {toast.message}
+        </div>
+      )}
     </main>
   )
 }

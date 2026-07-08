@@ -5,6 +5,16 @@ export interface BoardDraft {
   content: string
 }
 
+export interface ToastState {
+  message: string
+  tone: 'success' | 'error'
+}
+
+export interface PendingDelete {
+  target: 'post' | 'comment'
+  id: number
+}
+
 export interface BoardState {
   posts: Post[]
   nickname: string
@@ -12,6 +22,9 @@ export interface BoardState {
   commentDrafts: Record<number, BoardDraft>
   editingPosts: Record<number, BoardDraft>
   editingComments: Record<number, BoardDraft>
+  expandedPostId: number | null
+  pendingDelete: PendingDelete | null
+  toast: ToastState | null
   currentPage: number
   isLoading: boolean
   isSubmitting: boolean
@@ -22,6 +35,7 @@ export type BoardAction =
   | { type: 'posts/loadStarted' }
   | { type: 'posts/loadSucceeded'; payload: Post[] }
   | { type: 'posts/loadFailed'; payload: string }
+  | { type: 'posts/toggled'; payload: number }
   | { type: 'composer/nicknameChanged'; payload: string }
   | { type: 'composer/contentChanged'; payload: string }
   | { type: 'composer/submitStarted' }
@@ -38,8 +52,12 @@ export type BoardAction =
   | { type: 'comments/editNicknameChanged'; payload: { commentId: number; nickname: string } }
   | { type: 'comments/editContentChanged'; payload: { commentId: number; content: string } }
   | { type: 'comments/editCanceled'; payload: number }
+  | { type: 'delete/requested'; payload: PendingDelete }
+  | { type: 'delete/canceled' }
   | { type: 'pagination/pageChanged'; payload: number }
   | { type: 'posts/deleted'; payload: number }
+  | { type: 'toast/show'; payload: ToastState }
+  | { type: 'toast/hidden' }
   | { type: 'error/set'; payload: string }
   | { type: 'error/clear' }
 
@@ -50,6 +68,9 @@ export const initialBoardState: BoardState = {
   commentDrafts: {},
   editingPosts: {},
   editingComments: {},
+  expandedPostId: null,
+  pendingDelete: null,
+  toast: null,
   currentPage: 1,
   isLoading: true,
   isSubmitting: false,
@@ -70,10 +91,21 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
   switch (action.type) {
     case 'posts/loadStarted':
       return { ...state, isLoading: true, errorMessage: '' }
-    case 'posts/loadSucceeded':
-      return { ...state, posts: action.payload, isLoading: false, errorMessage: '' }
+    case 'posts/loadSucceeded': {
+      const expandedPostExists = state.expandedPostId === null
+        || action.payload.some((post) => post.id === state.expandedPostId)
+      return {
+        ...state,
+        posts: action.payload,
+        expandedPostId: expandedPostExists ? state.expandedPostId : null,
+        isLoading: false,
+        errorMessage: '',
+      }
+    }
     case 'posts/loadFailed':
       return { ...state, isLoading: false, errorMessage: action.payload }
+    case 'posts/toggled':
+      return { ...state, expandedPostId: state.expandedPostId === action.payload ? null : action.payload }
     case 'composer/nicknameChanged':
       return { ...state, nickname: action.payload }
     case 'composer/contentChanged':
@@ -166,10 +198,23 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
     }
     case 'comments/editCanceled':
       return { ...state, editingComments: removeDraft(state.editingComments, action.payload) }
+    case 'delete/requested':
+      return { ...state, pendingDelete: action.payload }
+    case 'delete/canceled':
+      return { ...state, pendingDelete: null }
     case 'pagination/pageChanged':
-      return { ...state, currentPage: action.payload }
+      return { ...state, currentPage: action.payload, expandedPostId: null }
     case 'posts/deleted':
-      return { ...state, posts: state.posts.filter((post) => post.id !== action.payload) }
+      return {
+        ...state,
+        posts: state.posts.filter((post) => post.id !== action.payload),
+        expandedPostId: state.expandedPostId === action.payload ? null : state.expandedPostId,
+        pendingDelete: null,
+      }
+    case 'toast/show':
+      return { ...state, toast: action.payload }
+    case 'toast/hidden':
+      return { ...state, toast: null }
     case 'error/set':
       return { ...state, errorMessage: action.payload }
     case 'error/clear':
