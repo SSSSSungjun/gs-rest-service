@@ -38,15 +38,30 @@ public class CommentService {
     }
 
     @Transactional
+    public CommentResponseDto updateComment(Long commentId, CommentRequestDto requestDto, String sessionId) {
+        validateContent(requestDto.getContent());
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+        validateOwner(comment, sessionId);
+
+        comment.update(normalizeNickname(requestDto.getNickname()), requestDto.getContent().trim());
+        return CommentResponseDto.from(comment, sessionId);
+    }
+
+    @Transactional
     public void deleteComment(Long commentId, String sessionId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
-
-        if (!comment.isOwnedBy(sessionId)) {
-            throw new ForbiddenOperationException("본인이 작성한 댓글만 삭제할 수 있습니다.");
-        }
+        validateOwner(comment, sessionId);
 
         commentRepository.delete(comment);
+    }
+
+    private void validateOwner(Comment comment, String sessionId) {
+        if (!comment.isOwnedBy(sessionId)) {
+            throw new ForbiddenOperationException("본인이 작성한 댓글만 수정하거나 삭제할 수 있습니다.");
+        }
     }
 
     private void validateContent(String content) {
