@@ -1,6 +1,6 @@
-import type { Post } from './boardApi'
+import type { Comment, Post } from './boardApi'
 
-export interface CommentDraft {
+export interface BoardDraft {
   nickname: string
   content: string
 }
@@ -9,7 +9,9 @@ export interface BoardState {
   posts: Post[]
   nickname: string
   content: string
-  commentDrafts: Record<number, CommentDraft>
+  commentDrafts: Record<number, BoardDraft>
+  editingPosts: Record<number, BoardDraft>
+  editingComments: Record<number, BoardDraft>
   isLoading: boolean
   isSubmitting: boolean
   errorMessage: string
@@ -27,6 +29,14 @@ export type BoardAction =
   | { type: 'comments/nicknameChanged'; payload: { postId: number; nickname: string } }
   | { type: 'comments/contentChanged'; payload: { postId: number; content: string } }
   | { type: 'comments/draftCleared'; payload: number }
+  | { type: 'posts/editStarted'; payload: Post }
+  | { type: 'posts/editNicknameChanged'; payload: { postId: number; nickname: string } }
+  | { type: 'posts/editContentChanged'; payload: { postId: number; content: string } }
+  | { type: 'posts/editCanceled'; payload: number }
+  | { type: 'comments/editStarted'; payload: Comment }
+  | { type: 'comments/editNicknameChanged'; payload: { commentId: number; nickname: string } }
+  | { type: 'comments/editContentChanged'; payload: { commentId: number; content: string } }
+  | { type: 'comments/editCanceled'; payload: number }
   | { type: 'posts/deleted'; payload: number }
   | { type: 'error/set'; payload: string }
   | { type: 'error/clear' }
@@ -36,13 +46,21 @@ export const initialBoardState: BoardState = {
   nickname: '',
   content: '',
   commentDrafts: {},
+  editingPosts: {},
+  editingComments: {},
   isLoading: true,
   isSubmitting: false,
   errorMessage: '',
 }
 
-function getCommentDraft(state: BoardState, postId: number): CommentDraft {
-  return state.commentDrafts[postId] ?? { nickname: '', content: '' }
+function getDraft(drafts: Record<number, BoardDraft>, id: number): BoardDraft {
+  return drafts[id] ?? { nickname: '', content: '' }
+}
+
+function removeDraft(drafts: Record<number, BoardDraft>, id: number): Record<number, BoardDraft> {
+  const nextDrafts = { ...drafts }
+  delete nextDrafts[id]
+  return nextDrafts
 }
 
 export function boardReducer(state: BoardState, action: BoardAction): BoardState {
@@ -64,7 +82,7 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
     case 'composer/resetContent':
       return { ...state, content: '' }
     case 'comments/nicknameChanged': {
-      const currentDraft = getCommentDraft(state, action.payload.postId)
+      const currentDraft = getDraft(state.commentDrafts, action.payload.postId)
       return {
         ...state,
         commentDrafts: {
@@ -74,7 +92,7 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
       }
     }
     case 'comments/contentChanged': {
-      const currentDraft = getCommentDraft(state, action.payload.postId)
+      const currentDraft = getDraft(state.commentDrafts, action.payload.postId)
       return {
         ...state,
         commentDrafts: {
@@ -83,11 +101,68 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
         },
       }
     }
-    case 'comments/draftCleared': {
-      const nextDrafts = { ...state.commentDrafts }
-      delete nextDrafts[action.payload]
-      return { ...state, commentDrafts: nextDrafts }
+    case 'comments/draftCleared':
+      return { ...state, commentDrafts: removeDraft(state.commentDrafts, action.payload) }
+    case 'posts/editStarted':
+      return {
+        ...state,
+        editingPosts: {
+          ...state.editingPosts,
+          [action.payload.id]: { nickname: action.payload.nickname, content: action.payload.content },
+        },
+      }
+    case 'posts/editNicknameChanged': {
+      const currentDraft = getDraft(state.editingPosts, action.payload.postId)
+      return {
+        ...state,
+        editingPosts: {
+          ...state.editingPosts,
+          [action.payload.postId]: { ...currentDraft, nickname: action.payload.nickname },
+        },
+      }
     }
+    case 'posts/editContentChanged': {
+      const currentDraft = getDraft(state.editingPosts, action.payload.postId)
+      return {
+        ...state,
+        editingPosts: {
+          ...state.editingPosts,
+          [action.payload.postId]: { ...currentDraft, content: action.payload.content },
+        },
+      }
+    }
+    case 'posts/editCanceled':
+      return { ...state, editingPosts: removeDraft(state.editingPosts, action.payload) }
+    case 'comments/editStarted':
+      return {
+        ...state,
+        editingComments: {
+          ...state.editingComments,
+          [action.payload.id]: { nickname: action.payload.nickname, content: action.payload.content },
+        },
+      }
+    case 'comments/editNicknameChanged': {
+      const currentDraft = getDraft(state.editingComments, action.payload.commentId)
+      return {
+        ...state,
+        editingComments: {
+          ...state.editingComments,
+          [action.payload.commentId]: { ...currentDraft, nickname: action.payload.nickname },
+        },
+      }
+    }
+    case 'comments/editContentChanged': {
+      const currentDraft = getDraft(state.editingComments, action.payload.commentId)
+      return {
+        ...state,
+        editingComments: {
+          ...state.editingComments,
+          [action.payload.commentId]: { ...currentDraft, content: action.payload.content },
+        },
+      }
+    }
+    case 'comments/editCanceled':
+      return { ...state, editingComments: removeDraft(state.editingComments, action.payload) }
     case 'posts/deleted':
       return { ...state, posts: state.posts.filter((post) => post.id !== action.payload) }
     case 'error/set':
