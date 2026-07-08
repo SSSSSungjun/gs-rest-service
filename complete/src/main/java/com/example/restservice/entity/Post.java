@@ -1,5 +1,6 @@
 package com.example.restservice.entity;
 
+import com.example.restservice.support.SeoulTime;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -61,7 +62,7 @@ public class Post {
 
     @PrePersist
     protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = SeoulTime.now();
         if (this.legacyAnonymousToken == null || this.legacyAnonymousToken.isBlank()) {
             this.legacyAnonymousToken = this.ownerSessionId;
         }
