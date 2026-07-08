@@ -1,21 +1,37 @@
 import { useCallback, useEffect, useMemo, useReducer } from 'react'
-import type { FormEvent } from 'react'
+import type { ChangeEvent, FormEvent, KeyboardEvent } from 'react'
 import './App.css'
 import { boardApi } from './boardApi'
 import { boardReducer, initialBoardState } from './boardReducer'
 
 const POSTS_PER_PAGE = 8
 const TOAST_DURATION_MS = 2400
+const MAX_TEXTAREA_HEIGHT = 220
 
 function formatDate(value: string) {
   if (!value) return ''
 
   return new Intl.DateTimeFormat('ko-KR', {
+    timeZone: 'Asia/Seoul',
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
   }).format(new Date(value))
+}
+
+function preventEnterSubmit(event: KeyboardEvent<HTMLFormElement>) {
+  if (event.key !== 'Enter') return
+
+  const target = event.target
+  if (target instanceof HTMLTextAreaElement) return
+
+  event.preventDefault()
+}
+
+function resizeTextarea(element: HTMLTextAreaElement) {
+  element.style.height = 'auto'
+  element.style.height = `${Math.min(element.scrollHeight, MAX_TEXTAREA_HEIGHT)}px`
 }
 
 function App() {
@@ -58,6 +74,19 @@ function App() {
       console.error(error)
     }
   }, [showToast])
+
+  const handleComposerChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    dispatch({ type: 'composer/contentChanged', payload: event.target.value })
+    resizeTextarea(event.currentTarget)
+  }
+
+  const handleCommentChange = (event: ChangeEvent<HTMLTextAreaElement>, postId: number) => {
+    dispatch({
+      type: 'comments/contentChanged',
+      payload: { postId, content: event.target.value },
+    })
+    resizeTextarea(event.currentTarget)
+  }
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault()
@@ -209,35 +238,6 @@ function App() {
         </div>
       </section>
 
-      <section className="composer" aria-label="게시글 작성">
-        <form onSubmit={handleSubmit}>
-          <div className="field-row">
-            <label>
-              <span>닉네임</span>
-              <input
-                value={nickname}
-                onChange={(event) => dispatch({ type: 'composer/nicknameChanged', payload: event.target.value })}
-                maxLength={40}
-                placeholder="익명"
-              />
-            </label>
-          </div>
-          <label>
-            <span>내용</span>
-            <textarea
-              value={content}
-              onChange={(event) => dispatch({ type: 'composer/contentChanged', payload: event.target.value })}
-              rows={5}
-              placeholder="오늘 나누고 싶은 이야기를 적어주세요."
-            />
-          </label>
-          <div className="form-actions">
-            {errorMessage && <p className="form-error">{errorMessage}</p>}
-            <button type="submit" disabled={isSubmitting}>{isSubmitting ? '등록 중' : '게시하기'}</button>
-          </div>
-        </form>
-      </section>
-
       <section className="feed" aria-label="게시글 목록">
         {isLoading && <p className="empty-state">게시글을 불러오는 중입니다.</p>}
         {!isLoading && posts.length === 0 && <p className="empty-state">아직 게시글이 없습니다.</p>}
@@ -248,7 +248,7 @@ function App() {
           const isExpanded = expandedPostId === post.id
 
           return (
-            <article className="post-card" key={post.id}>
+            <article className={`post-card ${isExpanded ? 'expanded' : ''}`} key={post.id}>
               <header className="post-header">
                 <div>
                   <strong>{post.nickname || '익명'}</strong>
@@ -271,7 +271,7 @@ function App() {
               </header>
 
               {postEditDraft ? (
-                <form className="edit-form" onSubmit={(event) => handleUpdatePost(event, post.id)}>
+                <form className="edit-form" onSubmit={(event) => handleUpdatePost(event, post.id)} onKeyDown={preventEnterSubmit}>
                   <input
                     value={postEditDraft.nickname}
                     onChange={(event) => dispatch({
@@ -300,25 +300,15 @@ function App() {
                 </form>
               ) : (
                 <button
-                  className="post-content-button"
+                  className="post-open-button"
                   type="button"
                   aria-expanded={isExpanded}
                   onClick={() => dispatch({ type: 'posts/toggled', payload: post.id })}
                 >
-                  {post.content}
+                  <span className="post-content">{post.content}</span>
+                  <span className="post-card-meta">댓글 {post.comments.length}</span>
                 </button>
               )}
-
-              <div className="post-footer">
-                <button
-                  className="comment-count-button"
-                  type="button"
-                  aria-expanded={isExpanded}
-                  onClick={() => dispatch({ type: 'posts/toggled', payload: post.id })}
-                >
-                  댓글 {post.comments.length}
-                </button>
-              </div>
 
               {isExpanded && (
                 <div className="comments">
@@ -329,7 +319,7 @@ function App() {
                     return (
                       <div className="comment" key={comment.id}>
                         {commentEditDraft ? (
-                          <form className="comment-edit-form" onSubmit={(event) => handleUpdateComment(event, comment.id)}>
+                          <form className="comment-edit-form" onSubmit={(event) => handleUpdateComment(event, comment.id)} onKeyDown={preventEnterSubmit}>
                             <input
                               value={commentEditDraft.nickname}
                               onChange={(event) => dispatch({
@@ -340,12 +330,13 @@ function App() {
                               placeholder="익명"
                               aria-label="댓글 수정 닉네임"
                             />
-                            <input
+                            <textarea
                               value={commentEditDraft.content}
                               onChange={(event) => dispatch({
                                 type: 'comments/editContentChanged',
                                 payload: { commentId: comment.id, content: event.target.value },
                               })}
+                              rows={1}
                               aria-label="댓글 수정 내용"
                             />
                             <div className="inline-actions">
@@ -382,7 +373,7 @@ function App() {
                     )
                   })}
 
-                  <form className="comment-form" onSubmit={(event) => handleCreateComment(event, post.id)}>
+                  <form className="comment-form" onSubmit={(event) => handleCreateComment(event, post.id)} onKeyDown={preventEnterSubmit}>
                     <input
                       className="comment-nickname-input"
                       value={commentDraft.nickname}
@@ -394,12 +385,10 @@ function App() {
                       placeholder="익명"
                       aria-label="댓글 닉네임"
                     />
-                    <input
+                    <textarea
                       value={commentDraft.content}
-                      onChange={(event) => dispatch({
-                        type: 'comments/contentChanged',
-                        payload: { postId: post.id, content: event.target.value },
-                      })}
+                      onChange={(event) => handleCommentChange(event, post.id)}
+                      rows={1}
                       placeholder="댓글을 남겨보세요"
                       aria-label="댓글 내용"
                     />
@@ -426,6 +415,31 @@ function App() {
             ))}
           </nav>
         )}
+      </section>
+
+      <section className="composer composer-bottom" aria-label="게시글 작성">
+        <form onSubmit={handleSubmit} onKeyDown={preventEnterSubmit}>
+          <div className="composer-input-panel">
+            <input
+              className="composer-nickname-input"
+              value={nickname}
+              onChange={(event) => dispatch({ type: 'composer/nicknameChanged', payload: event.target.value })}
+              maxLength={40}
+              placeholder="익명"
+              aria-label="게시글 닉네임"
+            />
+            <textarea
+              className="composer-textarea"
+              value={content}
+              onChange={handleComposerChange}
+              rows={1}
+              placeholder="오늘 나누고 싶은 이야기를 적어주세요."
+              aria-label="게시글 내용"
+            />
+            <button type="submit" disabled={isSubmitting}>{isSubmitting ? '등록 중' : '게시하기'}</button>
+          </div>
+          {errorMessage && <p className="form-error">{errorMessage}</p>}
+        </form>
       </section>
 
       {pendingDelete && (
