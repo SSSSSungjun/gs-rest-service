@@ -14,17 +14,17 @@ public interface PostLikeRepository extends JpaRepository<PostLike, Long> {
     Optional<PostLike> findByPostIdAndOwnerSessionId(Long postId, String ownerSessionId);
 
     @Query("""
-            select like.post.id as targetId, count(like.id) as likeCount
-            from PostLike like
-            where like.post.id in :postIds
-            group by like.post.id
+            select postLike.post.id as targetId, count(postLike.id) as likeCount
+            from PostLike postLike
+            where postLike.post.id in :postIds
+            group by postLike.post.id
             """)
     List<LikeCountProjection> countByPostIds(@Param("postIds") Collection<Long> postIds);
 
     @Query("""
-            select like.post.id
-            from PostLike like
-            where like.ownerSessionId = :ownerSessionId and like.post.id in :postIds
+            select postLike.post.id
+            from PostLike postLike
+            where postLike.ownerSessionId = :ownerSessionId and postLike.post.id in :postIds
             """)
     List<Long> findLikedPostIds(
             @Param("ownerSessionId") String ownerSessionId,
