@@ -1,5 +1,5 @@
 import type { ChangeEvent, FormEvent } from 'react'
-import { preventEnterSubmit } from '../boardUi'
+import { handleTextareaKeyDown, preventEnterSubmit } from '../boardUi'
 
 interface BoardComposerProps {
   nickname: string
@@ -36,6 +36,7 @@ export function BoardComposer({
             className="composer-textarea"
             value={content}
             onChange={onContentChange}
+            onKeyDown={handleTextareaKeyDown}
             rows={1}
             placeholder="오늘 나누고 싶은 이야기를 적어주세요."
             aria-label="게시글 내용"
