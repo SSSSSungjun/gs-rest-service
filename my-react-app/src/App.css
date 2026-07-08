@@ -7,9 +7,7 @@
 
 .board-hero {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 24px;
-  align-items: end;
+  gap: 10px;
   padding: 16px 0 24px;
 }
 
@@ -37,33 +35,6 @@
   color: #486255;
   font-size: 16px;
   line-height: 1.65;
-}
-
-.board-stats {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(86px, 1fr));
-  gap: 8px;
-  margin: 0;
-}
-
-.board-stats div {
-  padding: 12px 14px;
-  border: 1px solid #bedbc8;
-  border-radius: 8px;
-  background: #fbfef8;
-}
-
-.board-stats dt {
-  color: #64786c;
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.board-stats dd {
-  margin: 2px 0 0;
-  color: #12301f;
-  font-size: 22px;
-  font-weight: 800;
 }
 
 .composer,
@@ -302,14 +273,38 @@ time {
   min-width: 0;
 }
 
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 0 0;
+}
+
+.pagination button {
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid #bdd5c5;
+  background: #fbfef8;
+  color: #315b3e;
+  font-size: 14px;
+}
+
+.pagination button:hover,
+.pagination button.active {
+  border-color: #16a34a;
+  background: #16a34a;
+  color: #ffffff;
+}
+
 @media (max-width: 720px) {
   .board-shell {
     padding: 20px 12px 40px;
   }
 
   .board-hero {
-    grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 8px;
   }
 
   .board-hero h1 {
@@ -318,10 +313,6 @@ time {
 
   .hero-copy {
     font-size: 15px;
-  }
-
-  .board-stats {
-    width: 100%;
   }
 
   .composer,
