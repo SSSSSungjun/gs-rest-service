@@ -180,7 +180,16 @@ button:disabled {
 
 .post-card {
   padding: 18px;
-  transition: border-color 160ms ease, box-shadow 160ms ease;
+  transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.clickable-card {
+  cursor: pointer;
+}
+
+.clickable-card:hover {
+  border-color: #8fc99c;
+  box-shadow: 0 14px 34px rgba(21, 83, 45, 0.12);
 }
 
 .detail-card {
