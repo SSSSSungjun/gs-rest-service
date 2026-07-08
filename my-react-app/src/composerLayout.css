@@ -1,0 +1,25 @@
+.board-shell {
+  padding-bottom: 48px;
+}
+
+.composer-bottom {
+  position: static;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  z-index: auto;
+  margin: 0 0 14px;
+  backdrop-filter: none;
+}
+
+@media (max-width: 720px) {
+  .board-shell {
+    padding-bottom: 48px;
+  }
+
+  .composer-bottom {
+    right: auto;
+    bottom: auto;
+    left: auto;
+  }
+}
