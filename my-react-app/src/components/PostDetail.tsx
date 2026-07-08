@@ -1,7 +1,7 @@
 import type { ChangeEvent, FormEvent } from 'react'
 import type { Post } from '../boardApi'
 import type { BoardDraft } from '../boardReducer'
-import { formatDate, handleTextareaKeyDown, preventEnterSubmit, wasEdited } from '../boardUi'
+import { formatDate, handleTextareaKeyDown, isPopularPost, preventEnterSubmit, wasEdited } from '../boardUi'
 import { ActionMenu } from './ActionMenu'
 import { CommentEditForm } from './CommentEditForm'
 import { PostEditForm } from './PostEditForm'
@@ -67,15 +67,19 @@ export function PostDetail({
   onSubmitComment,
 }: PostDetailProps) {
   const postImages = post.images ?? []
+  const isPopular = isPopularPost(post.likeCount)
 
   return (
-    <article className="post-card detail-card" key={post.id}>
+    <article className={`post-card detail-card ${isPopular ? 'popular-post' : ''}`} key={post.id}>
       <div className="detail-toolbar">
         <button className="back-button" type="button" onClick={onBack}>목록</button>
       </div>
       <header className="post-header">
         <div>
-          <strong>{post.nickname || '익명'}</strong>
+          <div className="post-title-row">
+            <strong>{post.nickname || '익명'}</strong>
+            {isPopular && <span className="popular-badge">인기글</span>}
+          </div>
           <time dateTime={post.createdAt}>
             {formatDate(post.createdAt)}
             {wasEdited(post.createdAt, post.updatedAt) && <span className="edited-label">(수정됨)</span>}

@@ -2,6 +2,7 @@ import type { ChangeEvent, FormEvent } from 'react'
 import type { PostImage } from '../boardApi'
 import { handleTextareaKeyDown, preventEnterSubmit } from '../boardUi'
 import { ImageAttachmentFields } from './ImageAttachmentFields'
+import '../composerLayout.css'
 
 interface BoardComposerProps {
   nickname: string

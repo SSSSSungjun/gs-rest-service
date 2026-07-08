@@ -1,6 +1,7 @@
 import type { KeyboardEvent, MouseEvent } from 'react'
 
 export const POSTS_PER_PAGE = 8
+export const POPULAR_POST_LIKE_THRESHOLD = 10
 export const MAX_TEXTAREA_HEIGHT = 220
 export const POST_HASH_PREFIX = '#post-'
 
@@ -20,6 +21,10 @@ export function wasEdited(createdAt: string, updatedAt: string | null) {
   if (!createdAt || !updatedAt) return false
 
   return new Date(updatedAt).getTime() > new Date(createdAt).getTime()
+}
+
+export function isPopularPost(likeCount: number) {
+  return likeCount >= POPULAR_POST_LIKE_THRESHOLD
 }
 
 export function preventEnterSubmit(event: KeyboardEvent<HTMLFormElement>) {

@@ -7,11 +7,13 @@ import { boardReducer, initialBoardState } from './boardReducer'
 import { BoardComposer } from './components/BoardComposer'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { Pagination } from './components/Pagination'
+import { PopularPostSection } from './components/PopularPostSection'
 import { PostDetail } from './components/PostDetail'
 import { PostList } from './components/PostList'
-import { getPostIdFromHash, POST_HASH_PREFIX, POSTS_PER_PAGE, resizeTextarea } from './boardUi'
+import { getPostIdFromHash, isPopularPost, POST_HASH_PREFIX, POSTS_PER_PAGE, resizeTextarea } from './boardUi'
 
 const MAX_IMAGE_COUNT = 10
+const MAX_POPULAR_SECTION_POSTS = 3
 
 function App() {
   const [state, dispatch] = useReducer(boardReducer, initialBoardState)
@@ -44,6 +46,18 @@ function App() {
     const startIndex = (currentPage - 1) * POSTS_PER_PAGE
     return posts.slice(startIndex, startIndex + POSTS_PER_PAGE)
   }, [currentPage, posts])
+  const popularPosts = useMemo(
+    () => posts
+      .filter((post) => isPopularPost(post.likeCount))
+      .sort((first, second) => {
+        if (second.likeCount !== first.likeCount) {
+          return second.likeCount - first.likeCount
+        }
+        return new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime()
+      })
+      .slice(0, MAX_POPULAR_SECTION_POSTS),
+    [posts],
+  )
 
   const showSystemMessage = useCallback((message: string) => {
     window.alert(message)
@@ -353,8 +367,20 @@ function App() {
       </section>
 
       <section className="feed" aria-label={isDetailView ? '게시글 상세' : '게시글 목록'}>
+        <div className="feed-toolbar">
+          <div>
+            <strong>{isDetailView ? '게시글 상세' : '전체 글'}</strong>
+            {!isDetailView && <span>{posts.length}개</span>}
+          </div>
+          <button className="refresh-button" type="button" onClick={() => fetchPosts(false)} disabled={isLoading}>
+            {isLoading ? '갱신 중' : '갱신하기'}
+          </button>
+        </div>
+
         {isLoading && posts.length === 0 && <p className="empty-state">게시글을 불러오는 중입니다.</p>}
         {!isLoading && posts.length === 0 && <p className="empty-state">아직 게시글이 없습니다.</p>}
+
+        {!isDetailView && <PopularPostSection posts={popularPosts} onOpenPost={openPostDetail} />}
 
         {selectedPost ? (
           <PostDetail
@@ -439,7 +465,7 @@ function App() {
           />
         )}
 
-        {!isDetailView && !isLoading && posts.length > POSTS_PER_PAGE && (
+        {!isDetailView && !isLoading && posts.length > 0 && (
           <Pagination
             pageCount={pageCount}
             currentPage={currentPage}
