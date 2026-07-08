@@ -1,5 +1,7 @@
 package com.example.restservice.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,6 +14,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class PostRequestDto {
+    @Size(max = 40, message = "닉네임은 40자 이하로 입력해주세요.")
     private String nickname;
+
+    @NotBlank(message = "내용을 입력해주세요.")
+    @Size(max = 2000, message = "내용은 2000자 이하로 입력해주세요.")
     private String content;
 }
