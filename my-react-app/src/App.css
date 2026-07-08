@@ -15,7 +15,7 @@
 
 .eyebrow {
   margin: 0 0 8px;
-  color: #2563eb;
+  color: #15803d;
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0;
@@ -24,7 +24,7 @@
 
 .board-hero h1 {
   margin: 0;
-  color: #111827;
+  color: #12301f;
   font-size: 34px;
   line-height: 1.18;
   font-weight: 800;
@@ -34,7 +34,7 @@
 .hero-copy {
   max-width: 620px;
   margin: 10px 0 0;
-  color: #4b5563;
+  color: #486255;
   font-size: 16px;
   line-height: 1.65;
 }
@@ -48,30 +48,30 @@
 
 .board-stats div {
   padding: 12px 14px;
-  border: 1px solid #dbe3ee;
+  border: 1px solid #bedbc8;
   border-radius: 8px;
-  background: #ffffff;
+  background: #fbfef8;
 }
 
 .board-stats dt {
-  color: #6b7280;
+  color: #64786c;
   font-size: 12px;
   font-weight: 700;
 }
 
 .board-stats dd {
   margin: 2px 0 0;
-  color: #111827;
+  color: #12301f;
   font-size: 22px;
   font-weight: 800;
 }
 
 .composer,
 .post-card {
-  border: 1px solid #dbe3ee;
+  border: 1px solid #c8dfcf;
   border-radius: 8px;
-  background: #ffffff;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+  background: rgba(255, 255, 255, 0.94);
+  box-shadow: 0 12px 30px rgba(21, 83, 45, 0.08);
 }
 
 .composer {
@@ -91,7 +91,7 @@ label {
 }
 
 label span {
-  color: #374151;
+  color: #284d37;
   font-size: 13px;
   font-weight: 700;
 }
@@ -100,10 +100,10 @@ input,
 textarea {
   width: 100%;
   box-sizing: border-box;
-  border: 1px solid #cfd8e3;
+  border: 1px solid #bdd5c5;
   border-radius: 8px;
-  background: #fbfdff;
-  color: #111827;
+  background: #fcfff8;
+  color: #12301f;
   font: inherit;
   outline: none;
   transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
@@ -122,9 +122,9 @@ textarea {
 
 input:focus,
 textarea:focus {
-  border-color: #2563eb;
+  border-color: #16a34a;
   background: #ffffff;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
 }
 
 .form-actions {
@@ -144,7 +144,7 @@ button {
   min-height: 40px;
   border: 0;
   border-radius: 8px;
-  background: #2563eb;
+  background: #16a34a;
   color: #ffffff;
   font: inherit;
   font-weight: 800;
@@ -153,7 +153,7 @@ button {
 }
 
 button:hover {
-  background: #1d4ed8;
+  background: #15803d;
 }
 
 button:active {
@@ -178,7 +178,7 @@ button:disabled {
 
 .empty-state {
   margin: 22px 0;
-  color: #6b7280;
+  color: #64786c;
   text-align: center;
 }
 
@@ -196,7 +196,7 @@ button:disabled {
 .post-header strong,
 .comment strong {
   display: block;
-  color: #111827;
+  color: #12301f;
   font-size: 15px;
   font-weight: 800;
 }
@@ -204,13 +204,13 @@ button:disabled {
 time {
   display: block;
   margin-top: 2px;
-  color: #7a8699;
+  color: #6b7d70;
   font-size: 12px;
 }
 
 .post-content {
   margin: 14px 0 18px;
-  color: #1f2937;
+  color: #213a2b;
   font-size: 16px;
   line-height: 1.7;
   white-space: pre-wrap;
@@ -221,27 +221,27 @@ time {
 .text-button {
   min-height: 34px;
   padding: 0 12px;
-  border: 1px solid #d4dce8;
-  background: #ffffff;
-  color: #475569;
+  border: 1px solid #bdd5c5;
+  background: #fbfef8;
+  color: #315b3e;
   font-size: 13px;
 }
 
 .ghost-button:hover,
 .text-button:hover {
-  background: #f8fafc;
-  color: #111827;
+  background: #edf8e9;
+  color: #12301f;
 }
 
 .comments {
   display: grid;
   gap: 10px;
   padding-top: 14px;
-  border-top: 1px solid #e5eaf1;
+  border-top: 1px solid #dcebd8;
 }
 
 .comments-title {
-  color: #4b5563;
+  color: #486255;
   font-size: 13px;
   font-weight: 800;
 }
@@ -252,12 +252,12 @@ time {
   gap: 10px;
   padding: 12px;
   border-radius: 8px;
-  background: #f8fafc;
+  background: #f3faef;
 }
 
 .comment p {
   margin: 7px 0 0;
-  color: #374151;
+  color: #315040;
   font-size: 14px;
   line-height: 1.6;
   white-space: pre-wrap;
@@ -265,8 +265,12 @@ time {
 }
 
 .comment-form {
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(96px, 140px) minmax(0, 1fr) auto;
   align-items: center;
+}
+
+.comment-nickname-input {
+  min-width: 0;
 }
 
 @media (max-width: 720px) {

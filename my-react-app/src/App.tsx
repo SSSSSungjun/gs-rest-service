@@ -68,12 +68,12 @@ function App() {
 
   const handleCreateComment = async (event: FormEvent, postId: number) => {
     event.preventDefault()
-    const draft = commentDrafts[postId] ?? ''
-    if (!draft.trim()) return
+    const draft = commentDrafts[postId] ?? { nickname: '', content: '' }
+    if (!draft.content.trim()) return
 
     dispatch({ type: 'error/clear' })
     try {
-      await boardApi.createComment(postId, { nickname, content: draft })
+      await boardApi.createComment(postId, { nickname: draft.nickname, content: draft.content })
       dispatch({ type: 'comments/draftCleared', payload: postId })
       await fetchPosts()
     } catch (error) {
@@ -101,8 +101,8 @@ function App() {
     <main className="board-shell">
       <section className="board-hero" aria-labelledby="board-title">
         <div>
-          <p className="eyebrow">Anonymous board</p>
-          <h1 id="board-title">사내 익명 게시판</h1>
+          <p className="eyebrow">Bamboo forest</p>
+          <h1 id="board-title">대나무숲</h1>
           <p className="hero-copy">가입 없이 남기고, 내가 쓴 글과 댓글은 이 브라우저에서 바로 삭제할 수 있습니다.</p>
         </div>
         <dl className="board-stats" aria-label="게시판 현황">
@@ -150,53 +150,69 @@ function App() {
         {isLoading && <p className="empty-state">게시글을 불러오는 중입니다.</p>}
         {!isLoading && posts.length === 0 && <p className="empty-state">아직 게시글이 없습니다.</p>}
 
-        {posts.map((post) => (
-          <article className="post-card" key={post.id}>
-            <header className="post-header">
-              <div>
-                <strong>{post.nickname || '익명'}</strong>
-                <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
-              </div>
-              {post.ownedByMe && (
-                <button className="ghost-button" onClick={() => handleDeletePost(post.id)} type="button">
-                  삭제
-                </button>
-              )}
-            </header>
+        {posts.map((post) => {
+          const commentDraft = commentDrafts[post.id] ?? { nickname: '', content: '' }
 
-            <p className="post-content">{post.content}</p>
-
-            <div className="comments">
-              <div className="comments-title">댓글 {post.comments.length}</div>
-              {post.comments.map((comment) => (
-                <div className="comment" key={comment.id}>
-                  <div>
-                    <strong>{comment.nickname || '익명'}</strong>
-                    <time dateTime={comment.createdAt}>{formatDate(comment.createdAt)}</time>
-                    <p>{comment.content}</p>
-                  </div>
-                  {comment.ownedByMe && (
-                    <button className="text-button" onClick={() => handleDeleteComment(comment.id)} type="button">
-                      삭제
-                    </button>
-                  )}
+          return (
+            <article className="post-card" key={post.id}>
+              <header className="post-header">
+                <div>
+                  <strong>{post.nickname || '익명'}</strong>
+                  <time dateTime={post.createdAt}>{formatDate(post.createdAt)}</time>
                 </div>
-              ))}
+                {post.ownedByMe && (
+                  <button className="ghost-button" onClick={() => handleDeletePost(post.id)} type="button">
+                    삭제
+                  </button>
+                )}
+              </header>
 
-              <form className="comment-form" onSubmit={(event) => handleCreateComment(event, post.id)}>
-                <input
-                  value={commentDrafts[post.id] ?? ''}
-                  onChange={(event) => dispatch({
-                    type: 'comments/draftChanged',
-                    payload: { postId: post.id, content: event.target.value },
-                  })}
-                  placeholder="댓글을 남겨보세요"
-                />
-                <button type="submit">등록</button>
-              </form>
-            </div>
-          </article>
-        ))}
+              <p className="post-content">{post.content}</p>
+
+              <div className="comments">
+                <div className="comments-title">댓글 {post.comments.length}</div>
+                {post.comments.map((comment) => (
+                  <div className="comment" key={comment.id}>
+                    <div>
+                      <strong>{comment.nickname || '익명'}</strong>
+                      <time dateTime={comment.createdAt}>{formatDate(comment.createdAt)}</time>
+                      <p>{comment.content}</p>
+                    </div>
+                    {comment.ownedByMe && (
+                      <button className="text-button" onClick={() => handleDeleteComment(comment.id)} type="button">
+                        삭제
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                <form className="comment-form" onSubmit={(event) => handleCreateComment(event, post.id)}>
+                  <input
+                    className="comment-nickname-input"
+                    value={commentDraft.nickname}
+                    onChange={(event) => dispatch({
+                      type: 'comments/nicknameChanged',
+                      payload: { postId: post.id, nickname: event.target.value },
+                    })}
+                    maxLength={40}
+                    placeholder="익명"
+                    aria-label="댓글 닉네임"
+                  />
+                  <input
+                    value={commentDraft.content}
+                    onChange={(event) => dispatch({
+                      type: 'comments/contentChanged',
+                      payload: { postId: post.id, content: event.target.value },
+                    })}
+                    placeholder="댓글을 남겨보세요"
+                    aria-label="댓글 내용"
+                  />
+                  <button type="submit">등록</button>
+                </form>
+              </div>
+            </article>
+          )
+        })}
       </section>
     </main>
   )

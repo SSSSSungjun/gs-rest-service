@@ -1,10 +1,15 @@
 import type { Post } from './boardApi'
 
+export interface CommentDraft {
+  nickname: string
+  content: string
+}
+
 export interface BoardState {
   posts: Post[]
   nickname: string
   content: string
-  commentDrafts: Record<number, string>
+  commentDrafts: Record<number, CommentDraft>
   isLoading: boolean
   isSubmitting: boolean
   errorMessage: string
@@ -19,7 +24,8 @@ export type BoardAction =
   | { type: 'composer/submitStarted' }
   | { type: 'composer/submitFinished' }
   | { type: 'composer/resetContent' }
-  | { type: 'comments/draftChanged'; payload: { postId: number; content: string } }
+  | { type: 'comments/nicknameChanged'; payload: { postId: number; nickname: string } }
+  | { type: 'comments/contentChanged'; payload: { postId: number; content: string } }
   | { type: 'comments/draftCleared'; payload: number }
   | { type: 'posts/deleted'; payload: number }
   | { type: 'error/set'; payload: string }
@@ -33,6 +39,10 @@ export const initialBoardState: BoardState = {
   isLoading: true,
   isSubmitting: false,
   errorMessage: '',
+}
+
+function getCommentDraft(state: BoardState, postId: number): CommentDraft {
+  return state.commentDrafts[postId] ?? { nickname: '', content: '' }
 }
 
 export function boardReducer(state: BoardState, action: BoardAction): BoardState {
@@ -53,14 +63,26 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
       return { ...state, isSubmitting: false }
     case 'composer/resetContent':
       return { ...state, content: '' }
-    case 'comments/draftChanged':
+    case 'comments/nicknameChanged': {
+      const currentDraft = getCommentDraft(state, action.payload.postId)
       return {
         ...state,
         commentDrafts: {
           ...state.commentDrafts,
-          [action.payload.postId]: action.payload.content,
+          [action.payload.postId]: { ...currentDraft, nickname: action.payload.nickname },
         },
       }
+    }
+    case 'comments/contentChanged': {
+      const currentDraft = getCommentDraft(state, action.payload.postId)
+      return {
+        ...state,
+        commentDrafts: {
+          ...state.commentDrafts,
+          [action.payload.postId]: { ...currentDraft, content: action.payload.content },
+        },
+      }
+    }
     case 'comments/draftCleared': {
       const nextDrafts = { ...state.commentDrafts }
       delete nextDrafts[action.payload]
