@@ -1,5 +1,5 @@
 :root {
-  --composer-reserved-height: 205px;
+  --composer-reserved-height: 150px;
 }
 
 .board-shell {
@@ -17,6 +17,7 @@
 .feed {
   order: 2;
   min-height: 0;
+  gap: 10px;
 }
 
 .feed-scroll-region {
@@ -33,15 +34,120 @@
   left: max(12px, calc((100vw - 1040px) / 2 + 20px));
   z-index: 20;
   order: 3;
-  max-height: min(38vh, calc(var(--composer-reserved-height) - 14px));
+  max-height: min(42vh, calc(var(--composer-reserved-height) + 80px));
   margin: 0;
   overflow-y: auto;
   backdrop-filter: blur(10px);
   scrollbar-width: thin;
 }
 
+.composer form {
+  gap: 8px;
+}
+
+.composer-input-panel {
+  grid-template-columns: 104px minmax(0, 1fr) auto;
+}
+
+.composer-attachment-panel {
+  display: grid;
+  gap: 8px;
+}
+
+.composer-attachment-panel summary {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 30px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #bdd5c5;
+  border-radius: 8px;
+  background: #fbfef8;
+  color: #315b3e;
+  padding: 0 10px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+  list-style: none;
+}
+
+.composer-attachment-panel summary::-webkit-details-marker {
+  display: none;
+}
+
+.composer-attachment-panel[open] summary {
+  background: #edf8e9;
+}
+
+.attachment-toggle-icon {
+  display: inline-grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #ffffff;
+  line-height: 1;
+}
+
+.composer-attachment-panel[open] .attachment-toggle-icon {
+  transform: rotate(45deg);
+}
+
+.composer-attachment-panel .image-attachment-fields {
+  padding-top: 2px;
+}
+
+.image-attachment-summary {
+  gap: 6px;
+}
+
+.image-attachment-summary strong,
+.image-attachment-summary span {
+  min-height: 24px;
+  padding: 0 8px;
+}
+
+.image-attachment-preview-list {
+  grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+}
+
+.feed-toolbar {
+  align-items: center;
+}
+
+.feed-toolbar > div {
+  gap: 0;
+}
+
 .feed-tabs {
-  width: min(100%, 320px);
+  width: min(100%, 360px);
+}
+
+.feed-tabs button {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.feed-tabs button span {
+  display: inline-flex;
+  min-width: 22px;
+  min-height: 20px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: #dff3dc;
+  color: #315b3e;
+  padding: 0 6px;
+  font-size: 12px;
+}
+
+.feed-tabs button.active span {
+  background: #16a34a;
+  color: #ffffff;
 }
 
 .refresh-button {
@@ -60,54 +166,59 @@
   content: '…';
 }
 
-.pagination {
+.post-card {
+  padding: 14px;
+}
+
+.post-open-button {
+  margin-top: 10px;
+}
+
+.post-list-preview {
   display: grid;
-  justify-items: center;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.post-list-preview.has-images {
+  grid-template-columns: 112px minmax(0, 1fr);
+  align-items: start;
+}
+
+.post-list-copy {
+  display: grid;
+  min-width: 0;
+  gap: 8px;
+}
+
+.post-list-preview .post-image-gallery {
+  margin-top: 0;
+}
+
+.post-list-preview .list-image-gallery {
+  grid-template-columns: repeat(2, minmax(0, 52px));
   gap: 6px;
-  padding: 0 0 6px;
 }
 
-.pagination-pages {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 6px;
+.post-list-preview .list-image-gallery .post-image-frame {
+  width: 52px;
 }
 
-.pagination-jump {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: end;
-  justify-content: center;
-}
-
-.pagination-jump label {
-  width: 104px;
-}
-
-.pagination-jump label span {
-  font-size: 12px;
-}
-
-.pagination-jump input {
-  min-height: 34px;
-  text-align: center;
-}
-
-.pagination-jump button {
-  min-height: 34px;
-  padding: 0 12px;
+.post-card-meta-row {
+  gap: 10px;
+  margin-top: 0;
 }
 
 .meta-pill,
 .like-button {
   gap: 4px;
-  min-height: 28px;
+  min-height: 26px;
   border-color: transparent;
   background: transparent;
-  padding: 0 4px;
+  padding: 0 2px;
   color: #486255;
+  font-size: 12px;
 }
 
 .like-button:hover,
@@ -117,9 +228,68 @@
   color: #166534;
 }
 
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 0 4px;
+}
+
+.pagination-pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.pagination button {
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0 8px;
+  font-size: 13px;
+}
+
+.pagination-jump {
+  display: inline-flex;
+  width: auto;
+  flex-wrap: nowrap;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination-jump label {
+  display: inline-flex;
+  width: auto;
+  gap: 4px;
+  align-items: center;
+}
+
+.pagination-jump label span,
+.pagination-total {
+  color: #64786c;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.pagination-jump input {
+  width: 54px;
+  min-height: 32px;
+  padding: 0 6px;
+  text-align: center;
+}
+
+.pagination-jump button {
+  min-height: 32px;
+  padding: 0 10px;
+}
+
 @media (max-width: 720px) {
   :root {
-    --composer-reserved-height: 270px;
+    --composer-reserved-height: 195px;
   }
 
   .board-shell {
@@ -135,18 +305,50 @@
     right: 10px;
     bottom: 8px;
     left: 10px;
-    max-height: min(44vh, calc(var(--composer-reserved-height) - 14px));
+    max-height: min(48vh, calc(var(--composer-reserved-height) + 88px));
+  }
+
+  .composer-input-panel {
+    grid-template-columns: 84px minmax(0, 1fr) auto;
+    gap: 6px;
+  }
+
+  .composer-input-panel button {
+    width: auto;
+    padding: 0 12px;
+  }
+
+  .composer-nickname-input {
+    padding: 0 8px;
   }
 
   .feed-tabs {
-    width: min(100%, 260px);
+    width: min(100%, 300px);
   }
 
-  .pagination-jump {
-    width: 100%;
+  .post-list-preview.has-images {
+    grid-template-columns: 86px minmax(0, 1fr);
   }
 
-  .pagination-jump label {
-    width: min(132px, 100%);
+  .post-list-preview .list-image-gallery {
+    grid-template-columns: repeat(2, minmax(0, 40px));
+  }
+
+  .post-list-preview .list-image-gallery .post-image-frame {
+    width: 40px;
+  }
+
+  .pagination {
+    gap: 6px;
+  }
+
+  .pagination-pages {
+    gap: 3px;
+  }
+
+  .pagination button {
+    min-width: 30px;
+    min-height: 30px;
+    padding: 0 7px;
   }
 }

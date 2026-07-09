@@ -377,7 +377,6 @@ function App() {
         <div className="feed-toolbar">
           <div>
             <strong>{isDetailView ? '게시글 상세' : activeFeedTab === 'popular' ? '인기글' : '전체 글'}</strong>
-            {!isDetailView && <span>{activePosts.length}개</span>}
           </div>
           <button className="refresh-button" type="button" onClick={() => fetchPosts(false)} disabled={isLoading}>
             {isLoading ? '갱신 중' : '갱신하기'}
@@ -393,7 +392,7 @@ function App() {
               className={activeFeedTab === 'all' ? 'active' : undefined}
               onClick={() => changeFeedTab('all')}
             >
-              전체글
+              전체글 <span>{posts.length}</span>
             </button>
             <button
               type="button"
@@ -402,7 +401,7 @@ function App() {
               className={activeFeedTab === 'popular' ? 'active' : undefined}
               onClick={() => changeFeedTab('popular')}
             >
-              인기글
+              인기글 <span>{popularPosts.length}</span>
             </button>
           </div>
         )}
