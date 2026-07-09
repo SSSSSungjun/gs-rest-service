@@ -259,7 +259,7 @@
 }
 
 .post-list-preview.has-images {
-  grid-template-columns: 104px minmax(0, 1fr);
+  grid-template-columns: max-content minmax(0, 1fr);
   align-items: start;
 }
 
@@ -534,7 +534,7 @@
 }
 
 .post-list-preview.has-images {
-  grid-template-columns: 104px minmax(0, 1fr);
+  grid-template-columns: max-content minmax(0, 1fr);
   gap: 6px;
 }
 
@@ -545,6 +545,38 @@
 
 .post-card:not(.detail-card) .post-card-meta-row {
   margin-top: 0;
+}
+
+.comments-toggle {
+  width: fit-content;
+  min-height: 30px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #12301f;
+  padding: 0 2px;
+  text-align: left;
+  font-size: 16px;
+}
+
+.comments-toggle:hover {
+  background: transparent;
+  color: #166534;
+}
+
+.comments-toggle::after {
+  content: '열기';
+  margin-left: 8px;
+  color: #64786c;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.comments-toggle[aria-expanded='true']::after {
+  content: '접기';
+}
+
+.comments-collapsed {
+  gap: 0;
 }
 
 @media (max-width: 720px) {
@@ -599,7 +631,7 @@
   }
 
   .post-list-preview.has-images {
-    grid-template-columns: 82px minmax(0, 1fr);
+    grid-template-columns: max-content minmax(0, 1fr);
     gap: 6px;
   }
 
