@@ -179,6 +179,12 @@
   padding: 0 8px;
 }
 
+.compact-image-controls {
+  display: inline-grid;
+  width: fit-content;
+  grid-template-columns: auto;
+}
+
 .image-attachment-preview-list {
   grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
 }
