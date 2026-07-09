@@ -78,7 +78,7 @@ export function PostDetail({
         <div>
           <div className="post-title-row">
             <strong>{post.nickname || '익명'}</strong>
-            {isPopular && <span className="popular-badge">🔥 인기</span>}
+            {isPopular && <span className="popular-badge">인기</span>}
           </div>
           <time dateTime={post.createdAt}>
             {formatDate(post.createdAt)}
@@ -124,15 +124,15 @@ export function PostDetail({
             aria-pressed={post.likedByMe}
             onClick={() => onTogglePostLike(post.id)}
           >
-            👍 {post.likeCount}
+            좋아요 {post.likeCount}
           </button>
-          <span className="meta-pill" aria-label={`댓글 ${post.comments.length}개`}>💬 {post.comments.length}</span>
-          {postImages.length > 0 && <span className="meta-pill" aria-label={`사진 ${postImages.length}장`}>📷 {postImages.length}</span>}
+          <span className="meta-pill" aria-label={`댓글 ${post.comments.length}개`}>댓글 {post.comments.length}</span>
+          {postImages.length > 0 && <span className="meta-pill" aria-label={`사진 ${postImages.length}장`}>사진 {postImages.length}</span>}
         </div>
       )}
 
       <div className="comments">
-        <div className="comments-title">💬 {post.comments.length}</div>
+        <div className="comments-title">댓글 {post.comments.length}</div>
         {post.comments.map((comment) => {
           const commentEditDraft = editingComments[comment.id]
 
@@ -173,7 +173,7 @@ export function PostDetail({
                     aria-pressed={comment.likedByMe}
                     onClick={() => onToggleCommentLike(comment.id)}
                   >
-                    👍 {comment.likeCount}
+                    좋아요 {comment.likeCount}
                   </button>
                 </>
               )}
