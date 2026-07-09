@@ -364,6 +364,188 @@
   padding: 0 10px;
 }
 
+.composer-bottom {
+  max-height: min(54vh, 320px);
+  overflow: visible;
+  padding: 10px;
+}
+
+.composer-bottom form {
+  gap: 6px;
+}
+
+.composer-draft-box {
+  display: grid;
+  gap: 8px;
+}
+
+.composer-preview-strip {
+  max-height: 154px;
+  overflow-y: auto;
+  padding: 2px 2px 0;
+  scrollbar-width: thin;
+}
+
+.composer-preview-strip .image-attachment-fields {
+  gap: 8px;
+}
+
+.composer-preview-strip .image-preview-toggle {
+  margin-left: 4px;
+}
+
+.composer-preview-strip .image-attachment-preview-list {
+  grid-template-columns: repeat(auto-fill, minmax(58px, 72px));
+  justify-content: start;
+}
+
+.composer-preview-strip .image-attachment-preview {
+  width: 72px;
+}
+
+.composer-input-shell {
+  position: relative;
+  display: grid;
+  grid-template-columns: 34px 86px minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  border: 1px solid #bdd5c5;
+  border-radius: 8px;
+  background: #fcfff8;
+  padding: 5px;
+}
+
+.composer-input-shell:focus-within {
+  border-color: #16a34a;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+}
+
+.composer-input-shell .composer-nickname-input,
+.composer-input-shell .composer-textarea {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.composer-input-shell .composer-nickname-input {
+  min-height: 34px;
+  border-right: 1px solid #dcebd8;
+  padding: 0 8px;
+}
+
+.composer-input-shell .composer-textarea {
+  min-height: 34px;
+  max-height: 128px;
+  padding: 6px 4px;
+}
+
+.composer-attach-button,
+.composer-submit-button {
+  display: inline-grid;
+  min-height: 34px;
+  place-items: center;
+  border-radius: 8px;
+}
+
+.composer-attach-button {
+  width: 34px;
+  border: 0;
+  background: transparent;
+  color: #12301f;
+  padding: 0;
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.composer-attach-button:hover {
+  background: #edf8e9;
+  color: #166534;
+}
+
+.composer-submit-button {
+  min-width: 52px;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.composer-attachment-menu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  z-index: 30;
+  display: grid;
+  min-width: 150px;
+  border: 1px solid #d8e4da;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 18px 42px rgba(18, 48, 31, 0.18);
+  padding: 8px;
+}
+
+.composer-attachment-option {
+  display: grid;
+  min-height: 42px;
+  place-items: center;
+  border-radius: 12px;
+  background: #f2f0f0;
+  color: #12301f;
+  padding: 0 14px;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.composer-attachment-option:hover {
+  background: #e9f4e6;
+}
+
+.composer-attachment-option.disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.composer-attachment-option input {
+  display: none;
+}
+
+.post-card:not(.detail-card) {
+  display: grid;
+  gap: 8px;
+}
+
+.post-list-header {
+  min-width: 0;
+}
+
+.post-list-heading {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.post-list-heading .post-title-row {
+  gap: 6px;
+}
+
+.post-list-preview {
+  margin-top: 0;
+}
+
+.post-list-preview.has-images {
+  grid-template-columns: 112px minmax(0, 1fr);
+}
+
+.post-list-preview .post-content {
+  min-width: 0;
+  align-self: start;
+}
+
+.post-card:not(.detail-card) .post-card-meta-row {
+  margin-top: 0;
+}
+
 @media (max-width: 720px) {
   :root {
     --composer-reserved-height: 195px;
@@ -439,5 +621,41 @@
     min-width: 30px;
     min-height: 30px;
     padding: 0 7px;
+  }
+
+  .composer-bottom {
+    max-height: min(56vh, 360px);
+    padding: 8px;
+  }
+
+  .composer-input-shell {
+    grid-template-columns: 32px 70px minmax(0, 1fr) auto;
+    gap: 4px;
+    padding: 4px;
+  }
+
+  .composer-attach-button {
+    width: 32px;
+    min-height: 32px;
+    font-size: 25px;
+  }
+
+  .composer-input-shell .composer-nickname-input,
+  .composer-input-shell .composer-textarea,
+  .composer-submit-button {
+    min-height: 32px;
+  }
+
+  .composer-submit-button {
+    min-width: 44px;
+    padding: 0 9px;
+  }
+
+  .composer-preview-strip .image-attachment-preview-list {
+    grid-template-columns: repeat(auto-fill, minmax(52px, 64px));
+  }
+
+  .composer-preview-strip .image-attachment-preview {
+    width: 64px;
   }
 }
