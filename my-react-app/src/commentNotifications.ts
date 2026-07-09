@@ -1,6 +1,7 @@
 import type { Post } from './boardApi'
 
 const STORAGE_KEY = 'bambooForest.seenCommentIds'
+const INCLUDE_OWN_COMMENTS_MIGRATION_KEY = 'bambooForest.commentNotifications.includeOwnComments.v1'
 
 export interface CommentNotification {
   postId: number
@@ -37,18 +38,32 @@ function collectOwnedPostCommentIds(posts: Post[]) {
   for (const post of posts) {
     if (!post.ownedByMe) continue
     for (const comment of post.comments) {
-      if (!comment.ownedByMe) {
-        commentIds.add(comment.id)
-      }
+      commentIds.add(comment.id)
     }
   }
   return commentIds
+}
+
+function ensureOwnCommentNotificationBaseline(posts: Post[], seenCommentIds: Set<number>) {
+  if (window.localStorage.getItem(INCLUDE_OWN_COMMENTS_MIGRATION_KEY)) return false
+  const ownedPostCommentIds = collectOwnedPostCommentIds(posts)
+  for (const commentId of ownedPostCommentIds) {
+    seenCommentIds.add(commentId)
+  }
+  writeSeenCommentIds(seenCommentIds)
+  window.localStorage.setItem(INCLUDE_OWN_COMMENTS_MIGRATION_KEY, 'true')
+  return true
 }
 
 export function getUnreadCommentNotifications(posts: Post[]) {
   const seenCommentIds = readSeenCommentIds()
   if (seenCommentIds === null) {
     writeSeenCommentIds(collectOwnedPostCommentIds(posts))
+    window.localStorage.setItem(INCLUDE_OWN_COMMENTS_MIGRATION_KEY, 'true')
+    return []
+  }
+
+  if (ensureOwnCommentNotificationBaseline(posts, seenCommentIds)) {
     return []
   }
 
@@ -58,7 +73,7 @@ export function getUnreadCommentNotifications(posts: Post[]) {
     if (!post.ownedByMe) continue
 
     for (const comment of post.comments) {
-      if (comment.ownedByMe || seenCommentIds.has(comment.id)) continue
+      if (seenCommentIds.has(comment.id)) continue
       notifications.push({
         postId: post.id,
         postPreview: makePreview(post.content),

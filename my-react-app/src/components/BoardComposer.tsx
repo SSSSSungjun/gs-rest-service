@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, ClipboardEvent, DragEvent, FormEvent } from 'react'
 import type { PostImage } from '../boardApi'
 import { handleTextareaKeyDown, preventEnterSubmit } from '../boardUi'
@@ -60,7 +60,30 @@ export function BoardComposer({
   onSubmit,
 }: BoardComposerProps) {
   const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false)
+  const attachmentShellRef = useRef<HTMLDivElement>(null)
   const hasImages = images.length > 0
+
+  useEffect(() => {
+    if (!isAttachmentMenuOpen) return
+
+    const closeOnPointerDown = (event: PointerEvent) => {
+      if (attachmentShellRef.current?.contains(event.target as Node)) return
+      setIsAttachmentMenuOpen(false)
+    }
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsAttachmentMenuOpen(false)
+      }
+    }
+
+    window.addEventListener('pointerdown', closeOnPointerDown)
+    window.addEventListener('keydown', closeOnEscape)
+    return () => {
+      window.removeEventListener('pointerdown', closeOnPointerDown)
+      window.removeEventListener('keydown', closeOnEscape)
+    }
+  }, [isAttachmentMenuOpen])
 
   const uploadImages = (files: File[]) => {
     if (files.length === 0) return
@@ -128,7 +151,7 @@ export function BoardComposer({
             </div>
           )}
 
-          <div className="composer-input-shell">
+          <div className="composer-input-shell" ref={attachmentShellRef}>
             <button
               className="composer-attach-button"
               type="button"

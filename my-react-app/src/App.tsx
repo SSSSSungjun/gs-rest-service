@@ -103,6 +103,21 @@ function App() {
     dispatch({ type: 'posts/detailClosed' })
   }, [])
 
+  const handleBoardTitleClick = useCallback(() => {
+    const isDefaultFeed = !isDetailView && activeFeedTab === 'all' && currentPage === 1
+    if (isDefaultFeed) {
+      void fetchPosts(false)
+      return
+    }
+
+    if (window.location.hash.startsWith(POST_HASH_PREFIX)) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    }
+    setActiveFeedTab('all')
+    dispatch({ type: 'pagination/pageChanged', payload: 1 })
+    dispatch({ type: 'posts/detailClosed' })
+  }, [activeFeedTab, currentPage, fetchPosts, isDetailView])
+
   const dismissCommentNotifications = useCallback((commentIds: number[]) => {
     markCommentNotificationsSeen(commentIds)
     setCommentNotifications((currentNotifications) => currentNotifications.filter(
@@ -394,7 +409,7 @@ function App() {
         <div>
           <p className="eyebrow">Bamboo forest</p>
           <h1 id="board-title">
-            <button className="board-title-button" type="button" onClick={() => fetchPosts(false)} disabled={isLoading}>
+            <button className="board-title-button" type="button" onClick={handleBoardTitleClick} disabled={isLoading}>
               대나무숲
             </button>
           </h1>
