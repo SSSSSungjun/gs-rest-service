@@ -127,7 +127,6 @@ export function PostDetail({
             좋아요 {post.likeCount}
           </button>
           <span className="meta-pill" aria-label={`댓글 ${post.comments.length}개`}>댓글 {post.comments.length}</span>
-          {postImages.length > 0 && <span className="meta-pill" aria-label={`사진 ${postImages.length}장`}>사진 {postImages.length}</span>}
         </div>
       )}
 

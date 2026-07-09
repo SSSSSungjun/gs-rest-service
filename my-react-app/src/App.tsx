@@ -4,7 +4,10 @@ import './App.css'
 import { boardApi } from './boardApi'
 import type { PostImage } from './boardApi'
 import { boardReducer, initialBoardState } from './boardReducer'
+import { getUnreadCommentNotifications, markCommentNotificationsSeen } from './commentNotifications'
+import type { CommentNotification } from './commentNotifications'
 import { BoardComposer } from './components/BoardComposer'
+import { CommentNotificationBar } from './components/CommentNotificationBar'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { Pagination } from './components/Pagination'
 import { PostDetail } from './components/PostDetail'
@@ -19,6 +22,7 @@ function App() {
   const [state, dispatch] = useReducer(boardReducer, initialBoardState)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [activeFeedTab, setActiveFeedTab] = useState<FeedTab>('all')
+  const [commentNotifications, setCommentNotifications] = useState<CommentNotification[]>([])
   const {
     posts,
     nickname,
@@ -98,6 +102,19 @@ function App() {
     }
     dispatch({ type: 'posts/detailClosed' })
   }, [])
+
+  const dismissCommentNotifications = useCallback((commentIds: number[]) => {
+    markCommentNotificationsSeen(commentIds)
+    setCommentNotifications((currentNotifications) => currentNotifications.filter(
+      (notification) => !commentIds.includes(notification.commentId),
+    ))
+  }, [])
+
+  const openCommentNotificationPost = useCallback((postId: number, commentIds: number[]) => {
+    dismissCommentNotifications(commentIds)
+    setActiveFeedTab('all')
+    openPostDetail(postId)
+  }, [dismissCommentNotifications, openPostDetail])
 
   const changeFeedTab = (nextTab: FeedTab) => {
     setActiveFeedTab(nextTab)
@@ -343,6 +360,14 @@ function App() {
   }, [fetchPosts])
 
   useEffect(() => {
+    if (posts.length === 0) {
+      setCommentNotifications([])
+      return
+    }
+    setCommentNotifications(getUnreadCommentNotifications(posts))
+  }, [posts])
+
+  useEffect(() => {
     const syncDetailFromHash = () => {
       const postId = getPostIdFromHash()
       if (postId === null) {
@@ -368,10 +393,20 @@ function App() {
       <section className="board-hero" aria-labelledby="board-title">
         <div>
           <p className="eyebrow">Bamboo forest</p>
-          <h1 id="board-title">대나무숲</h1>
+          <h1 id="board-title">
+            <button className="board-title-button" type="button" onClick={() => fetchPosts(false)} disabled={isLoading}>
+              대나무숲
+            </button>
+          </h1>
           <p className="hero-copy">가입 없이 남기고, 내가 쓴 글과 댓글은 이 브라우저에서 바로 삭제할 수 있습니다.</p>
         </div>
       </section>
+
+      <CommentNotificationBar
+        notifications={commentNotifications}
+        onOpenPost={openCommentNotificationPost}
+        onDismiss={dismissCommentNotifications}
+      />
 
       <section className="feed" aria-label={isDetailView ? '게시글 상세' : '게시글 목록'}>
         <div className="feed-toolbar">
