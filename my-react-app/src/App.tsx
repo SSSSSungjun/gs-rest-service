@@ -407,100 +407,102 @@ function App() {
           </div>
         )}
 
-        {isLoading && posts.length === 0 && <p className="empty-state">게시글을 불러오는 중입니다.</p>}
-        {!isLoading && posts.length === 0 && <p className="empty-state">아직 게시글이 없습니다.</p>}
-        {!isLoading && posts.length > 0 && activePosts.length === 0 && <p className="empty-state">아직 인기글이 없습니다.</p>}
+        <div className="feed-scroll-region">
+          {isLoading && posts.length === 0 && <p className="empty-state">게시글을 불러오는 중입니다.</p>}
+          {!isLoading && posts.length === 0 && <p className="empty-state">아직 게시글이 없습니다.</p>}
+          {!isLoading && posts.length > 0 && activePosts.length === 0 && <p className="empty-state">아직 인기글이 없습니다.</p>}
 
-        {selectedPost ? (
-          <PostDetail
-            post={selectedPost}
-            commentDraft={commentDrafts[selectedPost.id] ?? { nickname: '', content: '' }}
-            postEditDraft={editingPosts[selectedPost.id]}
-            editingComments={editingComments}
-            isUploadingImage={isUploadingImage}
-            onBack={closePostDetail}
-            onStartEditPost={(post) => dispatch({ type: 'posts/editStarted', payload: post })}
-            onRequestDeletePost={(postId) => dispatch({ type: 'delete/requested', payload: { target: 'post', id: postId } })}
-            onTogglePostLike={handleTogglePostLike}
-            onPostEditNicknameChange={(postId, nextNickname) => dispatch({
-              type: 'posts/editNicknameChanged',
-              payload: { postId, nickname: nextNickname },
-            })}
-            onPostEditContentChange={(postId, nextContent) => dispatch({
-              type: 'posts/editContentChanged',
-              payload: { postId, content: nextContent },
-            })}
-            onPostEditAddImageUrl={handleAddPostEditImageUrl}
-            onPostEditUploadImages={handleUploadPostEditImages}
-            onPostEditRemoveImage={(postId, index) => dispatch({
-              type: 'posts/editImageRemoved',
-              payload: { postId, index },
-            })}
-            onPostEditShowImagesInContentChange={(postId, nextShowImagesInContent) => dispatch({
-              type: 'posts/editShowImagesChanged',
-              payload: { postId, showImagesInContent: nextShowImagesInContent },
-            })}
-            onSubmitPostEdit={handleUpdatePost}
-            onCancelPostEdit={(postId) => dispatch({ type: 'posts/editCanceled', payload: postId })}
-            onStartEditComment={(comment) => dispatch({ type: 'comments/editStarted', payload: comment })}
-            onRequestDeleteComment={(commentId) => dispatch({ type: 'delete/requested', payload: { target: 'comment', id: commentId } })}
-            onToggleCommentLike={handleToggleCommentLike}
-            onCommentEditNicknameChange={(commentId, nextNickname) => dispatch({
-              type: 'comments/editNicknameChanged',
-              payload: { commentId, nickname: nextNickname },
-            })}
-            onCommentEditContentChange={(commentId, nextContent) => dispatch({
-              type: 'comments/editContentChanged',
-              payload: { commentId, content: nextContent },
-            })}
-            onSubmitCommentEdit={handleUpdateComment}
-            onCancelCommentEdit={(commentId) => dispatch({ type: 'comments/editCanceled', payload: commentId })}
-            onCommentNicknameChange={(postId, nextNickname) => dispatch({
-              type: 'comments/nicknameChanged',
-              payload: { postId, nickname: nextNickname },
-            })}
-            onCommentContentChange={handleCommentChange}
-            onSubmitComment={handleCreateComment}
-          />
-        ) : (
-          <PostList
-            posts={visiblePosts}
-            editingPosts={editingPosts}
-            isUploadingImage={isUploadingImage}
-            onOpenPost={openPostDetail}
-            onStartEditPost={(post) => dispatch({ type: 'posts/editStarted', payload: post })}
-            onRequestDeletePost={(postId) => dispatch({ type: 'delete/requested', payload: { target: 'post', id: postId } })}
-            onTogglePostLike={handleTogglePostLike}
-            onPostEditNicknameChange={(postId, nextNickname) => dispatch({
-              type: 'posts/editNicknameChanged',
-              payload: { postId, nickname: nextNickname },
-            })}
-            onPostEditContentChange={(postId, nextContent) => dispatch({
-              type: 'posts/editContentChanged',
-              payload: { postId, content: nextContent },
-            })}
-            onPostEditAddImageUrl={handleAddPostEditImageUrl}
-            onPostEditUploadImages={handleUploadPostEditImages}
-            onPostEditRemoveImage={(postId, index) => dispatch({
-              type: 'posts/editImageRemoved',
-              payload: { postId, index },
-            })}
-            onPostEditShowImagesInContentChange={(postId, nextShowImagesInContent) => dispatch({
-              type: 'posts/editShowImagesChanged',
-              payload: { postId, showImagesInContent: nextShowImagesInContent },
-            })}
-            onSubmitPostEdit={handleUpdatePost}
-            onCancelPostEdit={(postId) => dispatch({ type: 'posts/editCanceled', payload: postId })}
-          />
-        )}
+          {selectedPost ? (
+            <PostDetail
+              post={selectedPost}
+              commentDraft={commentDrafts[selectedPost.id] ?? { nickname: '', content: '' }}
+              postEditDraft={editingPosts[selectedPost.id]}
+              editingComments={editingComments}
+              isUploadingImage={isUploadingImage}
+              onBack={closePostDetail}
+              onStartEditPost={(post) => dispatch({ type: 'posts/editStarted', payload: post })}
+              onRequestDeletePost={(postId) => dispatch({ type: 'delete/requested', payload: { target: 'post', id: postId } })}
+              onTogglePostLike={handleTogglePostLike}
+              onPostEditNicknameChange={(postId, nextNickname) => dispatch({
+                type: 'posts/editNicknameChanged',
+                payload: { postId, nickname: nextNickname },
+              })}
+              onPostEditContentChange={(postId, nextContent) => dispatch({
+                type: 'posts/editContentChanged',
+                payload: { postId, content: nextContent },
+              })}
+              onPostEditAddImageUrl={handleAddPostEditImageUrl}
+              onPostEditUploadImages={handleUploadPostEditImages}
+              onPostEditRemoveImage={(postId, index) => dispatch({
+                type: 'posts/editImageRemoved',
+                payload: { postId, index },
+              })}
+              onPostEditShowImagesInContentChange={(postId, nextShowImagesInContent) => dispatch({
+                type: 'posts/editShowImagesChanged',
+                payload: { postId, showImagesInContent: nextShowImagesInContent },
+              })}
+              onSubmitPostEdit={handleUpdatePost}
+              onCancelPostEdit={(postId) => dispatch({ type: 'posts/editCanceled', payload: postId })}
+              onStartEditComment={(comment) => dispatch({ type: 'comments/editStarted', payload: comment })}
+              onRequestDeleteComment={(commentId) => dispatch({ type: 'delete/requested', payload: { target: 'comment', id: commentId } })}
+              onToggleCommentLike={handleToggleCommentLike}
+              onCommentEditNicknameChange={(commentId, nextNickname) => dispatch({
+                type: 'comments/editNicknameChanged',
+                payload: { commentId, nickname: nextNickname },
+              })}
+              onCommentEditContentChange={(commentId, nextContent) => dispatch({
+                type: 'comments/editContentChanged',
+                payload: { commentId, content: nextContent },
+              })}
+              onSubmitCommentEdit={handleUpdateComment}
+              onCancelCommentEdit={(commentId) => dispatch({ type: 'comments/editCanceled', payload: commentId })}
+              onCommentNicknameChange={(postId, nextNickname) => dispatch({
+                type: 'comments/nicknameChanged',
+                payload: { postId, nickname: nextNickname },
+              })}
+              onCommentContentChange={handleCommentChange}
+              onSubmitComment={handleCreateComment}
+            />
+          ) : (
+            <PostList
+              posts={visiblePosts}
+              editingPosts={editingPosts}
+              isUploadingImage={isUploadingImage}
+              onOpenPost={openPostDetail}
+              onStartEditPost={(post) => dispatch({ type: 'posts/editStarted', payload: post })}
+              onRequestDeletePost={(postId) => dispatch({ type: 'delete/requested', payload: { target: 'post', id: postId } })}
+              onTogglePostLike={handleTogglePostLike}
+              onPostEditNicknameChange={(postId, nextNickname) => dispatch({
+                type: 'posts/editNicknameChanged',
+                payload: { postId, nickname: nextNickname },
+              })}
+              onPostEditContentChange={(postId, nextContent) => dispatch({
+                type: 'posts/editContentChanged',
+                payload: { postId, content: nextContent },
+              })}
+              onPostEditAddImageUrl={handleAddPostEditImageUrl}
+              onPostEditUploadImages={handleUploadPostEditImages}
+              onPostEditRemoveImage={(postId, index) => dispatch({
+                type: 'posts/editImageRemoved',
+                payload: { postId, index },
+              })}
+              onPostEditShowImagesInContentChange={(postId, nextShowImagesInContent) => dispatch({
+                type: 'posts/editShowImagesChanged',
+                payload: { postId, showImagesInContent: nextShowImagesInContent },
+              })}
+              onSubmitPostEdit={handleUpdatePost}
+              onCancelPostEdit={(postId) => dispatch({ type: 'posts/editCanceled', payload: postId })}
+            />
+          )}
 
-        {!isDetailView && !isLoading && activePosts.length > 0 && (
-          <Pagination
-            pageCount={pageCount}
-            currentPage={currentPage}
-            onPageChange={(page) => dispatch({ type: 'pagination/pageChanged', payload: page })}
-          />
-        )}
+          {!isDetailView && !isLoading && activePosts.length > 0 && (
+            <Pagination
+              pageCount={pageCount}
+              currentPage={currentPage}
+              onPageChange={(page) => dispatch({ type: 'pagination/pageChanged', payload: page })}
+            />
+          )}
+        </div>
       </section>
 
       {!isDetailView && !hasActivePostEdit && (

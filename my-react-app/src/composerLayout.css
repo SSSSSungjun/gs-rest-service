@@ -1,8 +1,13 @@
+:root {
+  --composer-reserved-height: 310px;
+}
+
 .board-shell {
   display: flex;
+  min-height: 100vh;
   flex-direction: column;
   gap: 14px;
-  padding-bottom: 48px;
+  padding-bottom: calc(var(--composer-reserved-height) + 28px);
 }
 
 .board-hero {
@@ -11,27 +16,94 @@
 
 .feed {
   order: 2;
+  min-height: 0;
+}
+
+.feed-scroll-region {
+  display: grid;
+  max-height: calc(100vh - var(--composer-reserved-height) - 260px);
+  min-height: 220px;
+  gap: 14px;
+  overflow-y: auto;
+  padding-right: 3px;
+  scrollbar-width: thin;
 }
 
 .composer-bottom {
-  position: static;
-  right: auto;
-  bottom: auto;
-  left: auto;
-  z-index: auto;
+  position: fixed;
+  right: max(12px, calc((100vw - 1040px) / 2 + 20px));
+  bottom: 14px;
+  left: max(12px, calc((100vw - 1040px) / 2 + 20px));
+  z-index: 20;
   order: 3;
+  max-height: min(42vh, calc(var(--composer-reserved-height) - 28px));
   margin: 0;
-  backdrop-filter: none;
+  overflow-y: auto;
+  backdrop-filter: blur(10px);
+  scrollbar-width: thin;
+}
+
+.pagination {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+
+.pagination-pages {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+}
+
+.pagination-jump {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: end;
+  justify-content: center;
+}
+
+.pagination-jump label {
+  width: 118px;
+}
+
+.pagination-jump input {
+  min-height: 36px;
+  text-align: center;
+}
+
+.pagination-jump button {
+  min-height: 36px;
+  padding: 0 14px;
 }
 
 @media (max-width: 720px) {
+  :root {
+    --composer-reserved-height: 360px;
+  }
+
   .board-shell {
-    padding-bottom: 48px;
+    padding-bottom: calc(var(--composer-reserved-height) + 18px);
+  }
+
+  .feed-scroll-region {
+    max-height: calc(100vh - var(--composer-reserved-height) - 210px);
+    min-height: 180px;
   }
 
   .composer-bottom {
-    right: auto;
-    bottom: auto;
-    left: auto;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    max-height: min(48vh, calc(var(--composer-reserved-height) - 24px));
+  }
+
+  .pagination-jump {
+    width: 100%;
+  }
+
+  .pagination-jump label {
+    width: min(150px, 100%);
   }
 }
