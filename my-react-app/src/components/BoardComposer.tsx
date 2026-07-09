@@ -14,8 +14,7 @@ interface BoardComposerProps {
   errorMessage: string
   onNicknameChange: (nickname: string) => void
   onContentChange: (event: ChangeEvent<HTMLTextAreaElement>) => void
-  onAddImageUrl: (url: string) => boolean
-  onRemoveImageUrlFromContent: (url: string) => void
+  onAddImageUrl: (url: string) => void
   onUploadImages: (files: File[]) => void
   onRemoveImage: (index: number) => void
   onShowImagesInContentChange: (showImagesInContent: boolean) => void
@@ -54,7 +53,6 @@ export function BoardComposer({
   onNicknameChange,
   onContentChange,
   onAddImageUrl,
-  onRemoveImageUrlFromContent,
   onUploadImages,
   onRemoveImage,
   onShowImagesInContentChange,
@@ -71,7 +69,14 @@ export function BoardComposer({
     }
 
     const imageUrl = getPastedImageUrl(event.clipboardData.getData('text'))
-    if (imageUrl && onAddImageUrl(imageUrl)) {
+    if (imageUrl) {
+      event.preventDefault()
+      onAddImageUrl(imageUrl)
+    }
+  }
+
+  const handleDragOver = (event: DragEvent<HTMLTextAreaElement>) => {
+    if (event.dataTransfer.types.includes('Files') || event.dataTransfer.types.includes('text/uri-list')) {
       event.preventDefault()
     }
   }
@@ -85,9 +90,9 @@ export function BoardComposer({
     }
 
     const imageUrl = getPastedImageUrl(event.dataTransfer.getData('text/uri-list') || event.dataTransfer.getData('text/plain'))
-    if (imageUrl && onAddImageUrl(imageUrl)) {
+    if (imageUrl) {
       event.preventDefault()
-      onRemoveImageUrlFromContent(imageUrl)
+      onAddImageUrl(imageUrl)
     }
   }
 
@@ -109,6 +114,7 @@ export function BoardComposer({
             onChange={onContentChange}
             onKeyDown={handleTextareaKeyDown}
             onPaste={handlePaste}
+            onDragOver={handleDragOver}
             onDrop={handleDrop}
             rows={1}
             placeholder="글을 쓰거나 이미지를 붙여넣어 보세요."
