@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { ChangeEvent, ClipboardEvent, DragEvent, FormEvent } from 'react'
 import type { PostImage } from '../boardApi'
 import { handleTextareaKeyDown, preventEnterSubmit } from '../boardUi'
@@ -58,13 +59,25 @@ export function BoardComposer({
   onShowImagesInContentChange,
   onSubmit,
 }: BoardComposerProps) {
+  const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false)
   const hasImages = images.length > 0
+
+  const uploadImages = (files: File[]) => {
+    if (files.length === 0) return
+    onUploadImages(files)
+    setIsAttachmentMenuOpen(false)
+  }
+
+  const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    uploadImages(Array.from(event.target.files ?? []))
+    event.currentTarget.value = ''
+  }
 
   const handlePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
     const pastedFiles = getImageFiles(event.clipboardData.files)
     if (pastedFiles.length > 0) {
       event.preventDefault()
-      onUploadImages(pastedFiles)
+      uploadImages(pastedFiles)
       return
     }
 
@@ -85,7 +98,7 @@ export function BoardComposer({
     const droppedFiles = getImageFiles(event.dataTransfer.files)
     if (droppedFiles.length > 0) {
       event.preventDefault()
-      onUploadImages(droppedFiles)
+      uploadImages(droppedFiles)
       return
     }
 
@@ -99,44 +112,73 @@ export function BoardComposer({
   return (
     <section className="composer composer-bottom" aria-label="게시글 작성">
       <form onSubmit={onSubmit} onKeyDown={preventEnterSubmit}>
-        <div className="composer-input-panel">
-          <input
-            className="composer-nickname-input"
-            value={nickname}
-            onChange={(event) => onNicknameChange(event.target.value)}
-            maxLength={40}
-            placeholder="익명"
-            aria-label="게시글 닉네임"
-          />
-          <textarea
-            className="composer-textarea"
-            value={content}
-            onChange={onContentChange}
-            onKeyDown={handleTextareaKeyDown}
-            onPaste={handlePaste}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            rows={1}
-            placeholder="글을 쓰거나 이미지를 붙여넣어 보세요."
-            aria-label="게시글 내용"
-          />
-          <button type="submit" disabled={isSubmitting || isUploadingImage}>{isSubmitting ? '등록 중' : '게시하기'}</button>
-        </div>
+        <div className="composer-draft-box">
+          {hasImages && (
+            <div className="composer-preview-strip">
+              <ImageAttachmentFields
+                images={images}
+                showImagesInContent={showImagesInContent}
+                isUploading={isUploadingImage}
+                showSummary={false}
+                showFilePicker={false}
+                onUploadFiles={onUploadImages}
+                onRemoveImage={onRemoveImage}
+                onShowImagesInContentChange={onShowImagesInContentChange}
+              />
+            </div>
+          )}
 
-        <details className="composer-attachment-panel" open={hasImages || isUploadingImage}>
-          <summary aria-label="사진 첨부 옵션 열기">
-            <span className="attachment-toggle-icon">+</span>
-            <span>사진 {images.length}</span>
-          </summary>
-          <ImageAttachmentFields
-            images={images}
-            showImagesInContent={showImagesInContent}
-            isUploading={isUploadingImage}
-            onUploadFiles={onUploadImages}
-            onRemoveImage={onRemoveImage}
-            onShowImagesInContentChange={onShowImagesInContentChange}
-          />
-        </details>
+          <div className="composer-input-shell">
+            <button
+              className="composer-attach-button"
+              type="button"
+              aria-label="사진 첨부 메뉴"
+              aria-expanded={isAttachmentMenuOpen}
+              onClick={() => setIsAttachmentMenuOpen((isOpen) => !isOpen)}
+              disabled={isUploadingImage}
+            >
+              +
+            </button>
+            <input
+              className="composer-nickname-input"
+              value={nickname}
+              onChange={(event) => onNicknameChange(event.target.value)}
+              maxLength={40}
+              placeholder="익명"
+              aria-label="게시글 닉네임"
+            />
+            <textarea
+              className="composer-textarea"
+              value={content}
+              onChange={onContentChange}
+              onKeyDown={handleTextareaKeyDown}
+              onPaste={handlePaste}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              rows={1}
+              placeholder="무슨 일이 있었나요?"
+              aria-label="게시글 내용"
+            />
+            <button className="composer-submit-button" type="submit" disabled={isSubmitting || isUploadingImage}>
+              {isSubmitting ? '등록 중' : '게시'}
+            </button>
+
+            {isAttachmentMenuOpen && (
+              <div className="composer-attachment-menu" role="menu">
+                <label className={`composer-attachment-option ${isUploadingImage ? 'disabled' : ''}`}>
+                  <span>사진 첨부하기</span>
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    multiple
+                    onChange={handleFileInputChange}
+                    disabled={isUploadingImage}
+                  />
+                </label>
+              </div>
+            )}
+          </div>
+        </div>
 
         {errorMessage && <p className="form-error">{errorMessage}</p>}
       </form>
