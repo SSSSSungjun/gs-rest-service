@@ -8,6 +8,8 @@ interface ImageAttachmentFieldsProps {
   images: PostImage[]
   showImagesInContent: boolean
   isUploading?: boolean
+  showSummary?: boolean
+  showFilePicker?: boolean
   onUploadFiles: (files: File[]) => void
   onRemoveImage: (index: number) => void
   onShowImagesInContentChange: (showImagesInContent: boolean) => void
@@ -17,6 +19,8 @@ export function ImageAttachmentFields({
   images,
   showImagesInContent,
   isUploading = false,
+  showSummary = true,
+  showFilePicker = true,
   onUploadFiles,
   onRemoveImage,
   onShowImagesInContentChange,
@@ -34,23 +38,27 @@ export function ImageAttachmentFields({
 
   return (
     <div className="image-attachment-fields">
-      <div className="image-attachment-summary">
-        <strong>사진 {images.length}/{MAX_IMAGE_COUNT}</strong>
-        <span>붙여넣기, 드래그, 파일 선택</span>
-      </div>
+      {showSummary && (
+        <div className="image-attachment-summary">
+          <strong>사진 {images.length}/{MAX_IMAGE_COUNT}</strong>
+          <span>파일 선택</span>
+        </div>
+      )}
 
-      <div className="image-attachment-controls compact-image-controls">
-        <label className={`file-pick-button ${remainingCount <= 0 || isUploading ? 'disabled' : ''}`}>
-          <span>{isUploading ? '업로드 중' : '파일 선택'}</span>
-          <input
-            type="file"
-            accept="image/jpeg,image/png,image/gif,image/webp"
-            multiple
-            onChange={handleFileChange}
-            disabled={remainingCount <= 0 || isUploading}
-          />
-        </label>
-      </div>
+      {showFilePicker && (
+        <div className="image-attachment-controls compact-image-controls">
+          <label className={`file-pick-button ${remainingCount <= 0 || isUploading ? 'disabled' : ''}`}>
+            <span>{isUploading ? '업로드 중' : '파일 선택'}</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              multiple
+              onChange={handleFileChange}
+              disabled={remainingCount <= 0 || isUploading}
+            />
+          </label>
+        </div>
+      )}
 
       {hasImages && (
         <label className="image-preview-toggle">
