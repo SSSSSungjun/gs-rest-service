@@ -13,7 +13,7 @@ export interface CommentNotification {
 function readSeenCommentIds() {
   try {
     const rawValue = window.localStorage.getItem(STORAGE_KEY)
-    if (!rawValue) return new Set<number>()
+    if (!rawValue) return null
     const parsedValue = JSON.parse(rawValue)
     if (!Array.isArray(parsedValue)) return new Set<number>()
     return new Set(parsedValue.filter((commentId): commentId is number => Number.isInteger(commentId)))
@@ -32,8 +32,26 @@ function makePreview(value: string) {
   return `${compactValue.slice(0, 36)}...`
 }
 
+function collectOwnedPostCommentIds(posts: Post[]) {
+  const commentIds = new Set<number>()
+  for (const post of posts) {
+    if (!post.ownedByMe) continue
+    for (const comment of post.comments) {
+      if (!comment.ownedByMe) {
+        commentIds.add(comment.id)
+      }
+    }
+  }
+  return commentIds
+}
+
 export function getUnreadCommentNotifications(posts: Post[]) {
   const seenCommentIds = readSeenCommentIds()
+  if (seenCommentIds === null) {
+    writeSeenCommentIds(collectOwnedPostCommentIds(posts))
+    return []
+  }
+
   const notifications: CommentNotification[] = []
 
   for (const post of posts) {
@@ -56,7 +74,7 @@ export function getUnreadCommentNotifications(posts: Post[]) {
 
 export function markCommentNotificationsSeen(commentIds: number[]) {
   if (commentIds.length === 0) return
-  const seenCommentIds = readSeenCommentIds()
+  const seenCommentIds = readSeenCommentIds() ?? new Set<number>()
   for (const commentId of commentIds) {
     seenCommentIds.add(commentId)
   }
