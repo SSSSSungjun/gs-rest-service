@@ -63,7 +63,7 @@ export function PostList({
               <div>
                 <div className="post-title-row">
                   <strong>{post.nickname || '익명'}</strong>
-                  {isPopular && <span className="popular-badge">인기글</span>}
+                  {isPopular && <span className="popular-badge">🔥 인기</span>}
                 </div>
                 <time dateTime={post.createdAt}>
                   {formatDate(post.createdAt)}
@@ -105,13 +105,14 @@ export function PostList({
                 <button
                   className={`like-button ${post.likedByMe ? 'active' : ''}`}
                   type="button"
+                  aria-label={`좋아요 ${post.likeCount}개`}
                   aria-pressed={post.likedByMe}
                   onClick={() => onTogglePostLike(post.id)}
                 >
-                  좋아요 {post.likeCount}
+                  👍 {post.likeCount}
                 </button>
-                <span className="meta-pill">댓글 {post.comments.length}</span>
-                {postImages.length > 0 && <span className="meta-pill">사진 {postImages.length}</span>}
+                <span className="meta-pill" aria-label={`댓글 ${post.comments.length}개`}>💬 {post.comments.length}</span>
+                {postImages.length > 0 && <span className="meta-pill" aria-label={`사진 ${postImages.length}장`}>📷 {postImages.length}</span>}
               </div>
             )}
           </article>
