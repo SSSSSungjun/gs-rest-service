@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 import type { Post } from '../boardApi'
 import type { BoardDraft } from '../boardReducer'
@@ -66,6 +67,7 @@ export function PostDetail({
   onCommentContentChange,
   onSubmitComment,
 }: PostDetailProps) {
+  const [areCommentsOpen, setAreCommentsOpen] = useState(false)
   const postImages = post.images ?? []
   const isPopular = isPopularPost(post.likeCount)
 
@@ -133,75 +135,87 @@ export function PostDetail({
         </div>
       )}
 
-      <div className="comments">
-        <div className="comments-title">댓글 {post.comments.length}</div>
-        {post.comments.map((comment) => {
-          const commentEditDraft = editingComments[comment.id]
+      <div className={`comments ${areCommentsOpen ? 'comments-open' : 'comments-collapsed'}`}>
+        <button
+          className="comments-title comments-toggle"
+          type="button"
+          aria-expanded={areCommentsOpen}
+          onClick={() => setAreCommentsOpen((isOpen) => !isOpen)}
+        >
+          댓글 {post.comments.length}
+        </button>
 
-          return (
-            <div className="comment" key={comment.id}>
-              {commentEditDraft ? (
-                <CommentEditForm
-                  commentId={comment.id}
-                  draft={commentEditDraft}
-                  onNicknameChange={onCommentEditNicknameChange}
-                  onContentChange={onCommentEditContentChange}
-                  onSubmit={onSubmitCommentEdit}
-                  onCancel={onCancelCommentEdit}
-                />
-              ) : (
-                <>
-                  <div className="comment-body">
-                    <div>
-                      <strong>{comment.nickname || '익명'}</strong>
-                      <time dateTime={comment.createdAt}>
-                        {formatDate(comment.createdAt)}
-                        {wasEdited(comment.createdAt, comment.updatedAt) && <span className="edited-label">(수정됨)</span>}
-                      </time>
-                      <p>{comment.content}</p>
-                    </div>
-                    {comment.ownedByMe && (
-                      <ActionMenu
-                        label="댓글 메뉴"
-                        onEdit={() => onStartEditComment(comment)}
-                        onDelete={() => onRequestDeleteComment(comment.id)}
-                      />
-                    )}
-                  </div>
-                  <button
-                    className={`like-button compact-like ${comment.likedByMe ? 'active' : ''}`}
-                    type="button"
-                    aria-label={`댓글 좋아요 ${comment.likeCount}개`}
-                    aria-pressed={comment.likedByMe}
-                    onClick={() => onToggleCommentLike(comment.id)}
-                  >
-                    좋아요 {comment.likeCount}
-                  </button>
-                </>
-              )}
-            </div>
-          )
-        })}
+        {areCommentsOpen && (
+          <>
+            {post.comments.map((comment) => {
+              const commentEditDraft = editingComments[comment.id]
 
-        <form className="comment-form" onSubmit={(event) => onSubmitComment(event, post.id)} onKeyDown={preventEnterSubmit}>
-          <input
-            className="comment-nickname-input"
-            value={commentDraft.nickname}
-            onChange={(event) => onCommentNicknameChange(post.id, event.target.value)}
-            maxLength={40}
-            placeholder="익명"
-            aria-label="댓글 닉네임"
-          />
-          <textarea
-            value={commentDraft.content}
-            onChange={(event) => onCommentContentChange(event, post.id)}
-            onKeyDown={handleTextareaKeyDown}
-            rows={1}
-            placeholder="댓글을 남겨보세요"
-            aria-label="댓글 내용"
-          />
-          <button type="submit">등록</button>
-        </form>
+              return (
+                <div className="comment" key={comment.id}>
+                  {commentEditDraft ? (
+                    <CommentEditForm
+                      commentId={comment.id}
+                      draft={commentEditDraft}
+                      onNicknameChange={onCommentEditNicknameChange}
+                      onContentChange={onCommentEditContentChange}
+                      onSubmit={onSubmitCommentEdit}
+                      onCancel={onCancelCommentEdit}
+                    />
+                  ) : (
+                    <>
+                      <div className="comment-body">
+                        <div>
+                          <strong>{comment.nickname || '익명'}</strong>
+                          <time dateTime={comment.createdAt}>
+                            {formatDate(comment.createdAt)}
+                            {wasEdited(comment.createdAt, comment.updatedAt) && <span className="edited-label">(수정됨)</span>}
+                          </time>
+                          <p>{comment.content}</p>
+                        </div>
+                        {comment.ownedByMe && (
+                          <ActionMenu
+                            label="댓글 메뉴"
+                            onEdit={() => onStartEditComment(comment)}
+                            onDelete={() => onRequestDeleteComment(comment.id)}
+                          />
+                        )}
+                      </div>
+                      <button
+                        className={`like-button compact-like ${comment.likedByMe ? 'active' : ''}`}
+                        type="button"
+                        aria-label={`댓글 좋아요 ${comment.likeCount}개`}
+                        aria-pressed={comment.likedByMe}
+                        onClick={() => onToggleCommentLike(comment.id)}
+                      >
+                        좋아요 {comment.likeCount}
+                      </button>
+                    </>
+                  )}
+                </div>
+              )
+            })}
+
+            <form className="comment-form" onSubmit={(event) => onSubmitComment(event, post.id)} onKeyDown={preventEnterSubmit}>
+              <input
+                className="comment-nickname-input"
+                value={commentDraft.nickname}
+                onChange={(event) => onCommentNicknameChange(post.id, event.target.value)}
+                maxLength={40}
+                placeholder="익명"
+                aria-label="댓글 닉네임"
+              />
+              <textarea
+                value={commentDraft.content}
+                onChange={(event) => onCommentContentChange(event, post.id)}
+                onKeyDown={handleTextareaKeyDown}
+                rows={1}
+                placeholder="댓글을 남겨보세요"
+                aria-label="댓글 내용"
+              />
+              <button type="submit">등록</button>
+            </form>
+          </>
+        )}
       </div>
     </article>
   )
