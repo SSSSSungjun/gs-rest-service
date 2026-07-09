@@ -23,7 +23,6 @@ export function PostEditForm({
   isUploadingImage,
   onNicknameChange,
   onContentChange,
-  onAddImageUrl,
   onUploadImages,
   onRemoveImage,
   onShowImagesInContentChange,
@@ -56,7 +55,6 @@ export function PostEditForm({
         images={draft.images ?? []}
         showImagesInContent={draft.showImagesInContent ?? true}
         isUploading={isUploadingImage}
-        onAddUrl={(url) => onAddImageUrl(postId, url)}
         onUploadFiles={(files) => onUploadImages(postId, files)}
         onRemoveImage={(index) => onRemoveImage(postId, index)}
         onShowImagesInContentChange={(showImagesInContent) => onShowImagesInContentChange(postId, showImagesInContent)}
