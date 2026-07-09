@@ -59,11 +59,11 @@ export function PostList({
             key={post.id}
             onClick={(event) => handleCardClick(event, post.id)}
           >
-            <header className="post-header">
-              <div>
+            <header className="post-header post-list-header">
+              <div className="post-list-heading">
                 <div className="post-title-row">
-                  <strong>{post.nickname || '익명'}</strong>
                   {isPopular && <span className="popular-badge">인기</span>}
+                  <strong>{post.nickname || '익명'}</strong>
                 </div>
                 <time dateTime={post.createdAt}>
                   {formatDate(post.createdAt)}
@@ -94,27 +94,27 @@ export function PostList({
                 onCancel={onCancelPostEdit}
               />
             ) : (
-              <div className={`post-list-preview ${postImages.length > 0 ? 'has-images' : ''}`} aria-label="게시글 상세 보기">
-                {postImages.length > 0 && <PostImageGallery images={postImages} variant="list" />}
-                <div className="post-list-copy">
+              <>
+                <div className={`post-list-preview ${postImages.length > 0 ? 'has-images' : ''}`} aria-label="게시글 상세 보기">
+                  {postImages.length > 0 && <PostImageGallery images={postImages} variant="list" />}
                   <span className="post-content">{post.content}</span>
-                  <div className="post-card-meta-row">
-                    <button
-                      className={`like-button ${post.likedByMe ? 'active' : ''}`}
-                      type="button"
-                      aria-label={`좋아요 ${post.likeCount}개`}
-                      aria-pressed={post.likedByMe}
-                      onClick={() => onTogglePostLike(post.id)}
-                    >
-                      좋아요 {post.likeCount}
-                    </button>
-                    <span className="meta-pill" aria-label={`댓글 ${post.comments.length}개`}>댓글 {post.comments.length}</span>
-                    {postImages.length > 0 && (
-                      <span className="meta-pill" aria-label={`사진 ${postImages.length}장`}>사진 {postImages.length}</span>
-                    )}
-                  </div>
                 </div>
-              </div>
+                <div className="post-card-meta-row">
+                  <button
+                    className={`like-button ${post.likedByMe ? 'active' : ''}`}
+                    type="button"
+                    aria-label={`좋아요 ${post.likeCount}개`}
+                    aria-pressed={post.likedByMe}
+                    onClick={() => onTogglePostLike(post.id)}
+                  >
+                    좋아요 {post.likeCount}
+                  </button>
+                  <span className="meta-pill" aria-label={`댓글 ${post.comments.length}개`}>댓글 {post.comments.length}</span>
+                  {postImages.length > 0 && (
+                    <span className="meta-pill" aria-label={`사진 ${postImages.length}장`}>사진 {postImages.length}</span>
+                  )}
+                </div>
+              </>
             )}
           </article>
         )
