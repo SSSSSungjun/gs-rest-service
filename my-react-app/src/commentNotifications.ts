@@ -37,9 +37,7 @@ function collectOwnedPostCommentIds(posts: Post[]) {
   for (const post of posts) {
     if (!post.ownedByMe) continue
     for (const comment of post.comments) {
-      if (!comment.ownedByMe) {
-        commentIds.add(comment.id)
-      }
+      commentIds.add(comment.id)
     }
   }
   return commentIds
@@ -58,7 +56,7 @@ export function getUnreadCommentNotifications(posts: Post[]) {
     if (!post.ownedByMe) continue
 
     for (const comment of post.comments) {
-      if (comment.ownedByMe || seenCommentIds.has(comment.id)) continue
+      if (seenCommentIds.has(comment.id)) continue
       notifications.push({
         postId: post.id,
         postPreview: makePreview(post.content),
