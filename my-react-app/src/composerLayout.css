@@ -47,8 +47,17 @@
 .refresh-button {
   min-width: 40px;
   padding: 0 10px;
-  font-size: 18px;
+  font-size: 0;
   line-height: 1;
+}
+
+.refresh-button::before {
+  content: '↻';
+  font-size: 18px;
+}
+
+.refresh-button:disabled::before {
+  content: '…';
 }
 
 .pagination {
