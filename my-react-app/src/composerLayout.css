@@ -1,13 +1,13 @@
 :root {
-  --composer-reserved-height: 310px;
+  --composer-reserved-height: 230px;
 }
 
 .board-shell {
   display: flex;
   min-height: 100vh;
   flex-direction: column;
-  gap: 14px;
-  padding-bottom: calc(var(--composer-reserved-height) + 28px);
+  gap: 12px;
+  padding-bottom: calc(var(--composer-reserved-height) + 20px);
 }
 
 .board-hero {
@@ -21,9 +21,9 @@
 
 .feed-scroll-region {
   display: grid;
-  max-height: calc(100vh - var(--composer-reserved-height) - 260px);
-  min-height: 220px;
-  gap: 14px;
+  max-height: calc(100vh - var(--composer-reserved-height) - 190px);
+  min-height: 280px;
+  gap: 12px;
   overflow-y: auto;
   padding-right: 3px;
   scrollbar-width: thin;
@@ -36,7 +36,7 @@
   left: max(12px, calc((100vw - 1040px) / 2 + 20px));
   z-index: 20;
   order: 3;
-  max-height: min(42vh, calc(var(--composer-reserved-height) - 28px));
+  max-height: min(40vh, calc(var(--composer-reserved-height) - 22px));
   margin: 0;
   overflow-y: auto;
   backdrop-filter: blur(10px);
@@ -46,7 +46,8 @@
 .pagination {
   display: grid;
   justify-items: center;
-  gap: 10px;
+  gap: 8px;
+  padding: 0;
 }
 
 .pagination-pages {
@@ -80,23 +81,25 @@
 
 @media (max-width: 720px) {
   :root {
-    --composer-reserved-height: 360px;
+    --composer-reserved-height: 300px;
   }
 
   .board-shell {
-    padding-bottom: calc(var(--composer-reserved-height) + 18px);
+    gap: 10px;
+    padding-bottom: calc(var(--composer-reserved-height) + 14px);
   }
 
   .feed-scroll-region {
-    max-height: calc(100vh - var(--composer-reserved-height) - 210px);
-    min-height: 180px;
+    max-height: calc(100vh - var(--composer-reserved-height) - 160px);
+    min-height: 220px;
+    gap: 10px;
   }
 
   .composer-bottom {
     right: 10px;
     bottom: 10px;
     left: 10px;
-    max-height: min(48vh, calc(var(--composer-reserved-height) - 24px));
+    max-height: min(46vh, calc(var(--composer-reserved-height) - 20px));
   }
 
   .pagination-jump {
