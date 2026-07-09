@@ -37,6 +37,8 @@ export function BoardComposer({
   onShowImagesInContentChange,
   onSubmit,
 }: BoardComposerProps) {
+  const hasImages = images.length > 0
+
   return (
     <section className="composer composer-bottom" aria-label="게시글 작성">
       <form onSubmit={onSubmit} onKeyDown={preventEnterSubmit}>
@@ -60,15 +62,23 @@ export function BoardComposer({
           />
           <button type="submit" disabled={isSubmitting || isUploadingImage}>{isSubmitting ? '등록 중' : '게시하기'}</button>
         </div>
-        <ImageAttachmentFields
-          images={images}
-          showImagesInContent={showImagesInContent}
-          isUploading={isUploadingImage}
-          onAddUrl={onAddImageUrl}
-          onUploadFiles={onUploadImages}
-          onRemoveImage={onRemoveImage}
-          onShowImagesInContentChange={onShowImagesInContentChange}
-        />
+
+        <details className="composer-attachment-panel" open={hasImages || isUploadingImage}>
+          <summary aria-label="사진 첨부 옵션 열기">
+            <span className="attachment-toggle-icon">+</span>
+            <span>사진 {images.length}</span>
+          </summary>
+          <ImageAttachmentFields
+            images={images}
+            showImagesInContent={showImagesInContent}
+            isUploading={isUploadingImage}
+            onAddUrl={onAddImageUrl}
+            onUploadFiles={onUploadImages}
+            onRemoveImage={onRemoveImage}
+            onShowImagesInContentChange={onShowImagesInContentChange}
+          />
+        </details>
+
         {errorMessage && <p className="form-error">{errorMessage}</p>}
       </form>
     </section>
