@@ -1,13 +1,13 @@
 :root {
-  --composer-reserved-height: 230px;
+  --composer-reserved-height: 205px;
 }
 
 .board-shell {
   display: flex;
   min-height: 100vh;
   flex-direction: column;
-  gap: 12px;
-  padding-bottom: calc(var(--composer-reserved-height) + 20px);
+  gap: 10px;
+  padding-bottom: calc(var(--composer-reserved-height) + 10px);
 }
 
 .board-hero {
@@ -21,33 +21,41 @@
 
 .feed-scroll-region {
   display: grid;
-  max-height: calc(100vh - var(--composer-reserved-height) - 190px);
-  min-height: 280px;
-  gap: 12px;
-  overflow-y: auto;
-  padding-right: 3px;
-  scrollbar-width: thin;
+  gap: 10px;
+  overflow: visible;
+  padding-right: 0;
 }
 
 .composer-bottom {
   position: fixed;
   right: max(12px, calc((100vw - 1040px) / 2 + 20px));
-  bottom: 14px;
+  bottom: 10px;
   left: max(12px, calc((100vw - 1040px) / 2 + 20px));
   z-index: 20;
   order: 3;
-  max-height: min(40vh, calc(var(--composer-reserved-height) - 22px));
+  max-height: min(38vh, calc(var(--composer-reserved-height) - 14px));
   margin: 0;
   overflow-y: auto;
   backdrop-filter: blur(10px);
   scrollbar-width: thin;
 }
 
+.feed-tabs {
+  width: min(100%, 320px);
+}
+
+.refresh-button {
+  min-width: 40px;
+  padding: 0 10px;
+  font-size: 18px;
+  line-height: 1;
+}
+
 .pagination {
   display: grid;
   justify-items: center;
-  gap: 8px;
-  padding: 0;
+  gap: 6px;
+  padding: 0 0 6px;
 }
 
 .pagination-pages {
@@ -60,46 +68,69 @@
 .pagination-jump {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
   align-items: end;
   justify-content: center;
 }
 
 .pagination-jump label {
-  width: 118px;
+  width: 104px;
+}
+
+.pagination-jump label span {
+  font-size: 12px;
 }
 
 .pagination-jump input {
-  min-height: 36px;
+  min-height: 34px;
   text-align: center;
 }
 
 .pagination-jump button {
-  min-height: 36px;
-  padding: 0 14px;
+  min-height: 34px;
+  padding: 0 12px;
+}
+
+.meta-pill,
+.like-button {
+  gap: 4px;
+  min-height: 28px;
+  border-color: transparent;
+  background: transparent;
+  padding: 0 4px;
+  color: #486255;
+}
+
+.like-button:hover,
+.like-button.active {
+  border-color: #bbf7d0;
+  background: #e7f8df;
+  color: #166534;
 }
 
 @media (max-width: 720px) {
   :root {
-    --composer-reserved-height: 300px;
+    --composer-reserved-height: 270px;
   }
 
   .board-shell {
-    gap: 10px;
-    padding-bottom: calc(var(--composer-reserved-height) + 14px);
+    gap: 8px;
+    padding-bottom: calc(var(--composer-reserved-height) + 8px);
   }
 
   .feed-scroll-region {
-    max-height: calc(100vh - var(--composer-reserved-height) - 160px);
-    min-height: 220px;
-    gap: 10px;
+    gap: 8px;
   }
 
   .composer-bottom {
     right: 10px;
-    bottom: 10px;
+    bottom: 8px;
     left: 10px;
-    max-height: min(46vh, calc(var(--composer-reserved-height) - 20px));
+    max-height: min(44vh, calc(var(--composer-reserved-height) - 14px));
+  }
+
+  .feed-tabs {
+    width: min(100%, 260px);
   }
 
   .pagination-jump {
@@ -107,6 +138,6 @@
   }
 
   .pagination-jump label {
-    width: min(150px, 100%);
+    width: min(132px, 100%);
   }
 }
