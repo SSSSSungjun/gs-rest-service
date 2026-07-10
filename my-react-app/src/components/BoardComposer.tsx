@@ -4,6 +4,7 @@ import type { PostImage } from '../boardApi'
 import { handleTextareaKeyDown, preventEnterSubmit } from '../boardUi'
 import { ImageAttachmentFields } from './ImageAttachmentFields'
 import '../composerLayout.css'
+import './BoardComposer.css'
 
 interface BoardComposerProps {
   nickname: string
