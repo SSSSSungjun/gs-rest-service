@@ -10,6 +10,13 @@ export interface PostImage {
   imageOrder?: number
 }
 
+export interface PollOption {
+  id: number
+  content: string
+  voteCount: number
+  votedByMe: boolean
+}
+
 export interface Comment {
   id: number
   parentCommentId?: number | null
@@ -34,6 +41,8 @@ export interface Post {
   createdAt: string
   updatedAt: string | null
   images: PostImage[]
+  pollOptions: PollOption[]
+  pollTotalVoteCount: number
   comments: Comment[]
 }
 
@@ -42,6 +51,7 @@ export interface BoardWritePayload {
   content: string
   images?: PostImage[]
   showImagesInContent?: boolean
+  pollOptions?: string[]
   parentCommentId?: number | null
 }
 
@@ -74,6 +84,10 @@ export const boardApi = {
 
   async togglePostLike(postId: number) {
     await apiClient.post(`/posts/${postId}/likes`)
+  },
+
+  async votePollOption(postId: number, optionId: number) {
+    await apiClient.post(`/posts/${postId}/poll-options/${optionId}/votes`)
   },
 
   async createComment(postId: number, payload: BoardWritePayload) {
