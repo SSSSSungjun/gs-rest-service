@@ -24,10 +24,12 @@ public class PostResponseDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<PostImageResponseDto> images;
+    private List<PollOptionResponseDto> pollOptions;
+    private long pollTotalVoteCount;
     private List<CommentResponseDto> comments;
 
     public static PostResponseDto from(Post post, String sessionId) {
-        return from(post, sessionId, 0, false, Map.of(), Set.of());
+        return from(post, sessionId, 0, false, Map.of(), Set.of(), Map.of(), Set.of());
     }
 
     public static PostResponseDto from(
@@ -36,8 +38,21 @@ public class PostResponseDto {
             long likeCount,
             boolean likedByMe,
             Map<Long, Long> commentLikeCounts,
-            Set<Long> likedCommentIds
+            Set<Long> likedCommentIds,
+            Map<Long, Long> pollVoteCounts,
+            Set<Long> votedPollOptionIds
     ) {
+        List<PollOptionResponseDto> pollOptions = post.getPollOptions().stream()
+                .map(pollOption -> PollOptionResponseDto.from(
+                        pollOption,
+                        pollVoteCounts.getOrDefault(pollOption.getId(), 0L),
+                        votedPollOptionIds.contains(pollOption.getId())
+                ))
+                .toList();
+        long pollTotalVoteCount = pollOptions.stream()
+                .mapToLong(PollOptionResponseDto::getVoteCount)
+                .sum();
+
         return PostResponseDto.builder()
                 .id(post.getId())
                 .nickname(post.getNickname())
@@ -51,6 +66,8 @@ public class PostResponseDto {
                 .images(post.getImages().stream()
                         .map(PostImageResponseDto::from)
                         .toList())
+                .pollOptions(pollOptions)
+                .pollTotalVoteCount(pollTotalVoteCount)
                 .comments(post.getComments().stream()
                         .map(comment -> CommentResponseDto.from(
                                 comment,
