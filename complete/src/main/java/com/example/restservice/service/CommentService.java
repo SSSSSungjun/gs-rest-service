@@ -28,9 +28,11 @@ public class CommentService {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
+        Comment parentComment = findParentComment(post, requestDto.getParentCommentId());
 
         Comment comment = Comment.builder()
                 .post(post)
+                .parentComment(parentComment)
                 .nickname(normalizeNickname(requestDto.getNickname()))
                 .content(requestDto.getContent().trim())
                 .ownerSessionId(sessionId)
@@ -59,6 +61,19 @@ public class CommentService {
 
         commentLikeRepository.deleteByCommentId(commentId);
         commentRepository.delete(comment);
+    }
+
+    private Comment findParentComment(Post post, Long parentCommentId) {
+        if (parentCommentId == null) {
+            return null;
+        }
+
+        Comment parentComment = commentRepository.findById(parentCommentId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+        if (!parentComment.getPost().getId().equals(post.getId())) {
+            throw new IllegalArgumentException("같은 글의 댓글에만 답글을 남길 수 있습니다.");
+        }
+        return parentComment;
     }
 
     private void validateOwner(Comment comment, String sessionId) {
