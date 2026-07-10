@@ -17,6 +17,7 @@ export interface BoardState {
   nickname: string
   content: string
   images: PostImage[]
+  pollOptions: string[]
   showImagesInContent: boolean
   commentDrafts: Record<number, BoardDraft>
   replyDrafts: Record<number, BoardDraft>
@@ -42,6 +43,11 @@ export type BoardAction =
   | { type: 'composer/contentChanged'; payload: string }
   | { type: 'composer/imageAdded'; payload: PostImage }
   | { type: 'composer/imageRemoved'; payload: number }
+  | { type: 'composer/pollStarted' }
+  | { type: 'composer/pollOptionChanged'; payload: { index: number; content: string } }
+  | { type: 'composer/pollOptionAdded' }
+  | { type: 'composer/pollOptionRemoved'; payload: number }
+  | { type: 'composer/pollCleared' }
   | { type: 'composer/showImagesChanged'; payload: boolean }
   | { type: 'composer/submitStarted' }
   | { type: 'composer/submitFinished' }
@@ -77,6 +83,7 @@ export const initialBoardState: BoardState = {
   nickname: '',
   content: '',
   images: [],
+  pollOptions: [],
   showImagesInContent: true,
   commentDrafts: {},
   replyDrafts: {},
@@ -111,6 +118,10 @@ function removeImage(images: PostImage[] | undefined, index: number): PostImage[
   return (images ?? []).filter((_, imageIndex) => imageIndex !== index)
 }
 
+function removePollOption(options: string[], index: number): string[] {
+  return options.filter((_, optionIndex) => optionIndex !== index)
+}
+
 export function boardReducer(state: BoardState, action: BoardAction): BoardState {
   switch (action.type) {
     case 'posts/loadStarted':
@@ -142,6 +153,21 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
       return { ...state, images: [...state.images, action.payload] }
     case 'composer/imageRemoved':
       return { ...state, images: removeImage(state.images, action.payload) }
+    case 'composer/pollStarted':
+      return { ...state, pollOptions: state.pollOptions.length === 0 ? ['', ''] : state.pollOptions }
+    case 'composer/pollOptionChanged':
+      return {
+        ...state,
+        pollOptions: state.pollOptions.map((option, index) => (
+          index === action.payload.index ? action.payload.content : option
+        )),
+      }
+    case 'composer/pollOptionAdded':
+      return { ...state, pollOptions: state.pollOptions.length >= 5 ? state.pollOptions : [...state.pollOptions, ''] }
+    case 'composer/pollOptionRemoved':
+      return { ...state, pollOptions: removePollOption(state.pollOptions, action.payload) }
+    case 'composer/pollCleared':
+      return { ...state, pollOptions: [] }
     case 'composer/showImagesChanged':
       return { ...state, showImagesInContent: action.payload }
     case 'composer/submitStarted':
@@ -149,7 +175,7 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
     case 'composer/submitFinished':
       return { ...state, isSubmitting: false }
     case 'composer/resetContent':
-      return { ...state, content: '', images: [], showImagesInContent: true }
+      return { ...state, content: '', images: [], pollOptions: [], showImagesInContent: true }
     case 'comments/nicknameChanged': {
       const currentDraft = getDraft(state.commentDrafts, action.payload.postId)
       return {
