@@ -5,6 +5,7 @@ import com.example.restservice.dto.response.PostImageResponseDto;
 import com.example.restservice.dto.response.PostResponseDto;
 import com.example.restservice.service.AnonymousSessionService;
 import com.example.restservice.service.LikeService;
+import com.example.restservice.service.PollService;
 import com.example.restservice.service.PostImageStorageService;
 import com.example.restservice.service.PostService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -33,6 +34,7 @@ public class PostController {
 
     private final PostService postService;
     private final LikeService likeService;
+    private final PollService pollService;
     private final PostImageStorageService postImageStorageService;
     private final AnonymousSessionService anonymousSessionService;
 
@@ -90,6 +92,18 @@ public class PostController {
     ) {
         String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
         likeService.togglePostLike(id, sessionId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/poll-options/{optionId}/votes")
+    public ResponseEntity<Void> votePollOption(
+            @PathVariable Long id,
+            @PathVariable Long optionId,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
+        pollService.vote(id, optionId, sessionId);
         return ResponseEntity.noContent().build();
     }
 }
