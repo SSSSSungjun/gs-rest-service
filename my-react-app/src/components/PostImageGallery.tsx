@@ -11,9 +11,21 @@ export function PostImageGallery({ images, variant }: PostImageGalleryProps) {
 
   const visibleImages = variant === 'list' ? images.slice(0, 2) : images
   const hiddenCount = images.length - visibleImages.length
+  const galleryClassName = [
+    'post-image-gallery',
+    variant === 'list' ? 'list-image-gallery' : 'detail-image-gallery',
+    variant === 'list' && visibleImages.length === 1 ? 'single-image-gallery' : '',
+    variant === 'list' && visibleImages.length > 1 ? 'multi-image-gallery' : '',
+  ].filter(Boolean).join(' ')
+  const galleryStyle = variant === 'list'
+    ? {
+      width: visibleImages.length === 1 ? '52px' : '110px',
+      gridTemplateColumns: `repeat(${visibleImages.length}, 52px)`,
+    }
+    : undefined
 
   return (
-    <div className={`post-image-gallery ${variant === 'list' ? 'list-image-gallery' : 'detail-image-gallery'}`}>
+    <div className={galleryClassName} style={galleryStyle}>
       {visibleImages.map((image, index) => (
         <figure className="post-image-frame" key={`${image.url}-${index}`}>
           <img src={resolveImageUrl(image.url)} alt={image.originalFilename || `첨부 이미지 ${index + 1}`} loading="lazy" />
