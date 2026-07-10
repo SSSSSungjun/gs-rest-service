@@ -12,16 +12,16 @@ import { ConfirmDialog } from './components/ConfirmDialog'
 import { Pagination } from './components/Pagination'
 import { PostDetail } from './components/PostDetail'
 import { PostList } from './components/PostList'
-import { getPostIdFromHash, isPopularPost, POST_HASH_PREFIX, POSTS_PER_PAGE, resizeTextarea } from './boardUi'
+import { getPostIdFromHash, POST_HASH_PREFIX, POSTS_PER_PAGE, resizeTextarea } from './boardUi'
 
-type FeedTab = 'all' | 'popular'
+type FeedSort = 'latest' | 'oldest' | 'popular'
 
 const MAX_IMAGE_COUNT = 10
 
 function App() {
   const [state, dispatch] = useReducer(boardReducer, initialBoardState)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
-  const [activeFeedTab, setActiveFeedTab] = useState<FeedTab>('all')
+  const [feedSort, setFeedSort] = useState<FeedSort>('latest')
   const [commentNotifications, setCommentNotifications] = useState<CommentNotification[]>([])
   const [isNotificationViewOpen, setIsNotificationViewOpen] = useState(false)
   const {
@@ -29,6 +29,7 @@ function App() {
     nickname,
     content,
     images,
+    pollOptions,
     showImagesInContent,
     commentDrafts,
     replyDrafts,
@@ -50,23 +51,25 @@ function App() {
   const isDetailView = selectedPost !== null
   const isNotificationView = isNotificationViewOpen && !isDetailView
   const hasActivePostEdit = Object.keys(editingPosts).length > 0
-  const popularPosts = useMemo(
-    () => posts
-      .filter((post) => isPopularPost(post.likeCount))
-      .sort((first, second) => {
+  const sortedPosts = useMemo(() => {
+    return [...posts].sort((first, second) => {
+      if (feedSort === 'oldest') {
+        return new Date(first.createdAt).getTime() - new Date(second.createdAt).getTime()
+      }
+      if (feedSort === 'popular') {
         if (second.likeCount !== first.likeCount) {
           return second.likeCount - first.likeCount
         }
         return new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime()
-      }),
-    [posts],
-  )
-  const activePosts = activeFeedTab === 'popular' ? popularPosts : posts
-  const pageCount = Math.max(1, Math.ceil(activePosts.length / POSTS_PER_PAGE))
+      }
+      return new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime()
+    })
+  }, [feedSort, posts])
+  const pageCount = Math.max(1, Math.ceil(sortedPosts.length / POSTS_PER_PAGE))
   const visiblePosts = useMemo(() => {
     const startIndex = (currentPage - 1) * POSTS_PER_PAGE
-    return activePosts.slice(startIndex, startIndex + POSTS_PER_PAGE)
-  }, [activePosts, currentPage])
+    return sortedPosts.slice(startIndex, startIndex + POSTS_PER_PAGE)
+  }, [currentPage, sortedPosts])
 
   const showSystemMessage = useCallback((message: string) => {
     window.alert(message)
@@ -110,7 +113,7 @@ function App() {
   }, [])
 
   const handleBoardTitleClick = useCallback(() => {
-    const isDefaultFeed = !isDetailView && !isNotificationView && activeFeedTab === 'all' && currentPage === 1
+    const isDefaultFeed = !isDetailView && !isNotificationView && feedSort === 'latest' && currentPage === 1
     if (isDefaultFeed) {
       void fetchPosts(false)
       return
@@ -119,11 +122,11 @@ function App() {
     if (window.location.hash.startsWith(POST_HASH_PREFIX)) {
       window.history.replaceState(null, '', window.location.pathname + window.location.search)
     }
-    setActiveFeedTab('all')
+    setFeedSort('latest')
     setIsNotificationViewOpen(false)
     dispatch({ type: 'pagination/pageChanged', payload: 1 })
     dispatch({ type: 'posts/detailClosed' })
-  }, [activeFeedTab, currentPage, fetchPosts, isDetailView, isNotificationView])
+  }, [currentPage, feedSort, fetchPosts, isDetailView, isNotificationView])
 
   const dismissCommentNotifications = useCallback((commentIds: number[]) => {
     markCommentNotificationsSeen(commentIds)
@@ -134,7 +137,7 @@ function App() {
 
   const openCommentNotificationPost = useCallback((postId: number, commentIds: number[]) => {
     dismissCommentNotifications(commentIds)
-    setActiveFeedTab('all')
+    setFeedSort('latest')
     setIsNotificationViewOpen(false)
     openPostDetail(postId)
   }, [dismissCommentNotifications, openPostDetail])
@@ -147,8 +150,8 @@ function App() {
     setIsNotificationViewOpen(true)
   }, [])
 
-  const changeFeedTab = (nextTab: FeedTab) => {
-    setActiveFeedTab(nextTab)
+  const changeFeedSort = (nextSort: FeedSort) => {
+    setFeedSort(nextSort)
     setIsNotificationViewOpen(false)
     dispatch({ type: 'pagination/pageChanged', payload: 1 })
   }
@@ -195,6 +198,10 @@ function App() {
       return null
     }
   }
+
+  const getCleanPollOptions = () => pollOptions
+    .map((option) => option.trim())
+    .filter(Boolean)
 
   const handleAddComposerImageUrl = (url: string) => {
     if (!ensureCanAddImages(images.length, 1)) return
@@ -256,6 +263,16 @@ function App() {
     }
   }
 
+  const handleVotePollOption = async (postId: number, optionId: number) => {
+    try {
+      await boardApi.votePollOption(postId, optionId)
+      await fetchPosts(false)
+    } catch (error) {
+      showSystemMessage('투표 처리에 실패했습니다.')
+      console.error(error)
+    }
+  }
+
   const handleToggleCommentLike = async (commentId: number) => {
     try {
       await boardApi.toggleCommentLike(commentId)
@@ -274,12 +291,26 @@ function App() {
       return
     }
 
+    const cleanPollOptions = getCleanPollOptions()
+    if (pollOptions.length > 0 && cleanPollOptions.length < 2) {
+      const message = '투표 선택지는 2개 이상 입력해주세요.'
+      dispatch({ type: 'error/set', payload: message })
+      showSystemMessage(message)
+      return
+    }
+
     dispatch({ type: 'composer/submitStarted' })
     try {
-      await boardApi.createPost({ nickname, content, images, showImagesInContent })
+      await boardApi.createPost({
+        nickname,
+        content,
+        images,
+        showImagesInContent,
+        pollOptions: cleanPollOptions.length > 0 ? cleanPollOptions : undefined,
+      })
       dispatch({ type: 'composer/resetContent' })
       dispatch({ type: 'pagination/pageChanged', payload: 1 })
-      setActiveFeedTab('all')
+      setFeedSort('latest')
       setIsNotificationViewOpen(false)
       showSystemMessage('게시글을 등록했습니다.')
       await fetchPosts(false)
@@ -462,40 +493,28 @@ function App() {
       <section className="feed" aria-label={isDetailView ? '게시글 상세' : isNotificationView ? '댓글 알림' : '게시글 목록'}>
         <div className="feed-toolbar">
           <div>
-            <strong>{isDetailView ? '게시글 상세' : isNotificationView ? '댓글 알림' : activeFeedTab === 'popular' ? '인기글' : '전체 글'}</strong>
+            <strong>{isDetailView ? '게시글 상세' : isNotificationView ? '댓글 알림' : '전체 글'}</strong>
           </div>
-          <button className="refresh-button" type="button" onClick={() => fetchPosts(false)} disabled={isLoading}>
-            {isLoading ? '갱신 중' : '갱신하기'}
-          </button>
+          <div className="feed-toolbar-actions">
+            {!isDetailView && !isNotificationView && (
+              <label className="feed-sort-select">
+                <span>정렬</span>
+                <select value={feedSort} onChange={(event) => changeFeedSort(event.target.value as FeedSort)}>
+                  <option value="latest">최신순</option>
+                  <option value="oldest">오래된순</option>
+                  <option value="popular">인기순</option>
+                </select>
+              </label>
+            )}
+            <button className="refresh-button" type="button" onClick={() => fetchPosts(false)} disabled={isLoading}>
+              {isLoading ? '갱신 중' : '갱신하기'}
+            </button>
+          </div>
         </div>
-
-        {!isDetailView && !isNotificationView && (
-          <div className="feed-tabs" role="tablist" aria-label="게시글 목록 종류">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeFeedTab === 'all'}
-              className={activeFeedTab === 'all' ? 'active' : undefined}
-              onClick={() => changeFeedTab('all')}
-            >
-              전체글 <span>{posts.length}</span>
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={activeFeedTab === 'popular'}
-              className={activeFeedTab === 'popular' ? 'active' : undefined}
-              onClick={() => changeFeedTab('popular')}
-            >
-              인기글 <span>{popularPosts.length}</span>
-            </button>
-          </div>
-        )}
 
         <div className="feed-scroll-region">
           {isLoading && posts.length === 0 && <p className="empty-state">게시글을 불러오는 중입니다.</p>}
           {!isLoading && posts.length === 0 && <p className="empty-state">아직 게시글이 없습니다.</p>}
-          {!isLoading && posts.length > 0 && activePosts.length === 0 && !isNotificationView && <p className="empty-state">아직 인기글이 없습니다.</p>}
 
           {isNotificationView ? (
             <CommentNotificationList
@@ -517,6 +536,7 @@ function App() {
               onStartEditPost={(post) => dispatch({ type: 'posts/editStarted', payload: post })}
               onRequestDeletePost={(postId) => dispatch({ type: 'delete/requested', payload: { target: 'post', id: postId } })}
               onTogglePostLike={handleTogglePostLike}
+              onVotePollOption={handleVotePollOption}
               onPostEditNicknameChange={(postId, nextNickname) => dispatch({
                 type: 'posts/editNicknameChanged',
                 payload: { postId, nickname: nextNickname },
@@ -580,6 +600,7 @@ function App() {
               onStartEditPost={(post) => dispatch({ type: 'posts/editStarted', payload: post })}
               onRequestDeletePost={(postId) => dispatch({ type: 'delete/requested', payload: { target: 'post', id: postId } })}
               onTogglePostLike={handleTogglePostLike}
+              onVotePollOption={handleVotePollOption}
               onPostEditNicknameChange={(postId, nextNickname) => dispatch({
                 type: 'posts/editNicknameChanged',
                 payload: { postId, nickname: nextNickname },
@@ -603,7 +624,7 @@ function App() {
             />
           )}
 
-          {!isDetailView && !isNotificationView && !isLoading && activePosts.length > 0 && (
+          {!isDetailView && !isNotificationView && !isLoading && sortedPosts.length > 0 && (
             <Pagination
               pageCount={pageCount}
               currentPage={currentPage}
@@ -618,6 +639,7 @@ function App() {
           nickname={nickname}
           content={content}
           images={images}
+          pollOptions={pollOptions}
           showImagesInContent={showImagesInContent}
           isSubmitting={isSubmitting}
           isUploadingImage={isUploadingImage}
@@ -627,6 +649,14 @@ function App() {
           onAddImageUrl={handleAddComposerImageUrl}
           onUploadImages={handleUploadComposerImages}
           onRemoveImage={(index) => dispatch({ type: 'composer/imageRemoved', payload: index })}
+          onStartPoll={() => dispatch({ type: 'composer/pollStarted' })}
+          onPollOptionChange={(index, nextContent) => dispatch({
+            type: 'composer/pollOptionChanged',
+            payload: { index, content: nextContent },
+          })}
+          onAddPollOption={() => dispatch({ type: 'composer/pollOptionAdded' })}
+          onRemovePollOption={(index) => dispatch({ type: 'composer/pollOptionRemoved', payload: index })}
+          onClearPoll={() => dispatch({ type: 'composer/pollCleared' })}
           onShowImagesInContentChange={(nextShowImagesInContent) => dispatch({
             type: 'composer/showImagesChanged',
             payload: nextShowImagesInContent,
