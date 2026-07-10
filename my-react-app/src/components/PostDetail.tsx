@@ -4,6 +4,7 @@ import type { BoardDraft } from '../boardReducer'
 import { formatDate, handleTextareaKeyDown, isPopularPost, preventEnterSubmit, wasEdited } from '../boardUi'
 import { ActionMenu } from './ActionMenu'
 import { CommentEditForm } from './CommentEditForm'
+import { PollBlock } from './PollBlock'
 import { PostEditForm } from './PostEditForm'
 import { PostImageGallery } from './PostImageGallery'
 import './PostDetail.css'
@@ -20,6 +21,7 @@ interface PostDetailProps {
   onStartEditPost: (post: Post) => void
   onRequestDeletePost: (postId: number) => void
   onTogglePostLike: (postId: number) => void
+  onVotePollOption: (postId: number, optionId: number) => void
   onPostEditNicknameChange: (postId: number, nickname: string) => void
   onPostEditContentChange: (postId: number, content: string) => void
   onPostEditAddImageUrl: (postId: number, url: string) => void
@@ -57,6 +59,7 @@ export function PostDetail({
   onStartEditPost,
   onRequestDeletePost,
   onTogglePostLike,
+  onVotePollOption,
   onPostEditNicknameChange,
   onPostEditContentChange,
   onPostEditAddImageUrl,
@@ -82,6 +85,7 @@ export function PostDetail({
   onSubmitReply,
 }: PostDetailProps) {
   const postImages = post.images ?? []
+  const pollOptions = post.pollOptions ?? []
   const isPopular = isPopularPost(post.likeCount)
 
   return (
@@ -127,6 +131,15 @@ export function PostDetail({
         <>
           <p className="detail-content">{post.content}</p>
           {post.showImagesInContent && <PostImageGallery images={postImages} variant="detail" />}
+          {pollOptions.length > 0 && (
+            <PollBlock
+              postId={post.id}
+              options={pollOptions}
+              totalVoteCount={post.pollTotalVoteCount ?? 0}
+              variant="detail"
+              onVote={onVotePollOption}
+            />
+          )}
         </>
       )}
 
@@ -144,6 +157,9 @@ export function PostDetail({
           <span className="meta-pill" aria-label={`댓글 ${post.comments.length}개`}>댓글 {post.comments.length}</span>
           {postImages.length > 0 && (
             <span className="meta-pill" aria-label={`사진 ${postImages.length}장`}>사진 {postImages.length}</span>
+          )}
+          {pollOptions.length > 0 && (
+            <span className="meta-pill" aria-label={`투표 ${post.pollTotalVoteCount ?? 0}표`}>투표 {post.pollTotalVoteCount ?? 0}</span>
           )}
         </div>
       )}
