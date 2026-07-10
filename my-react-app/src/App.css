@@ -296,26 +296,44 @@ button:disabled {
 
 .post-image-gallery {
   display: grid;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 6px;
+  margin-top: 10px;
 }
 
 .list-image-gallery {
-  grid-template-columns: repeat(2, minmax(0, 112px));
+  width: fit-content;
+  max-width: 110px;
+  grid-template-columns: repeat(auto-fit, minmax(0, 52px));
+  margin-top: 0;
 }
 
 .list-image-gallery .post-image-frame {
+  width: 52px;
   aspect-ratio: 1;
   margin: 0;
 }
 
 .detail-image-gallery {
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, min(100%, 420px)));
+  align-items: start;
+  justify-content: start;
 }
 
 .detail-image-gallery .post-image-frame {
-  aspect-ratio: 4 / 3;
+  display: flex;
+  width: min(100%, 420px);
+  max-height: 320px;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: auto;
   margin: 0;
+}
+
+.detail-image-gallery .post-image-frame img {
+  width: 100%;
+  height: auto;
+  max-height: 320px;
+  object-fit: contain;
 }
 
 .image-count-overlay {
@@ -722,6 +740,22 @@ time {
   color: #12301f;
 }
 
+.post-list-preview {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.post-list-preview.has-images {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+
+.post-list-preview.has-images .post-content {
+  margin-top: -2px;
+}
+
 .post-content,
 .detail-content {
   color: #213a2b;
@@ -1102,6 +1136,24 @@ time {
     align-items: stretch;
   }
 
+  .post-list-preview.has-images {
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .list-image-gallery {
+    grid-template-columns: repeat(auto-fit, minmax(0, 52px));
+  }
+
+  .detail-image-gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-image-gallery .post-image-frame {
+    width: 100%;
+    max-width: 420px;
+  }
+
   .comment-body {
     grid-template-columns: 1fr auto;
   }
@@ -1109,10 +1161,6 @@ time {
   .inline-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
-  }
-
-  .list-image-gallery {
-    grid-template-columns: repeat(2, minmax(0, 96px));
   }
 
   .detail-image-gallery {
