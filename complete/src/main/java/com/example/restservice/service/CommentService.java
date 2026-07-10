@@ -59,6 +59,8 @@ public class CommentService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
         validateOwner(comment, sessionId);
 
+        commentRepository.findByParentCommentId(commentId)
+                .forEach(Comment::clearParentComment);
         commentLikeRepository.deleteByCommentId(commentId);
         commentRepository.delete(comment);
     }
