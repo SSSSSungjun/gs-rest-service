@@ -83,4 +83,8 @@ public class Comment {
         this.nickname = nickname;
         this.content = content;
     }
+
+    public void clearParentComment() {
+        this.parentComment = null;
+    }
 }
