@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 import './App.css'
+import './feedSort.css'
 import { boardApi } from './boardApi'
 import type { PostImage } from './boardApi'
 import { boardReducer, initialBoardState } from './boardReducer'
