@@ -10,6 +10,8 @@ import { PostImageGallery } from './PostImageGallery'
 interface PostDetailProps {
   post: Post
   commentDraft: BoardDraft
+  replyDrafts: Record<number, BoardDraft>
+  activeReplyCommentId: number | null
   postEditDraft?: BoardDraft
   editingComments: Record<number, BoardDraft>
   isUploadingImage: boolean
@@ -35,11 +37,18 @@ interface PostDetailProps {
   onCommentNicknameChange: (postId: number, nickname: string) => void
   onCommentContentChange: (event: ChangeEvent<HTMLTextAreaElement>, postId: number) => void
   onSubmitComment: (event: FormEvent, postId: number) => void
+  onStartReply: (postId: number, commentId: number) => void
+  onCancelReply: (postId: number, commentId: number) => void
+  onReplyNicknameChange: (commentId: number, nickname: string) => void
+  onReplyContentChange: (event: ChangeEvent<HTMLTextAreaElement>, commentId: number) => void
+  onSubmitReply: (event: FormEvent, postId: number, parentCommentId: number) => void
 }
 
 export function PostDetail({
   post,
   commentDraft,
+  replyDrafts,
+  activeReplyCommentId,
   postEditDraft,
   editingComments,
   isUploadingImage,
@@ -65,6 +74,11 @@ export function PostDetail({
   onCommentNicknameChange,
   onCommentContentChange,
   onSubmitComment,
+  onStartReply,
+  onCancelReply,
+  onReplyNicknameChange,
+  onReplyContentChange,
+  onSubmitReply,
 }: PostDetailProps) {
   const postImages = post.images ?? []
   const isPopular = isPopularPost(post.likeCount)
@@ -138,9 +152,12 @@ export function PostDetail({
 
         {post.comments.map((comment) => {
           const commentEditDraft = editingComments[comment.id]
+          const replyDraft = replyDrafts[comment.id] ?? { nickname: '', content: '' }
+          const isReply = comment.parentCommentId !== null && comment.parentCommentId !== undefined
+          const replyToNickname = comment.replyToNickname || '삭제된 댓글'
 
           return (
-            <div className="comment" key={comment.id}>
+            <div className={`comment ${isReply ? 'reply-comment' : ''}`} key={comment.id}>
               {commentEditDraft ? (
                 <CommentEditForm
                   commentId={comment.id}
@@ -159,6 +176,7 @@ export function PostDetail({
                         {formatDate(comment.createdAt)}
                         {wasEdited(comment.createdAt, comment.updatedAt) && <span className="edited-label">(수정됨)</span>}
                       </time>
+                      {isReply && <span className="reply-target-label">@{replyToNickname}에게</span>}
                       <p>{comment.content}</p>
                     </div>
                     {comment.ownedByMe && (
@@ -169,15 +187,52 @@ export function PostDetail({
                       />
                     )}
                   </div>
-                  <button
-                    className={`like-button compact-like ${comment.likedByMe ? 'active' : ''}`}
-                    type="button"
-                    aria-label={`댓글 좋아요 ${comment.likeCount}개`}
-                    aria-pressed={comment.likedByMe}
-                    onClick={() => onToggleCommentLike(comment.id)}
-                  >
-                    좋아요 {comment.likeCount}
-                  </button>
+                  <div className="comment-action-row">
+                    <button
+                      className={`like-button compact-like ${comment.likedByMe ? 'active' : ''}`}
+                      type="button"
+                      aria-label={`댓글 좋아요 ${comment.likeCount}개`}
+                      aria-pressed={comment.likedByMe}
+                      onClick={() => onToggleCommentLike(comment.id)}
+                    >
+                      좋아요 {comment.likeCount}
+                    </button>
+                    <button
+                      className="text-button reply-button"
+                      type="button"
+                      onClick={() => onStartReply(post.id, comment.id)}
+                    >
+                      답글
+                    </button>
+                  </div>
+                  {activeReplyCommentId === comment.id && (
+                    <form
+                      className="comment-form reply-form"
+                      onSubmit={(event) => onSubmitReply(event, post.id, comment.id)}
+                      onKeyDown={preventEnterSubmit}
+                    >
+                      <input
+                        className="comment-nickname-input"
+                        value={replyDraft.nickname}
+                        onChange={(event) => onReplyNicknameChange(comment.id, event.target.value)}
+                        maxLength={40}
+                        placeholder="익명"
+                        aria-label="답글 닉네임"
+                      />
+                      <textarea
+                        value={replyDraft.content}
+                        onChange={(event) => onReplyContentChange(event, comment.id)}
+                        onKeyDown={handleTextareaKeyDown}
+                        rows={1}
+                        placeholder={`${comment.nickname || '익명'}에게 답글`}
+                        aria-label="답글 내용"
+                      />
+                      <div className="reply-form-actions">
+                        <button type="submit">등록</button>
+                        <button className="ghost-button" type="button" onClick={() => onCancelReply(post.id, comment.id)}>취소</button>
+                      </div>
+                    </form>
+                  )}
                 </>
               )}
             </div>
