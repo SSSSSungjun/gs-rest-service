@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
         name = "comments",
         indexes = {
                 @Index(name = "idx_comments_post_id", columnList = "post_id"),
+                @Index(name = "idx_comments_parent_comment_id", columnList = "parent_comment_id"),
                 @Index(name = "idx_comments_owner_session_id", columnList = "owner_session_id")
         }
 )
@@ -42,6 +43,10 @@ public class Comment {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "post_id", nullable = false)
     private Post post;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_comment_id")
+    private Comment parentComment;
 
     @Column(nullable = false, length = 40)
     private String nickname;
@@ -77,5 +82,9 @@ public class Comment {
     public void update(String nickname, String content) {
         this.nickname = nickname;
         this.content = content;
+    }
+
+    public void clearParentComment() {
+        this.parentComment = null;
     }
 }

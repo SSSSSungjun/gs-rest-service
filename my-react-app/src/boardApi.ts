@@ -12,6 +12,8 @@ export interface PostImage {
 
 export interface Comment {
   id: number
+  parentCommentId?: number | null
+  replyToNickname?: string | null
   nickname: string
   content: string
   ownedByMe: boolean
@@ -40,6 +42,7 @@ export interface BoardWritePayload {
   content: string
   images?: PostImage[]
   showImagesInContent?: boolean
+  parentCommentId?: number | null
 }
 
 export const boardApi = {

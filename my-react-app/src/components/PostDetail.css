@@ -1,0 +1,65 @@
+.reply-comment {
+  margin-left: 18px;
+  border-left: 3px solid #9ad0a6;
+  background: #f8fcf3;
+}
+
+.reply-target-label {
+  display: inline-flex;
+  width: fit-content;
+  min-height: 24px;
+  align-items: center;
+  margin-top: 7px;
+  border: 1px solid #bdd5c5;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #15803d;
+  padding: 0 8px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.comment-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.reply-button {
+  min-height: 28px;
+  padding: 0 9px;
+  font-size: 12px;
+}
+
+.reply-form {
+  margin-top: 2px;
+  padding-left: 12px;
+  border-left: 2px solid #c8dfcf;
+}
+
+.reply-form-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.reply-form-actions button {
+  min-height: 34px;
+  padding: 0 12px;
+}
+
+@media (max-width: 720px) {
+  .reply-comment {
+    margin-left: 10px;
+  }
+
+  .reply-form {
+    padding-left: 10px;
+  }
+
+  .reply-form-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+}

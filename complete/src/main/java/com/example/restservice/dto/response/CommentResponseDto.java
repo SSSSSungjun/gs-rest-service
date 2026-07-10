@@ -12,6 +12,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CommentResponseDto {
     private Long id;
+    private Long parentCommentId;
+    private String replyToNickname;
     private String nickname;
     private String content;
     private boolean ownedByMe;
@@ -25,8 +27,12 @@ public class CommentResponseDto {
     }
 
     public static CommentResponseDto from(Comment comment, String sessionId, long likeCount, boolean likedByMe) {
+        Comment parentComment = comment.getParentComment();
+
         return CommentResponseDto.builder()
                 .id(comment.getId())
+                .parentCommentId(parentComment == null ? null : parentComment.getId())
+                .replyToNickname(parentComment == null ? null : parentComment.getNickname())
                 .nickname(comment.getNickname())
                 .content(comment.getContent())
                 .ownedByMe(comment.isOwnedBy(sessionId))

@@ -19,6 +19,8 @@ export interface BoardState {
   images: PostImage[]
   showImagesInContent: boolean
   commentDrafts: Record<number, BoardDraft>
+  replyDrafts: Record<number, BoardDraft>
+  replyTargets: Record<number, number>
   editingPosts: Record<number, BoardDraft>
   editingComments: Record<number, BoardDraft>
   expandedPostId: number | null
@@ -47,6 +49,11 @@ export type BoardAction =
   | { type: 'comments/nicknameChanged'; payload: { postId: number; nickname: string } }
   | { type: 'comments/contentChanged'; payload: { postId: number; content: string } }
   | { type: 'comments/draftCleared'; payload: number }
+  | { type: 'comments/replyStarted'; payload: { postId: number; commentId: number } }
+  | { type: 'comments/replyCanceled'; payload: { postId: number; commentId: number } }
+  | { type: 'comments/replyNicknameChanged'; payload: { commentId: number; nickname: string } }
+  | { type: 'comments/replyContentChanged'; payload: { commentId: number; content: string } }
+  | { type: 'comments/replyDraftCleared'; payload: { postId: number; commentId: number } }
   | { type: 'posts/editStarted'; payload: Post }
   | { type: 'posts/editNicknameChanged'; payload: { postId: number; nickname: string } }
   | { type: 'posts/editContentChanged'; payload: { postId: number; content: string } }
@@ -72,6 +79,8 @@ export const initialBoardState: BoardState = {
   images: [],
   showImagesInContent: true,
   commentDrafts: {},
+  replyDrafts: {},
+  replyTargets: {},
   editingPosts: {},
   editingComments: {},
   expandedPostId: null,
@@ -90,6 +99,12 @@ function removeDraft(drafts: Record<number, BoardDraft>, id: number): Record<num
   const nextDrafts = { ...drafts }
   delete nextDrafts[id]
   return nextDrafts
+}
+
+function removeReplyTarget(replyTargets: Record<number, number>, postId: number): Record<number, number> {
+  const nextReplyTargets = { ...replyTargets }
+  delete nextReplyTargets[postId]
+  return nextReplyTargets
 }
 
 function removeImage(images: PostImage[] | undefined, index: number): PostImage[] {
@@ -157,6 +172,46 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
     }
     case 'comments/draftCleared':
       return { ...state, commentDrafts: removeDraft(state.commentDrafts, action.payload) }
+    case 'comments/replyStarted':
+      return {
+        ...state,
+        replyTargets: {
+          ...state.replyTargets,
+          [action.payload.postId]: action.payload.commentId,
+        },
+      }
+    case 'comments/replyCanceled':
+      return {
+        ...state,
+        replyTargets: removeReplyTarget(state.replyTargets, action.payload.postId),
+        replyDrafts: removeDraft(state.replyDrafts, action.payload.commentId),
+      }
+    case 'comments/replyNicknameChanged': {
+      const currentDraft = getDraft(state.replyDrafts, action.payload.commentId)
+      return {
+        ...state,
+        replyDrafts: {
+          ...state.replyDrafts,
+          [action.payload.commentId]: { ...currentDraft, nickname: action.payload.nickname },
+        },
+      }
+    }
+    case 'comments/replyContentChanged': {
+      const currentDraft = getDraft(state.replyDrafts, action.payload.commentId)
+      return {
+        ...state,
+        replyDrafts: {
+          ...state.replyDrafts,
+          [action.payload.commentId]: { ...currentDraft, content: action.payload.content },
+        },
+      }
+    }
+    case 'comments/replyDraftCleared':
+      return {
+        ...state,
+        replyTargets: removeReplyTarget(state.replyTargets, action.payload.postId),
+        replyDrafts: removeDraft(state.replyDrafts, action.payload.commentId),
+      }
     case 'posts/editStarted':
       return {
         ...state,

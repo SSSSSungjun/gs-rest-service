@@ -31,6 +31,8 @@ function App() {
     images,
     showImagesInContent,
     commentDrafts,
+    replyDrafts,
+    replyTargets,
     editingPosts,
     editingComments,
     expandedPostId,
@@ -160,6 +162,14 @@ function App() {
     dispatch({
       type: 'comments/contentChanged',
       payload: { postId, content: event.target.value },
+    })
+    resizeTextarea(event.currentTarget)
+  }
+
+  const handleReplyChange = (event: ChangeEvent<HTMLTextAreaElement>, commentId: number) => {
+    dispatch({
+      type: 'comments/replyContentChanged',
+      payload: { commentId, content: event.target.value },
     })
     resizeTextarea(event.currentTarget)
   }
@@ -311,22 +321,32 @@ function App() {
     }
   }
 
-  const handleCreateComment = async (event: FormEvent, postId: number) => {
+  const handleCreateComment = async (event: FormEvent, postId: number, parentCommentId?: number) => {
     event.preventDefault()
-    const draft = commentDrafts[postId] ?? { nickname: '', content: '' }
+    const draft = parentCommentId === undefined
+      ? commentDrafts[postId] ?? { nickname: '', content: '' }
+      : replyDrafts[parentCommentId] ?? { nickname: '', content: '' }
     if (!draft.content.trim()) {
-      showSystemMessage('댓글 내용을 입력해주세요.')
+      showSystemMessage(parentCommentId === undefined ? '댓글 내용을 입력해주세요.' : '답글 내용을 입력해주세요.')
       return
     }
 
     dispatch({ type: 'error/clear' })
     try {
-      await boardApi.createComment(postId, { nickname: draft.nickname, content: draft.content })
-      dispatch({ type: 'comments/draftCleared', payload: postId })
-      showSystemMessage('댓글을 등록했습니다.')
+      await boardApi.createComment(postId, {
+        nickname: draft.nickname,
+        content: draft.content,
+        parentCommentId: parentCommentId ?? null,
+      })
+      if (parentCommentId === undefined) {
+        dispatch({ type: 'comments/draftCleared', payload: postId })
+      } else {
+        dispatch({ type: 'comments/replyDraftCleared', payload: { postId, commentId: parentCommentId } })
+      }
+      showSystemMessage(parentCommentId === undefined ? '댓글을 등록했습니다.' : '답글을 등록했습니다.')
       await fetchPosts(false)
     } catch (error) {
-      const message = '댓글 등록에 실패했습니다.'
+      const message = parentCommentId === undefined ? '댓글 등록에 실패했습니다.' : '답글 등록에 실패했습니다.'
       dispatch({ type: 'error/set', payload: message })
       showSystemMessage(message)
       console.error(error)
@@ -488,6 +508,8 @@ function App() {
             <PostDetail
               post={selectedPost}
               commentDraft={commentDrafts[selectedPost.id] ?? { nickname: '', content: '' }}
+              replyDrafts={replyDrafts}
+              activeReplyCommentId={replyTargets[selectedPost.id] ?? null}
               postEditDraft={editingPosts[selectedPost.id]}
               editingComments={editingComments}
               isUploadingImage={isUploadingImage}
@@ -534,6 +556,20 @@ function App() {
               })}
               onCommentContentChange={handleCommentChange}
               onSubmitComment={handleCreateComment}
+              onStartReply={(postId, commentId) => dispatch({
+                type: 'comments/replyStarted',
+                payload: { postId, commentId },
+              })}
+              onCancelReply={(postId, commentId) => dispatch({
+                type: 'comments/replyCanceled',
+                payload: { postId, commentId },
+              })}
+              onReplyNicknameChange={(commentId, nextNickname) => dispatch({
+                type: 'comments/replyNicknameChanged',
+                payload: { commentId, nickname: nextNickname },
+              })}
+              onReplyContentChange={handleReplyChange}
+              onSubmitReply={handleCreateComment}
             />
           ) : (
             <PostList
