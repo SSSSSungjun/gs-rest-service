@@ -72,6 +72,11 @@ public class Post {
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PostImage> images = new ArrayList<>();
 
+    @Builder.Default
+    @OrderBy("optionOrder ASC")
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PollOption> pollOptions = new ArrayList<>();
+
     @PrePersist
     protected void onCreate() {
         LocalDateTime now = SeoulTime.now();
@@ -100,5 +105,10 @@ public class Post {
     public void replaceImages(List<PostImage> nextImages) {
         this.images.clear();
         this.images.addAll(nextImages);
+    }
+
+    public void replacePollOptions(List<PollOption> nextPollOptions) {
+        this.pollOptions.clear();
+        this.pollOptions.addAll(nextPollOptions);
     }
 }
