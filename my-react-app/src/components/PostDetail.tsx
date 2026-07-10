@@ -6,6 +6,7 @@ import { ActionMenu } from './ActionMenu'
 import { CommentEditForm } from './CommentEditForm'
 import { PostEditForm } from './PostEditForm'
 import { PostImageGallery } from './PostImageGallery'
+import './PostDetail.css'
 
 interface PostDetailProps {
   post: Post
