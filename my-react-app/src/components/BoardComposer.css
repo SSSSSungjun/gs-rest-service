@@ -1,0 +1,68 @@
+.composer-poll-editor {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #dcebd8;
+  border-radius: 8px;
+  background: #fbfef8;
+  padding: 10px;
+}
+
+.composer-poll-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.composer-poll-header strong {
+  color: #12301f;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.composer-poll-header .text-button {
+  min-height: 28px;
+  padding: 0 9px;
+  font-size: 12px;
+}
+
+.composer-poll-options {
+  display: grid;
+  gap: 6px;
+}
+
+.composer-poll-option-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+}
+
+.composer-poll-option-row input {
+  min-height: 36px;
+  padding: 0 10px;
+  font-size: 13px;
+}
+
+.composer-poll-option-row .text-button,
+.composer-poll-add {
+  min-height: 34px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.composer-attachment-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 720px) {
+  .composer-poll-option-row {
+    grid-template-columns: 1fr;
+  }
+
+  .composer-poll-option-row .text-button,
+  .composer-poll-add {
+    width: 100%;
+  }
+}
