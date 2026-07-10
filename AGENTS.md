@@ -90,11 +90,14 @@
 - UI 배치/간격: `my-react-app/src/App.css`, 관련 React component
 - 게시글 목록/상세: post list/detail component, post API client
 - 글쓰기 입력창/이미지 첨부: composer component, image attachment util/API
-- 댓글/알림: comment component, notification util/state
+- 댓글/알림: `my-react-app/src/components/CommentNotificationBar.tsx`, `my-react-app/src/components/PostDetail.tsx`, `my-react-app/src/commentNotifications.ts`, `my-react-app/src/App.tsx`
 - 백엔드 API 변경: controller/service/dto/entity 순서로 최소 확인
 
 현재 판단:
 
+- PR #32는 댓글 상세의 접기/펼치기를 제거해 댓글을 항상 표시하고, 댓글 알림을 상단 배너 대신 알림 버튼 + 별도 목록 화면으로 바꾸는 작업이다.
+- 알림 버튼은 새 알림이 있을 때 `+N` 배지와 초록 강조색을 사용한다.
+- 알림 목록 화면에서는 개별 알림 읽음 처리, 모두 읽음, 원문 게시글 열기를 제공한다.
 - `AGENTS.md`는 Codex 작업 규칙과 컨텍스트 캐시의 첫 진입점으로 충분하다.
 - 기술적인 의사결정과 트러블슈팅은 `docs/technical-notes.md`에 남기고, `AGENTS.md`에는 다음 작업자가 어디부터 보면 되는지만 짧게 남긴다.
 - Redis 같은 인프라 캐싱은 실제 성능 병목이나 배포 요구가 생긴 뒤 별도 설계한다.

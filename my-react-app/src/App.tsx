@@ -7,7 +7,7 @@ import { boardReducer, initialBoardState } from './boardReducer'
 import { getUnreadCommentNotifications, markCommentNotificationsSeen } from './commentNotifications'
 import type { CommentNotification } from './commentNotifications'
 import { BoardComposer } from './components/BoardComposer'
-import { CommentNotificationBar } from './components/CommentNotificationBar'
+import { CommentNotificationBar, CommentNotificationList } from './components/CommentNotificationBar'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { Pagination } from './components/Pagination'
 import { PostDetail } from './components/PostDetail'
@@ -23,6 +23,7 @@ function App() {
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [activeFeedTab, setActiveFeedTab] = useState<FeedTab>('all')
   const [commentNotifications, setCommentNotifications] = useState<CommentNotification[]>([])
+  const [isNotificationViewOpen, setIsNotificationViewOpen] = useState(false)
   const {
     posts,
     nickname,
@@ -45,6 +46,7 @@ function App() {
     [expandedPostId, posts],
   )
   const isDetailView = selectedPost !== null
+  const isNotificationView = isNotificationViewOpen && !isDetailView
   const hasActivePostEdit = Object.keys(editingPosts).length > 0
   const popularPosts = useMemo(
     () => posts
@@ -93,6 +95,7 @@ function App() {
     if (window.location.hash !== nextHash) {
       window.history.pushState({ postId }, '', nextHash)
     }
+    setIsNotificationViewOpen(false)
     dispatch({ type: 'posts/detailOpened', payload: postId })
   }, [])
 
@@ -100,11 +103,12 @@ function App() {
     if (window.location.hash.startsWith(POST_HASH_PREFIX)) {
       window.history.replaceState(null, '', window.location.pathname + window.location.search)
     }
+    setIsNotificationViewOpen(false)
     dispatch({ type: 'posts/detailClosed' })
   }, [])
 
   const handleBoardTitleClick = useCallback(() => {
-    const isDefaultFeed = !isDetailView && activeFeedTab === 'all' && currentPage === 1
+    const isDefaultFeed = !isDetailView && !isNotificationView && activeFeedTab === 'all' && currentPage === 1
     if (isDefaultFeed) {
       void fetchPosts(false)
       return
@@ -114,9 +118,10 @@ function App() {
       window.history.replaceState(null, '', window.location.pathname + window.location.search)
     }
     setActiveFeedTab('all')
+    setIsNotificationViewOpen(false)
     dispatch({ type: 'pagination/pageChanged', payload: 1 })
     dispatch({ type: 'posts/detailClosed' })
-  }, [activeFeedTab, currentPage, fetchPosts, isDetailView])
+  }, [activeFeedTab, currentPage, fetchPosts, isDetailView, isNotificationView])
 
   const dismissCommentNotifications = useCallback((commentIds: number[]) => {
     markCommentNotificationsSeen(commentIds)
@@ -128,11 +133,21 @@ function App() {
   const openCommentNotificationPost = useCallback((postId: number, commentIds: number[]) => {
     dismissCommentNotifications(commentIds)
     setActiveFeedTab('all')
+    setIsNotificationViewOpen(false)
     openPostDetail(postId)
   }, [dismissCommentNotifications, openPostDetail])
 
+  const openCommentNotificationList = useCallback(() => {
+    if (window.location.hash.startsWith(POST_HASH_PREFIX)) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    }
+    dispatch({ type: 'posts/detailClosed' })
+    setIsNotificationViewOpen(true)
+  }, [])
+
   const changeFeedTab = (nextTab: FeedTab) => {
     setActiveFeedTab(nextTab)
+    setIsNotificationViewOpen(false)
     dispatch({ type: 'pagination/pageChanged', payload: 1 })
   }
 
@@ -255,6 +270,7 @@ function App() {
       dispatch({ type: 'composer/resetContent' })
       dispatch({ type: 'pagination/pageChanged', payload: 1 })
       setActiveFeedTab('all')
+      setIsNotificationViewOpen(false)
       showSystemMessage('게시글을 등록했습니다.')
       await fetchPosts(false)
     } catch (error) {
@@ -389,6 +405,7 @@ function App() {
         dispatch({ type: 'posts/detailClosed' })
         return
       }
+      setIsNotificationViewOpen(false)
       dispatch({ type: 'posts/detailOpened', payload: postId })
     }
 
@@ -419,21 +436,20 @@ function App() {
 
       <CommentNotificationBar
         notifications={commentNotifications}
-        onOpenPost={openCommentNotificationPost}
-        onDismiss={dismissCommentNotifications}
+        onOpenList={openCommentNotificationList}
       />
 
-      <section className="feed" aria-label={isDetailView ? '게시글 상세' : '게시글 목록'}>
+      <section className="feed" aria-label={isDetailView ? '게시글 상세' : isNotificationView ? '댓글 알림' : '게시글 목록'}>
         <div className="feed-toolbar">
           <div>
-            <strong>{isDetailView ? '게시글 상세' : activeFeedTab === 'popular' ? '인기글' : '전체 글'}</strong>
+            <strong>{isDetailView ? '게시글 상세' : isNotificationView ? '댓글 알림' : activeFeedTab === 'popular' ? '인기글' : '전체 글'}</strong>
           </div>
           <button className="refresh-button" type="button" onClick={() => fetchPosts(false)} disabled={isLoading}>
             {isLoading ? '갱신 중' : '갱신하기'}
           </button>
         </div>
 
-        {!isDetailView && (
+        {!isDetailView && !isNotificationView && (
           <div className="feed-tabs" role="tablist" aria-label="게시글 목록 종류">
             <button
               type="button"
@@ -459,9 +475,16 @@ function App() {
         <div className="feed-scroll-region">
           {isLoading && posts.length === 0 && <p className="empty-state">게시글을 불러오는 중입니다.</p>}
           {!isLoading && posts.length === 0 && <p className="empty-state">아직 게시글이 없습니다.</p>}
-          {!isLoading && posts.length > 0 && activePosts.length === 0 && <p className="empty-state">아직 인기글이 없습니다.</p>}
+          {!isLoading && posts.length > 0 && activePosts.length === 0 && !isNotificationView && <p className="empty-state">아직 인기글이 없습니다.</p>}
 
-          {selectedPost ? (
+          {isNotificationView ? (
+            <CommentNotificationList
+              notifications={commentNotifications}
+              onOpenPost={openCommentNotificationPost}
+              onDismiss={dismissCommentNotifications}
+              onBack={() => setIsNotificationViewOpen(false)}
+            />
+          ) : selectedPost ? (
             <PostDetail
               post={selectedPost}
               commentDraft={commentDrafts[selectedPost.id] ?? { nickname: '', content: '' }}
@@ -544,7 +567,7 @@ function App() {
             />
           )}
 
-          {!isDetailView && !isLoading && activePosts.length > 0 && (
+          {!isDetailView && !isNotificationView && !isLoading && activePosts.length > 0 && (
             <Pagination
               pageCount={pageCount}
               currentPage={currentPage}
@@ -554,7 +577,7 @@ function App() {
         </div>
       </section>
 
-      {!isDetailView && !hasActivePostEdit && (
+      {!isDetailView && !isNotificationView && !hasActivePostEdit && (
         <BoardComposer
           nickname={nickname}
           content={content}
