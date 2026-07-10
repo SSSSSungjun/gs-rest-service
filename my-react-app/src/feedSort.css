@@ -1,0 +1,46 @@
+.feed-toolbar-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.feed-sort-select {
+  display: inline-flex;
+  width: fit-content;
+  gap: 6px;
+  align-items: center;
+}
+
+.feed-sort-select span {
+  color: #64786c;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.feed-sort-select select {
+  min-height: 34px;
+  border: 1px solid #bdd5c5;
+  border-radius: 8px;
+  background: #fbfef8;
+  color: #315b3e;
+  padding: 0 28px 0 10px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.feed-sort-select select:hover,
+.feed-sort-select select:focus {
+  border-color: #8fc99c;
+  background: #edf8e9;
+  color: #12301f;
+  outline: none;
+}
+
+@media (max-width: 720px) {
+  .feed-toolbar-actions {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
