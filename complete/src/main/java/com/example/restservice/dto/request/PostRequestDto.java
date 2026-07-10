@@ -29,5 +29,8 @@ public class PostRequestDto {
     @Size(max = 10, message = "이미지는 최대 10장까지 첨부할 수 있습니다.")
     private List<@Valid PostImageRequestDto> images = new ArrayList<>();
 
+    @Size(max = 5, message = "투표 선택지는 최대 5개까지 만들 수 있습니다.")
+    private List<@Size(max = 80, message = "투표 선택지는 80자 이하로 입력해주세요.") String> pollOptions;
+
     private boolean showImagesInContent;
 }
