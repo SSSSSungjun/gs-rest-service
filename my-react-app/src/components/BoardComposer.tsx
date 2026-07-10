@@ -4,11 +4,13 @@ import type { PostImage } from '../boardApi'
 import { handleTextareaKeyDown, preventEnterSubmit } from '../boardUi'
 import { ImageAttachmentFields } from './ImageAttachmentFields'
 import '../composerLayout.css'
+import './BoardComposer.css'
 
 interface BoardComposerProps {
   nickname: string
   content: string
   images: PostImage[]
+  pollOptions: string[]
   showImagesInContent: boolean
   isSubmitting: boolean
   isUploadingImage: boolean
@@ -18,6 +20,11 @@ interface BoardComposerProps {
   onAddImageUrl: (url: string) => void
   onUploadImages: (files: File[]) => void
   onRemoveImage: (index: number) => void
+  onStartPoll: () => void
+  onPollOptionChange: (index: number, content: string) => void
+  onAddPollOption: () => void
+  onRemovePollOption: (index: number) => void
+  onClearPoll: () => void
   onShowImagesInContentChange: (showImagesInContent: boolean) => void
   onSubmit: (event: FormEvent) => void
 }
@@ -47,6 +54,7 @@ export function BoardComposer({
   nickname,
   content,
   images,
+  pollOptions,
   showImagesInContent,
   isSubmitting,
   isUploadingImage,
@@ -56,12 +64,18 @@ export function BoardComposer({
   onAddImageUrl,
   onUploadImages,
   onRemoveImage,
+  onStartPoll,
+  onPollOptionChange,
+  onAddPollOption,
+  onRemovePollOption,
+  onClearPoll,
   onShowImagesInContentChange,
   onSubmit,
 }: BoardComposerProps) {
   const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false)
   const attachmentShellRef = useRef<HTMLDivElement>(null)
   const hasImages = images.length > 0
+  const hasPoll = pollOptions.length > 0
 
   useEffect(() => {
     if (!isAttachmentMenuOpen) return
@@ -94,6 +108,11 @@ export function BoardComposer({
   const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     uploadImages(Array.from(event.target.files ?? []))
     event.currentTarget.value = ''
+  }
+
+  const handleStartPoll = () => {
+    onStartPoll()
+    setIsAttachmentMenuOpen(false)
   }
 
   const handlePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
@@ -151,11 +170,39 @@ export function BoardComposer({
             </div>
           )}
 
+          {hasPoll && (
+            <div className="composer-poll-editor">
+              <div className="composer-poll-header">
+                <strong>투표</strong>
+                <button className="text-button" type="button" onClick={onClearPoll}>삭제</button>
+              </div>
+              <div className="composer-poll-options">
+                {pollOptions.map((option, index) => (
+                  <div className="composer-poll-option-row" key={index}>
+                    <input
+                      value={option}
+                      maxLength={80}
+                      placeholder={`선택지 ${index + 1}`}
+                      aria-label={`투표 선택지 ${index + 1}`}
+                      onChange={(event) => onPollOptionChange(index, event.target.value)}
+                    />
+                    {pollOptions.length > 2 && (
+                      <button className="text-button" type="button" onClick={() => onRemovePollOption(index)}>삭제</button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              {pollOptions.length < 5 && (
+                <button className="ghost-button composer-poll-add" type="button" onClick={onAddPollOption}>선택지 추가</button>
+              )}
+            </div>
+          )}
+
           <div className="composer-input-shell" ref={attachmentShellRef}>
             <button
               className="composer-attach-button"
               type="button"
-              aria-label="사진 첨부 메뉴"
+              aria-label="첨부 메뉴"
               aria-expanded={isAttachmentMenuOpen}
               onClick={() => setIsAttachmentMenuOpen((isOpen) => !isOpen)}
               disabled={isUploadingImage}
@@ -198,6 +245,9 @@ export function BoardComposer({
                     disabled={isUploadingImage}
                   />
                 </label>
+                <button className="composer-attachment-option" type="button" onClick={handleStartPoll} disabled={hasPoll}>
+                  투표 만들기
+                </button>
               </div>
             )}
           </div>
