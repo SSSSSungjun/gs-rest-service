@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import type { ChangeEvent, ClipboardEvent, DragEvent, FormEvent } from 'react'
+import type { ChangeEvent, ClipboardEvent, DragEvent, FormEvent, KeyboardEvent as ReactKeyboardEvent } from 'react'
 import type { PostImage } from '../boardApi'
 import { handleTextareaKeyDown, preventEnterSubmit, resizeTextarea } from '../boardUi'
 import { BarChart3Icon, CameraIcon, PlusIcon, SendIcon, SparklesIcon, Trash2Icon, XIcon } from './Icons'
@@ -187,7 +187,7 @@ export function BoardComposer({
     }
   }
 
-  const handleAiPromptKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleAiPromptKeyDown = (event: ReactKeyboardEvent<HTMLTextAreaElement>) => {
     if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
       event.preventDefault()
       void handleGenerateAiDraft()
