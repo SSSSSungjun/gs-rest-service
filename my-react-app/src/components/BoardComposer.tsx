@@ -49,6 +49,7 @@ function getPastedImageUrl(text: string) {
   } catch {
     return null
   }
+
   return null
 }
 
@@ -318,7 +319,7 @@ export function BoardComposer({
               </div>
             </div>
           ) : (
-          <div className="composer-input-shell" ref={attachmentShellRef}>
+            <div className="composer-input-shell" ref={attachmentShellRef}>
             <button
               className="composer-attach-button icon-only-button"
               type="button"
@@ -377,7 +378,7 @@ export function BoardComposer({
                 </button>
               </div>
             )}
-          </div>
+            </div>
           )}
         </div>
 
