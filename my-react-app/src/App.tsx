@@ -566,7 +566,16 @@ function App() {
         onOpenList={openCommentNotificationList}
       />
 
-      <section className="feed" aria-label={isDetailView ? '게시글 상세' : isNotificationView ? '댓글 알림' : '게시글 목록'}>
+      <section
+        className="feed"
+        aria-label={isDetailView
+          ? '게시글 상세'
+          : isNotificationView
+            ? '댓글 알림'
+            : isCommentSearch
+              ? '댓글 검색 결과'
+              : '게시글 목록'}
+      >
         <div className="feed-toolbar">
           <div>
             <strong>
@@ -599,9 +608,13 @@ function App() {
                     value={searchInput}
                     onChange={handleSearchQueryChange}
                     placeholder="검색어"
-                    aria-label="게시글 검색어"
+                    aria-label={searchMode === 'comments' ? '댓글 검색어' : '게시글 검색어'}
                   />
-                  <button className="feed-search-button" type="submit" aria-label="게시글 검색 실행">
+                  <button
+                    className="feed-search-button"
+                    type="submit"
+                    aria-label={searchMode === 'comments' ? '댓글 검색 실행' : '게시글 검색 실행'}
+                  >
                     <SearchIcon />
                   </button>
                 </div>
