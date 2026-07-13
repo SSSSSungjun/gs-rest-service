@@ -3,6 +3,7 @@ import type { Post } from '../boardApi'
 import type { BoardDraft } from '../boardReducer'
 import { formatDate, isInteractiveClick, isPopularPost, wasEdited } from '../boardUi'
 import { ActionMenu } from './ActionMenu'
+import { BarChart3Icon, HeartIcon, ImageIcon, MessageCircleIcon } from './Icons'
 import { PollBlock } from './PollBlock'
 import { PostEditForm } from './PostEditForm'
 import { PostImageGallery } from './PostImageGallery'
@@ -120,14 +121,14 @@ export function PostList({
                     aria-pressed={post.likedByMe}
                     onClick={() => onTogglePostLike(post.id)}
                   >
-                    좋아요 {post.likeCount}
+                    <HeartIcon /> {post.likeCount}
                   </button>
-                  <span className="meta-pill" aria-label={`댓글 ${post.comments.length}개`}>댓글 {post.comments.length}</span>
+                  <span className="meta-pill" aria-label={`댓글 ${post.comments.length}개`}><MessageCircleIcon /> {post.comments.length}</span>
                   {postImages.length > 0 && (
-                    <span className="meta-pill" aria-label={`사진 ${postImages.length}장`}>사진 {postImages.length}</span>
+                    <span className="meta-pill" aria-label={`사진 ${postImages.length}장`}><ImageIcon /> {postImages.length}</span>
                   )}
                   {pollOptions.length > 0 && (
-                    <span className="meta-pill" aria-label={`투표 ${post.pollTotalVoteCount ?? 0}표`}>투표 {post.pollTotalVoteCount ?? 0}</span>
+                    <span className="meta-pill" aria-label={`투표 ${post.pollTotalVoteCount ?? 0}표`}><BarChart3Icon /> {post.pollTotalVoteCount ?? 0}</span>
                   )}
                 </div>
               </>
