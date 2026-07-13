@@ -3,13 +3,15 @@ import type { Post } from '../boardApi'
 import type { BoardDraft } from '../boardReducer'
 import { formatDate, isInteractiveClick, isPopularPost, wasEdited } from '../boardUi'
 import { ActionMenu } from './ActionMenu'
-import { BarChart3Icon, HeartIcon, ImageIcon, MessageCircleIcon } from './Icons'
+import { BarChart3Icon, EyeIcon, HeartIcon, ImageIcon, MessageCircleIcon } from './Icons'
+import { HighlightedText } from './HighlightedText'
 import { PollBlock } from './PollBlock'
 import { PostEditForm } from './PostEditForm'
 import { PostImageGallery } from './PostImageGallery'
 
 interface PostListProps {
   posts: Post[]
+  searchQuery: string
   editingPosts: Record<number, BoardDraft>
   isUploadingImage: boolean
   onOpenPost: (postId: number) => void
@@ -29,6 +31,7 @@ interface PostListProps {
 
 export function PostList({
   posts,
+  searchQuery,
   editingPosts,
   isUploadingImage,
   onOpenPost,
@@ -68,7 +71,7 @@ export function PostList({
               <div className="post-list-heading">
                 <div className="post-title-row">
                   {isPopular && <span className="popular-badge">인기</span>}
-                  <strong>{post.nickname || '익명'}</strong>
+                  <strong><HighlightedText text={post.nickname || '익명'} query={searchQuery} /></strong>
                 </div>
                 <time dateTime={post.createdAt}>
                   {formatDate(post.createdAt)}
@@ -102,7 +105,7 @@ export function PostList({
               <>
                 <div className={`post-list-preview ${postImages.length > 0 ? 'has-images' : ''}`} aria-label="게시글 상세 보기">
                   {postImages.length > 0 && <PostImageGallery images={postImages} variant="list" />}
-                  <span className="post-content">{post.content}</span>
+                  <span className="post-content"><HighlightedText text={post.content} query={searchQuery} /></span>
                 </div>
                 {pollOptions.length > 0 && (
                   <PollBlock
@@ -123,6 +126,7 @@ export function PostList({
                   >
                     <HeartIcon /> {post.likeCount}
                   </button>
+                  <span className="meta-pill" aria-label={`조회수 ${post.viewCount ?? 0}회`}><EyeIcon /> {post.viewCount ?? 0}</span>
                   <span className="meta-pill" aria-label={`댓글 ${post.comments.length}개`}><MessageCircleIcon /> {post.comments.length}</span>
                   {postImages.length > 0 && (
                     <span className="meta-pill" aria-label={`사진 ${postImages.length}장`}><ImageIcon /> {postImages.length}</span>

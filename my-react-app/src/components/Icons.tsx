@@ -85,6 +85,15 @@ export function HeartIcon(props: IconProps) {
   )
 }
 
+export function EyeIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12" />
+      <circle cx="12" cy="12" r="3" />
+    </IconBase>
+  )
+}
+
 export function MessageCircleIcon(props: IconProps) {
   return (
     <IconBase {...props}>
