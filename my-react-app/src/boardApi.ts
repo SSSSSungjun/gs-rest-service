@@ -37,6 +37,7 @@ export interface Post {
   ownedByMe: boolean
   likeCount: number
   likedByMe: boolean
+  viewCount: number
   showImagesInContent: boolean
   createdAt: string
   updatedAt: string | null
@@ -71,6 +72,10 @@ export const boardApi = {
     formData.append('file', file)
     const response = await apiClient.post<PostImage>('/posts/images', formData)
     return response.data
+  },
+
+  async increasePostView(postId: number) {
+    await apiClient.post(`/posts/${postId}/views`)
   },
 
   async updatePost(postId: number, payload: BoardWritePayload) {
