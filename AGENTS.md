@@ -87,11 +87,12 @@
 
 우선 확인 후보:
 
-- UI 배치/간격: `my-react-app/src/App.css`, 관련 React component
+- UI 배치/간격: `my-react-app/src/App.css`, `my-react-app/src/forumToss.css`, 관련 React component
 - 게시글 목록/상세: post list/detail component, post API client
 - 글쓰기 입력창/이미지 첨부/투표: `my-react-app/src/components/BoardComposer.tsx`, `my-react-app/src/components/BoardComposer.css`, image attachment util/API
 - 투표 표시/집계: `my-react-app/src/components/PollBlock.tsx`, `complete/src/main/java/com/example/restservice/service/PollService.java`, poll entity/repository
 - 댓글/알림: `my-react-app/src/components/CommentNotificationBar.tsx`, `my-react-app/src/components/PostDetail.tsx`, `my-react-app/src/commentNotifications.ts`, `my-react-app/src/App.tsx`
+- 버튼/액션 아이콘: `my-react-app/src/components/Icons.tsx`, 액션이 있는 각 컴포넌트
 - 백엔드 API 변경: controller/service/dto/entity 순서로 최소 확인
 
 현재 판단:
@@ -103,6 +104,10 @@
 - PR #36은 목록 이미지 여백의 구조 원인을 `PostImageGallery`가 이미지 개수와 무관한 갤러리 컨테이너 폭을 부모 그리드에 넘기는 문제로 보고, 리스트 이미지 1장/2장 폭을 컴포넌트에서 52px/110px로 확정하는 작업이다.
 - PR #37은 댓글에 `parentCommentId`를 저장하는 대댓글 기능을 추가하고, 상세 화면에서 답글을 접지 않고 목록에 상시 표시하며 `@닉네임에게` 라벨로 대상 댓글을 보여주는 작업이다.
 - PR #38은 글 작성 `+` 메뉴에 투표 만들기를 추가하고, 게시글 목록/상세에서 투표 참여와 결과 표시를 제공하며, 전체글/인기글 탭을 최신순/오래된순/인기순 정렬 드롭다운으로 바꾼 작업이다. 투표는 세션당 한 표이며 같은 게시글 투표 처리는 비관적 락 + 트랜잭션으로 직렬화한다.
+- PR #39는 전체 UI를 카드-heavy 피드에서 게시판형 행 리스트 중심으로 바꾸고, 새 `forumToss.css` 오버라이드와 `Icons.tsx` 로컬 SVG 아이콘을 추가해 새로고침/작성/목록/상세/알림/메뉴 액션을 아이콘 중심 버튼으로 정리한 작업이다.
+- 사용자는 디씨/펨코처럼 빠르게 스캔되는 게시판형 정보 밀도는 원하지만, 실제 간격과 버튼 감도는 토스처럼 조금 여유 있고 둥근 쪽을 선호한다.
+- 사용자는 목록까지 전부 카드로 감싸는 디자인을 싫어한다. 목록은 행 단위 구분선과 메타 위계로 처리하고, 카드 느낌은 작성창/상세/모달 같은 뚜렷한 컨테이너에만 제한한다.
+- 사용자는 버튼을 텍스트만으로 처리하는 것을 싫어하며, 가능한 경우 아이콘/에셋 기반 버튼을 선호한다. 현재는 lockfile 변동을 피하려고 `lucide-react` 대신 로컬 SVG 아이콘 컴포넌트를 사용했다.
 - 공기업 행사용 커뮤니티 배포 이야기는 실제 클라우드 배포로 추진하지 않고, 백엔드 보안·트랜잭션·동시성·운영 리스크를 설명하기 위한 가상 시나리오로만 다룬다.
 - 알림 버튼은 새 알림이 있을 때 `+N` 배지와 초록 강조색을 사용한다.
 - 알림 목록 화면에서는 개별 알림 읽음 처리, 모두 읽음, 원문 게시글 열기를 제공한다.
