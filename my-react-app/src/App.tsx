@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useReducer, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 import './App.css'
 import './feedSort.css'
+import './forumToss.css'
 import { boardApi } from './boardApi'
 import type { PostImage } from './boardApi'
 import { boardReducer, initialBoardState } from './boardReducer'
@@ -10,6 +11,7 @@ import type { CommentNotification } from './commentNotifications'
 import { BoardComposer } from './components/BoardComposer'
 import { CommentNotificationBar, CommentNotificationList } from './components/CommentNotificationBar'
 import { ConfirmDialog } from './components/ConfirmDialog'
+import { RefreshCwIcon } from './components/Icons'
 import { Pagination } from './components/Pagination'
 import { PostDetail } from './components/PostDetail'
 import { PostList } from './components/PostList'
@@ -507,8 +509,8 @@ function App() {
                 </select>
               </label>
             )}
-            <button className="refresh-button" type="button" onClick={() => fetchPosts(false)} disabled={isLoading}>
-              {isLoading ? '갱신 중' : '갱신하기'}
+            <button className="refresh-button icon-only-button" type="button" onClick={() => fetchPosts(false)} disabled={isLoading} aria-label="게시글 새로고침">
+              <RefreshCwIcon />
             </button>
           </div>
         </div>
