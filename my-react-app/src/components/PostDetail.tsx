@@ -4,7 +4,8 @@ import type { BoardDraft } from '../boardReducer'
 import { formatDate, handleTextareaKeyDown, isPopularPost, preventEnterSubmit, wasEdited } from '../boardUi'
 import { ActionMenu } from './ActionMenu'
 import { CommentEditForm } from './CommentEditForm'
-import { ArrowLeftIcon, BarChart3Icon, HeartIcon, ImageIcon, MessageCircleIcon, ReplyIcon } from './Icons'
+import { ArrowLeftIcon, BarChart3Icon, EyeIcon, HeartIcon, ImageIcon, MessageCircleIcon, ReplyIcon } from './Icons'
+import { HighlightedText } from './HighlightedText'
 import { PollBlock } from './PollBlock'
 import { PostEditForm } from './PostEditForm'
 import { PostImageGallery } from './PostImageGallery'
@@ -12,6 +13,7 @@ import './PostDetail.css'
 
 interface PostDetailProps {
   post: Post
+  searchQuery: string
   commentDraft: BoardDraft
   replyDrafts: Record<number, BoardDraft>
   activeReplyCommentId: number | null
@@ -50,6 +52,7 @@ interface PostDetailProps {
 
 export function PostDetail({
   post,
+  searchQuery,
   commentDraft,
   replyDrafts,
   activeReplyCommentId,
@@ -97,7 +100,7 @@ export function PostDetail({
       <header className="post-header">
         <div>
           <div className="post-title-row">
-            <strong>{post.nickname || '익명'}</strong>
+            <strong><HighlightedText text={post.nickname || '익명'} query={searchQuery} /></strong>
             {isPopular && <span className="popular-badge">인기</span>}
           </div>
           <time dateTime={post.createdAt}>
@@ -130,7 +133,7 @@ export function PostDetail({
         />
       ) : (
         <>
-          <p className="detail-content">{post.content}</p>
+          <p className="detail-content"><HighlightedText text={post.content} query={searchQuery} /></p>
           {post.showImagesInContent && <PostImageGallery images={postImages} variant="detail" />}
           {pollOptions.length > 0 && (
             <PollBlock
@@ -155,6 +158,7 @@ export function PostDetail({
           >
             <HeartIcon /> {post.likeCount}
           </button>
+          <span className="meta-pill" aria-label={`조회수 ${post.viewCount ?? 0}회`}><EyeIcon /> {post.viewCount ?? 0}</span>
           <span className="meta-pill" aria-label={`댓글 ${post.comments.length}개`}><MessageCircleIcon /> {post.comments.length}</span>
           {postImages.length > 0 && (
             <span className="meta-pill" aria-label={`사진 ${postImages.length}장`}><ImageIcon /> {postImages.length}</span>
