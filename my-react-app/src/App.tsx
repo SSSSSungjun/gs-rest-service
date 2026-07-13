@@ -11,6 +11,7 @@ import { getUnreadCommentNotifications, markCommentNotificationsSeen } from './c
 import type { CommentNotification } from './commentNotifications'
 import { BoardComposer } from './components/BoardComposer'
 import { CommentNotificationBar, CommentNotificationList } from './components/CommentNotificationBar'
+import { CommentSearchResults } from './components/CommentSearchResults'
 import { ConfirmDialog } from './components/ConfirmDialog'
 import { RefreshCwIcon, SearchIcon } from './components/Icons'
 import { Pagination } from './components/Pagination'
@@ -19,6 +20,7 @@ import { PostList } from './components/PostList'
 import { getPostIdFromHash, POST_HASH_PREFIX, POSTS_PER_PAGE, resizeTextarea } from './boardUi'
 
 type FeedSort = 'latest' | 'oldest' | 'popular'
+type SearchMode = 'posts' | 'comments'
 
 const MAX_IMAGE_COUNT = 10
 
@@ -26,6 +28,8 @@ function App() {
   const [state, dispatch] = useReducer(boardReducer, initialBoardState)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [feedSort, setFeedSort] = useState<FeedSort>('latest')
+  const [searchMode, setSearchMode] = useState<SearchMode>('posts')
+  const [appliedSearchMode, setAppliedSearchMode] = useState<SearchMode>('posts')
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [commentNotifications, setCommentNotifications] = useState<CommentNotification[]>([])
@@ -72,23 +76,40 @@ function App() {
     })
   }, [feedSort, posts])
   const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase()
+  const isCommentSearch = appliedSearchMode === 'comments' && Boolean(normalizedSearchQuery)
   const filteredPosts = useMemo(() => {
     if (!normalizedSearchQuery) return sortedPosts
+    if (appliedSearchMode === 'comments') return []
 
     return sortedPosts.filter((post) => {
-      const searchableText = [
-        post.nickname,
-        post.content,
-        ...post.comments.flatMap((comment) => [comment.nickname, comment.content]),
-      ].join('\n').toLocaleLowerCase()
+      const searchableText = [post.nickname, post.content].join('\n').toLocaleLowerCase()
       return searchableText.includes(normalizedSearchQuery)
     })
-  }, [normalizedSearchQuery, sortedPosts])
-  const pageCount = Math.max(1, Math.ceil(filteredPosts.length / POSTS_PER_PAGE))
+  }, [appliedSearchMode, normalizedSearchQuery, sortedPosts])
+  const commentSearchResults = useMemo(() => {
+    if (!isCommentSearch) return []
+
+    return sortedPosts.flatMap((post) => post.comments
+      .filter((comment) => [comment.nickname, comment.content]
+        .join('\n')
+        .toLocaleLowerCase()
+        .includes(normalizedSearchQuery))
+      .map((comment) => ({
+        postId: post.id,
+        postContent: post.content,
+        comment,
+      })))
+  }, [isCommentSearch, normalizedSearchQuery, sortedPosts])
+  const searchResultCount = isCommentSearch ? commentSearchResults.length : filteredPosts.length
+  const pageCount = Math.max(1, Math.ceil(searchResultCount / POSTS_PER_PAGE))
   const visiblePosts = useMemo(() => {
     const startIndex = (currentPage - 1) * POSTS_PER_PAGE
     return filteredPosts.slice(startIndex, startIndex + POSTS_PER_PAGE)
   }, [currentPage, filteredPosts])
+  const visibleCommentResults = useMemo(() => {
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE
+    return commentSearchResults.slice(startIndex, startIndex + POSTS_PER_PAGE)
+  }, [commentSearchResults, currentPage])
 
   const showSystemMessage = useCallback((message: string) => {
     window.alert(message)
@@ -145,6 +166,7 @@ function App() {
 
   const handleBoardTitleClick = useCallback(() => {
     const isDefaultFeed = !isDetailView && !isNotificationView && feedSort === 'latest'
+      && searchMode === 'posts' && appliedSearchMode === 'posts'
       && currentPage === 1 && !searchInput.trim() && !searchQuery.trim()
     if (isDefaultFeed) {
       void fetchPosts(false)
@@ -155,12 +177,14 @@ function App() {
       window.history.replaceState(null, '', window.location.pathname + window.location.search)
     }
     setFeedSort('latest')
+    setSearchMode('posts')
+    setAppliedSearchMode('posts')
     setSearchInput('')
     setSearchQuery('')
     setIsNotificationViewOpen(false)
     dispatch({ type: 'pagination/pageChanged', payload: 1 })
     dispatch({ type: 'posts/detailClosed' })
-  }, [currentPage, feedSort, fetchPosts, isDetailView, isNotificationView, searchInput, searchQuery])
+  }, [appliedSearchMode, currentPage, feedSort, fetchPosts, isDetailView, isNotificationView, searchInput, searchMode, searchQuery])
 
   const dismissCommentNotifications = useCallback((commentIds: number[]) => {
     markCommentNotificationsSeen(commentIds)
@@ -190,6 +214,10 @@ function App() {
     dispatch({ type: 'pagination/pageChanged', payload: 1 })
   }
 
+  const handleSearchModeChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    setSearchMode(event.target.value as SearchMode)
+  }
+
   const handleSearchQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchInput(event.target.value)
   }
@@ -199,6 +227,7 @@ function App() {
     const nextQuery = searchInput.trim()
     setSearchInput(nextQuery)
     setSearchQuery(nextQuery)
+    setAppliedSearchMode(searchMode)
     setIsNotificationViewOpen(false)
     dispatch({ type: 'pagination/pageChanged', payload: 1 })
   }
@@ -537,23 +566,55 @@ function App() {
         onOpenList={openCommentNotificationList}
       />
 
-      <section className="feed" aria-label={isDetailView ? '게시글 상세' : isNotificationView ? '댓글 알림' : '게시글 목록'}>
+      <section
+        className="feed"
+        aria-label={isDetailView
+          ? '게시글 상세'
+          : isNotificationView
+            ? '댓글 알림'
+            : isCommentSearch
+              ? '댓글 검색 결과'
+              : '게시글 목록'}
+      >
         <div className="feed-toolbar">
           <div>
-            <strong>{isDetailView ? '게시글 상세' : isNotificationView ? '댓글 알림' : '전체 글'}</strong>
+            <strong>
+              {isDetailView
+                ? '게시글 상세'
+                : isNotificationView
+                  ? '댓글 알림'
+                  : isCommentSearch
+                    ? '댓글 검색 결과'
+                    : normalizedSearchQuery
+                      ? '게시글 검색 결과'
+                      : '전체 글'}
+            </strong>
           </div>
           <div className="feed-toolbar-actions">
             {!isDetailView && !isNotificationView && (
               <form className="feed-search-field" role="search" onSubmit={handleSearchSubmit}>
                 <span>검색</span>
                 <div className="feed-search-control">
+                  <select
+                    className="feed-search-target"
+                    value={searchMode}
+                    onChange={handleSearchModeChange}
+                    aria-label="검색 대상"
+                  >
+                    <option value="posts">게시글</option>
+                    <option value="comments">댓글</option>
+                  </select>
                   <input
                     value={searchInput}
                     onChange={handleSearchQueryChange}
                     placeholder="검색어"
-                    aria-label="게시글 검색어"
+                    aria-label={searchMode === 'comments' ? '댓글 검색어' : '게시글 검색어'}
                   />
-                  <button className="feed-search-button" type="submit" aria-label="게시글 검색 실행">
+                  <button
+                    className="feed-search-button"
+                    type="submit"
+                    aria-label={searchMode === 'comments' ? '댓글 검색 실행' : '게시글 검색 실행'}
+                  >
                     <SearchIcon />
                   </button>
                 </div>
@@ -578,7 +639,7 @@ function App() {
         <div className="feed-scroll-region">
           {isLoading && posts.length === 0 && <p className="empty-state">게시글을 불러오는 중입니다.</p>}
           {!isLoading && posts.length === 0 && <p className="empty-state">아직 게시글이 없습니다.</p>}
-          {!isLoading && posts.length > 0 && filteredPosts.length === 0 && !isDetailView && !isNotificationView && (
+          {!isLoading && posts.length > 0 && searchResultCount === 0 && !isDetailView && !isNotificationView && (
             <p className="empty-state">검색 결과가 없습니다.</p>
           )}
 
@@ -593,6 +654,7 @@ function App() {
             <PostDetail
               post={selectedPost}
               searchQuery={searchQuery}
+              searchMode={appliedSearchMode}
               commentDraft={commentDrafts[selectedPost.id] ?? { nickname: '', content: '' }}
               replyDrafts={replyDrafts}
               activeReplyCommentId={replyTargets[selectedPost.id] ?? null}
@@ -658,10 +720,16 @@ function App() {
               onReplyContentChange={handleReplyChange}
               onSubmitReply={handleCreateComment}
             />
+          ) : isCommentSearch ? (
+            <CommentSearchResults
+              results={visibleCommentResults}
+              query={searchQuery}
+              onOpenPost={openPostDetail}
+            />
           ) : (
             <PostList
               posts={visiblePosts}
-              searchQuery={searchQuery}
+              searchQuery={appliedSearchMode === 'posts' ? searchQuery : ''}
               editingPosts={editingPosts}
               isUploadingImage={isUploadingImage}
               onOpenPost={openPostDetail}
@@ -692,7 +760,7 @@ function App() {
             />
           )}
 
-          {!isDetailView && !isNotificationView && !isLoading && filteredPosts.length > 0 && (
+          {!isDetailView && !isNotificationView && !isLoading && searchResultCount > 0 && (
             <Pagination
               pageCount={pageCount}
               currentPage={currentPage}
