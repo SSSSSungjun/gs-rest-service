@@ -1,11 +1,11 @@
 body {
-  background: #f7f8fa;
+  background: #ffffff;
   color: #1f2933;
 }
 
 .board-shell {
   width: min(100%, 820px);
-  padding: 18px 16px 190px;
+  padding: 18px 22px 190px;
 }
 
 .board-hero {
@@ -50,8 +50,8 @@ body {
   top: 0;
   z-index: 12;
   border-bottom: 1px solid #e5e7eb;
-  background: rgba(247, 248, 250, 0.92);
-  padding: 8px 0;
+  background: rgba(255, 255, 255, 0.94);
+  padding: 8px 12px;
   backdrop-filter: blur(10px);
 }
 
@@ -61,23 +61,23 @@ body {
 
 .feed-scroll-region {
   gap: 0;
-  border-top: 1px solid #e5e7eb;
+  border-top: 0;
 }
 
 .post-card:not(.detail-card) {
   display: grid;
-  gap: 7px;
+  gap: 8px;
   border: 0;
   border-bottom: 1px solid #e5e7eb;
   border-radius: 0;
   background: transparent;
   box-shadow: none;
-  padding: 13px 4px;
+  padding: 15px 12px;
   transition: background 140ms ease;
 }
 
 .post-card:not(.detail-card):hover {
-  background: #ffffff;
+  background: #f7f8fa;
   box-shadow: none;
   transform: none;
 }
@@ -113,10 +113,10 @@ time {
 .popular-badge,
 .reply-target-label {
   min-height: 22px;
-  border-color: #bbf7d0;
+  border-color: #d1d5db;
   border-radius: 999px;
-  background: #ecfdf3;
-  color: #15803d;
+  background: #f3f4f6;
+  color: #374151;
   padding: 0 8px;
   font-size: 11px;
 }
@@ -144,7 +144,7 @@ time {
 .post-card-meta-row,
 .comment-action-row {
   gap: 12px;
-  margin-top: 2px;
+  margin-top: 7px;
 }
 
 .meta-pill,
@@ -194,7 +194,7 @@ time {
 .notification-entry-button:hover,
 .notification-dismiss-button:hover,
 .refresh-button:hover {
-  background: #eef2f7;
+  background: #f3f4f6;
   color: #111827;
 }
 
@@ -254,8 +254,12 @@ time {
 }
 
 .notification-entry-button.has-notifications {
+  width: auto;
+  min-width: 58px;
+  gap: 4px;
   background: #16a34a;
   color: #ffffff;
+  padding: 0 8px;
   box-shadow: none;
 }
 
@@ -276,12 +280,12 @@ time {
 }
 
 .action-menu summary:hover {
-  background: #eef2f7;
+  background: #f3f4f6;
   color: #111827;
 }
 
 .action-menu-panel {
-  min-width: 112px;
+  min-width: 96px;
   border-color: #e5e7eb;
   border-radius: 12px;
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
@@ -289,21 +293,20 @@ time {
 
 .action-menu-panel button {
   display: flex;
-  gap: 8px;
   align-items: center;
   border-radius: 0;
   color: #374151;
 }
 
 .composer-bottom {
-  right: max(10px, calc((100vw - 820px) / 2 + 16px));
-  left: max(10px, calc((100vw - 820px) / 2 + 16px));
+  right: max(10px, calc((100vw - 820px) / 2 + 22px));
+  left: max(10px, calc((100vw - 820px) / 2 + 22px));
   border-radius: 18px;
   padding: 8px;
 }
 
 .composer-input-shell {
-  grid-template-columns: 34px 78px minmax(0, 1fr) auto;
+  grid-template-columns: 34px 78px minmax(0, 1fr) 36px;
   border-color: #e5e7eb;
   border-radius: 16px;
   background: #ffffff;
@@ -311,8 +314,8 @@ time {
 }
 
 .composer-input-shell:focus-within {
-  border-color: #bbf7d0;
-  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+  border-color: #d1d5db;
+  box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.06);
 }
 
 .composer-attach-button {
@@ -320,16 +323,16 @@ time {
 }
 
 .composer-attach-button:hover {
-  background: #eef2f7;
+  background: #f3f4f6;
   color: #111827;
 }
 
 .composer-submit-button {
-  min-width: 58px;
+  min-width: 36px;
   min-height: 34px;
   border-radius: 999px;
   background: #16a34a;
-  padding: 0 12px;
+  padding: 0;
 }
 
 .composer-submit-button:hover {
@@ -337,18 +340,19 @@ time {
 }
 
 .composer-attachment-menu {
-  min-width: 168px;
+  display: flex;
+  min-width: 96px;
+  gap: 6px;
   border-color: #e5e7eb;
   border-radius: 18px;
   box-shadow: 0 18px 42px rgba(15, 23, 42, 0.14);
 }
 
 .composer-attachment-option {
-  display: flex;
+  display: inline-flex;
   min-height: 44px;
-  gap: 8px;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   border-radius: 14px;
   background: transparent;
   color: #111827;
@@ -374,17 +378,18 @@ time {
 .poll-option {
   border: 0;
   border-radius: 12px;
-  background: #f3f4f6;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px #e5e7eb;
 }
 
 .poll-option:hover,
 .poll-option.selected {
-  background: #eefbf1;
+  background: #f3f4f6;
   color: #111827;
 }
 
 .poll-option-fill {
-  background: #dcfce7;
+  background: #e5e7eb;
 }
 
 .comments {
@@ -423,13 +428,13 @@ textarea {
 
 input:focus,
 textarea:focus {
-  border-color: #86efac;
-  box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+  border-color: #d1d5db;
+  box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.06);
 }
 
 @media (max-width: 720px) {
   .board-shell {
-    padding: 14px 12px 206px;
+    padding: 14px 16px 206px;
   }
 
   .board-hero h1 {
@@ -442,22 +447,24 @@ textarea:focus {
 
   .feed-toolbar {
     align-items: center;
+    padding: 8px 12px;
   }
 
   .post-card:not(.detail-card) {
-    padding: 12px 2px;
+    padding: 14px 12px;
+  }
+
+  .composer-bottom {
+    right: 10px;
+    left: 10px;
   }
 
   .composer-input-shell {
-    grid-template-columns: 32px 64px minmax(0, 1fr) auto;
+    grid-template-columns: 32px 64px minmax(0, 1fr) 34px;
   }
 
   .composer-submit-button {
-    min-width: 42px;
-    padding: 0 9px;
-  }
-
-  .composer-submit-button svg {
-    display: none;
+    min-width: 34px;
+    padding: 0;
   }
 }
