@@ -230,15 +230,14 @@ export function BoardComposer({
               placeholder="무슨 일이 있었나요?"
               aria-label="게시글 내용"
             />
-            <button className="composer-submit-button icon-text-button" type="submit" disabled={isSubmitting || isUploadingImage}>
-              <SendIcon />{isSubmitting ? '등록 중' : '게시'}
+            <button className="composer-submit-button icon-only-button" type="submit" disabled={isSubmitting || isUploadingImage} aria-label={isSubmitting ? '게시글 등록 중' : '게시글 등록'}>
+              <SendIcon />
             </button>
 
             {isAttachmentMenuOpen && (
               <div className="composer-attachment-menu" role="menu">
-                <label className={`composer-attachment-option ${isUploadingImage ? 'disabled' : ''}`}>
+                <label className={`composer-attachment-option icon-only-button ${isUploadingImage ? 'disabled' : ''}`} aria-label="사진 첨부">
                   <CameraIcon />
-                  <span>사진 첨부</span>
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/gif,image/webp"
@@ -247,9 +246,8 @@ export function BoardComposer({
                     disabled={isUploadingImage}
                   />
                 </label>
-                <button className="composer-attachment-option" type="button" onClick={handleStartPoll} disabled={hasPoll}>
+                <button className="composer-attachment-option icon-only-button" type="button" onClick={handleStartPoll} disabled={hasPoll} aria-label="투표 만들기">
                   <BarChart3Icon />
-                  <span>투표 만들기</span>
                 </button>
               </div>
             )}
