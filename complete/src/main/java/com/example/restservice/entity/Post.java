@@ -13,6 +13,7 @@ import jakarta.persistence.OrderBy;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -60,6 +61,9 @@ public class Post {
     @Column(name = "view_count")
     private long viewCount = 0L;
 
+    @Transient
+    private boolean viewCountOnlyUpdate;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -93,6 +97,10 @@ public class Post {
 
     @PreUpdate
     protected void onUpdate() {
+        if (viewCountOnlyUpdate) {
+            viewCountOnlyUpdate = false;
+            return;
+        }
         this.updatedAt = SeoulTime.now();
     }
 
@@ -108,6 +116,7 @@ public class Post {
 
     public void increaseViewCount() {
         this.viewCount += 1;
+        this.viewCountOnlyUpdate = true;
     }
 
     public void replaceImages(List<PostImage> nextImages) {
