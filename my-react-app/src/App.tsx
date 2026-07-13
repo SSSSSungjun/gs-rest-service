@@ -25,6 +25,7 @@ function App() {
   const [state, dispatch] = useReducer(boardReducer, initialBoardState)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [feedSort, setFeedSort] = useState<FeedSort>('latest')
+  const [searchQuery, setSearchQuery] = useState('')
   const [commentNotifications, setCommentNotifications] = useState<CommentNotification[]>([])
   const [isNotificationViewOpen, setIsNotificationViewOpen] = useState(false)
   const {
@@ -68,11 +69,24 @@ function App() {
       return new Date(second.createdAt).getTime() - new Date(first.createdAt).getTime()
     })
   }, [feedSort, posts])
-  const pageCount = Math.max(1, Math.ceil(sortedPosts.length / POSTS_PER_PAGE))
+  const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase()
+  const filteredPosts = useMemo(() => {
+    if (!normalizedSearchQuery) return sortedPosts
+
+    return sortedPosts.filter((post) => {
+      const searchableText = [
+        post.nickname,
+        post.content,
+        ...post.comments.flatMap((comment) => [comment.nickname, comment.content]),
+      ].join('\n').toLocaleLowerCase()
+      return searchableText.includes(normalizedSearchQuery)
+    })
+  }, [normalizedSearchQuery, sortedPosts])
+  const pageCount = Math.max(1, Math.ceil(filteredPosts.length / POSTS_PER_PAGE))
   const visiblePosts = useMemo(() => {
     const startIndex = (currentPage - 1) * POSTS_PER_PAGE
-    return sortedPosts.slice(startIndex, startIndex + POSTS_PER_PAGE)
-  }, [currentPage, sortedPosts])
+    return filteredPosts.slice(startIndex, startIndex + POSTS_PER_PAGE)
+  }, [currentPage, filteredPosts])
 
   const showSystemMessage = useCallback((message: string) => {
     window.alert(message)
@@ -98,6 +112,15 @@ function App() {
     }
   }, [showSystemMessage])
 
+  const recordPostView = useCallback(async (postId: number) => {
+    try {
+      await boardApi.increasePostView(postId)
+      await fetchPosts(false)
+    } catch (error) {
+      console.error(error)
+    }
+  }, [fetchPosts])
+
   const openPostDetail = useCallback((postId: number) => {
     const nextHash = `${POST_HASH_PREFIX}${postId}`
     if (window.location.hash !== nextHash) {
@@ -105,7 +128,8 @@ function App() {
     }
     setIsNotificationViewOpen(false)
     dispatch({ type: 'posts/detailOpened', payload: postId })
-  }, [])
+    void recordPostView(postId)
+  }, [recordPostView])
 
   const closePostDetail = useCallback(() => {
     if (window.location.hash.startsWith(POST_HASH_PREFIX)) {
@@ -116,7 +140,7 @@ function App() {
   }, [])
 
   const handleBoardTitleClick = useCallback(() => {
-    const isDefaultFeed = !isDetailView && !isNotificationView && feedSort === 'latest' && currentPage === 1
+    const isDefaultFeed = !isDetailView && !isNotificationView && feedSort === 'latest' && currentPage === 1 && !searchQuery.trim()
     if (isDefaultFeed) {
       void fetchPosts(false)
       return
@@ -126,10 +150,11 @@ function App() {
       window.history.replaceState(null, '', window.location.pathname + window.location.search)
     }
     setFeedSort('latest')
+    setSearchQuery('')
     setIsNotificationViewOpen(false)
     dispatch({ type: 'pagination/pageChanged', payload: 1 })
     dispatch({ type: 'posts/detailClosed' })
-  }, [currentPage, feedSort, fetchPosts, isDetailView, isNotificationView])
+  }, [currentPage, feedSort, fetchPosts, isDetailView, isNotificationView, searchQuery])
 
   const dismissCommentNotifications = useCallback((commentIds: number[]) => {
     markCommentNotificationsSeen(commentIds)
@@ -155,6 +180,12 @@ function App() {
 
   const changeFeedSort = (nextSort: FeedSort) => {
     setFeedSort(nextSort)
+    setIsNotificationViewOpen(false)
+    dispatch({ type: 'pagination/pageChanged', payload: 1 })
+  }
+
+  const handleSearchQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value)
     setIsNotificationViewOpen(false)
     dispatch({ type: 'pagination/pageChanged', payload: 1 })
   }
@@ -500,6 +531,17 @@ function App() {
           </div>
           <div className="feed-toolbar-actions">
             {!isDetailView && !isNotificationView && (
+              <label className="feed-search-field">
+                <span>검색</span>
+                <input
+                  value={searchQuery}
+                  onChange={handleSearchQueryChange}
+                  placeholder="검색어"
+                  aria-label="게시글 검색"
+                />
+              </label>
+            )}
+            {!isDetailView && !isNotificationView && (
               <label className="feed-sort-select">
                 <span>정렬</span>
                 <select value={feedSort} onChange={(event) => changeFeedSort(event.target.value as FeedSort)}>
@@ -518,6 +560,9 @@ function App() {
         <div className="feed-scroll-region">
           {isLoading && posts.length === 0 && <p className="empty-state">게시글을 불러오는 중입니다.</p>}
           {!isLoading && posts.length === 0 && <p className="empty-state">아직 게시글이 없습니다.</p>}
+          {!isLoading && posts.length > 0 && filteredPosts.length === 0 && !isDetailView && !isNotificationView && (
+            <p className="empty-state">검색 결과가 없습니다.</p>
+          )}
 
           {isNotificationView ? (
             <CommentNotificationList
@@ -529,6 +574,7 @@ function App() {
           ) : selectedPost ? (
             <PostDetail
               post={selectedPost}
+              searchQuery={searchQuery}
               commentDraft={commentDrafts[selectedPost.id] ?? { nickname: '', content: '' }}
               replyDrafts={replyDrafts}
               activeReplyCommentId={replyTargets[selectedPost.id] ?? null}
@@ -597,6 +643,7 @@ function App() {
           ) : (
             <PostList
               posts={visiblePosts}
+              searchQuery={searchQuery}
               editingPosts={editingPosts}
               isUploadingImage={isUploadingImage}
               onOpenPost={openPostDetail}
@@ -627,7 +674,7 @@ function App() {
             />
           )}
 
-          {!isDetailView && !isNotificationView && !isLoading && sortedPosts.length > 0 && (
+          {!isDetailView && !isNotificationView && !isLoading && filteredPosts.length > 0 && (
             <Pagination
               pageCount={pageCount}
               currentPage={currentPage}
