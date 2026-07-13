@@ -59,7 +59,7 @@ public class Post {
 
     @Builder.Default
     @Column(name = "view_count")
-    private long viewCount = 0L;
+    private Long viewCount = 0L;
 
     @Transient
     private boolean viewCountOnlyUpdate;
@@ -93,6 +93,9 @@ public class Post {
         if (this.legacyAnonymousToken == null || this.legacyAnonymousToken.isBlank()) {
             this.legacyAnonymousToken = this.ownerSessionId;
         }
+        if (this.viewCount == null) {
+            this.viewCount = 0L;
+        }
     }
 
     @PreUpdate
@@ -114,8 +117,12 @@ public class Post {
         this.showImagesInContent = showImagesInContent;
     }
 
+    public long getViewCount() {
+        return viewCount == null ? 0L : viewCount;
+    }
+
     public void increaseViewCount() {
-        this.viewCount += 1;
+        this.viewCount = getViewCount() + 1;
         this.viewCountOnlyUpdate = true;
     }
 
