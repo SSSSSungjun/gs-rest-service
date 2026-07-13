@@ -20,6 +20,7 @@ public class PostResponseDto {
     private boolean ownedByMe;
     private long likeCount;
     private boolean likedByMe;
+    private long viewCount;
     private boolean showImagesInContent;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -60,6 +61,7 @@ public class PostResponseDto {
                 .ownedByMe(post.isOwnedBy(sessionId))
                 .likeCount(likeCount)
                 .likedByMe(likedByMe)
+                .viewCount(post.getViewCount())
                 .showImagesInContent(post.isShowImagesInContent())
                 .createdAt(post.getCreatedAt())
                 .updatedAt(post.getUpdatedAt())
