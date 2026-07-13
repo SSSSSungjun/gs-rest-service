@@ -49,6 +49,7 @@ function App() {
     isSubmitting,
     errorMessage,
   } = state
+
   const selectedPost = useMemo(
     () => posts.find((post) => post.id === expandedPostId) ?? null,
     [expandedPostId, posts],
@@ -97,6 +98,7 @@ function App() {
     if (showLoading) {
       dispatch({ type: 'posts/loadStarted' })
     }
+
     try {
       const data = await boardApi.getPosts()
       dispatch({ type: 'posts/loadSucceeded', payload: data })
@@ -149,7 +151,8 @@ function App() {
       return
     }
 
-    if (window.location.hash.startsWith(POST_HASH_PREFIX)) {      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    if (window.location.hash.startsWith(POST_HASH_PREFIX)) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search)
     }
     setFeedSort('latest')
     setSearchInput('')
@@ -206,7 +209,8 @@ function App() {
   }
 
   const handleCommentChange = (event: ChangeEvent<HTMLTextAreaElement>, postId: number) => {
-    dispatch({      type: 'comments/contentChanged',
+    dispatch({
+      type: 'comments/contentChanged',
       payload: { postId, content: event.target.value },
     })
     resizeTextarea(event.currentTarget)
@@ -255,7 +259,8 @@ function App() {
   }
 
   const handleUploadComposerImages = async (files: File[]) => {
-    if (!ensureCanAddImages(images.length, files.length)) return    setIsUploadingImage(true)
+    if (!ensureCanAddImages(images.length, files.length)) return
+    setIsUploadingImage(true)
     try {
       for (const file of files) {
         const image = await boardApi.uploadPostImage(file)
@@ -304,6 +309,7 @@ function App() {
       console.error(error)
     }
   }
+
   const handleVotePollOption = async (postId: number, optionId: number) => {
     try {
       await boardApi.votePollOption(postId, optionId)
@@ -353,7 +359,8 @@ function App() {
       dispatch({ type: 'pagination/pageChanged', payload: 1 })
       setFeedSort('latest')
       setIsNotificationViewOpen(false)
-      showSystemMessage('게시글을 등록했습니다.')      await fetchPosts(false)
+      showSystemMessage('게시글을 등록했습니다.')
+      await fetchPosts(false)
     } catch (error) {
       const message = '게시글 등록에 실패했습니다.'
       dispatch({ type: 'error/set', payload: message })
@@ -402,7 +409,8 @@ function App() {
       return
     }
 
-    dispatch({ type: 'error/clear' })    try {
+    dispatch({ type: 'error/clear' })
+    try {
       await boardApi.createComment(postId, {
         nickname: draft.nickname,
         content: draft.content,
@@ -451,7 +459,8 @@ function App() {
 
     dispatch({ type: 'error/clear' })
     try {
-      if (pendingDelete.target === 'post') {        await boardApi.deletePost(pendingDelete.id)
+      if (pendingDelete.target === 'post') {
+        await boardApi.deletePost(pendingDelete.id)
         dispatch({ type: 'posts/deleted', payload: pendingDelete.id })
         if (window.location.hash === `${POST_HASH_PREFIX}${pendingDelete.id}`) {
           window.history.replaceState(null, '', window.location.pathname + window.location.search)
@@ -500,7 +509,8 @@ function App() {
 
     syncDetailFromHash()
     window.addEventListener('popstate', syncDetailFromHash)
-    return () => window.removeEventListener('popstate', syncDetailFromHash)  }, [])
+    return () => window.removeEventListener('popstate', syncDetailFromHash)
+  }, [])
 
   useEffect(() => {
     if (currentPage > pageCount) {
@@ -554,7 +564,8 @@ function App() {
                 <span>정렬</span>
                 <select value={feedSort} onChange={(event) => changeFeedSort(event.target.value as FeedSort)}>
                   <option value="latest">최신순</option>
-                  <option value="oldest">오래된순</option>                  <option value="popular">인기순</option>
+                  <option value="oldest">오래된순</option>
+                  <option value="popular">인기순</option>
                 </select>
               </label>
             )}
@@ -603,7 +614,8 @@ function App() {
               })}
               onPostEditAddImageUrl={handleAddPostEditImageUrl}
               onPostEditUploadImages={handleUploadPostEditImages}
-              onPostEditRemoveImage={(postId, index) => dispatch({                type: 'posts/editImageRemoved',
+              onPostEditRemoveImage={(postId, index) => dispatch({
+                type: 'posts/editImageRemoved',
                 payload: { postId, index },
               })}
               onPostEditShowImagesInContentChange={(postId, nextShowImagesInContent) => dispatch({
@@ -652,7 +664,8 @@ function App() {
               searchQuery={searchQuery}
               editingPosts={editingPosts}
               isUploadingImage={isUploadingImage}
-              onOpenPost={openPostDetail}              onStartEditPost={(post) => dispatch({ type: 'posts/editStarted', payload: post })}
+              onOpenPost={openPostDetail}
+              onStartEditPost={(post) => dispatch({ type: 'posts/editStarted', payload: post })}
               onRequestDeletePost={(postId) => dispatch({ type: 'delete/requested', payload: { target: 'post', id: postId } })}
               onTogglePostLike={handleTogglePostLike}
               onVotePollOption={handleVotePollOption}
@@ -701,7 +714,8 @@ function App() {
           errorMessage={errorMessage}
           onNicknameChange={(nextNickname) => dispatch({ type: 'composer/nicknameChanged', payload: nextNickname })}
           onContentChange={handleComposerChange}
-          onAddImageUrl={handleAddComposerImageUrl}          onUploadImages={handleUploadComposerImages}
+          onAddImageUrl={handleAddComposerImageUrl}
+          onUploadImages={handleUploadComposerImages}
           onRemoveImage={(index) => dispatch({ type: 'composer/imageRemoved', payload: index })}
           onStartPoll={() => dispatch({ type: 'composer/pollStarted' })}
           onPollOptionChange={(index, nextContent) => dispatch({
