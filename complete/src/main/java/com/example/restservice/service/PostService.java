@@ -93,6 +93,13 @@ public class PostService {
     }
 
     @Transactional
+    public void increaseViewCount(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
+        post.increaseViewCount();
+    }
+
+    @Transactional
     public PostResponseDto updatePost(Long id, PostRequestDto requestDto, String sessionId) {
         validateContent(requestDto.getContent());
         validateImages(requestDto.getImages());
