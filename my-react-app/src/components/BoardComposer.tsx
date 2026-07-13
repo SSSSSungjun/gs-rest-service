@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, ClipboardEvent, DragEvent, FormEvent } from 'react'
 import type { PostImage } from '../boardApi'
 import { handleTextareaKeyDown, preventEnterSubmit } from '../boardUi'
+import { BarChart3Icon, CameraIcon, PlusIcon, SendIcon, Trash2Icon } from './Icons'
 import { ImageAttachmentFields } from './ImageAttachmentFields'
 import '../composerLayout.css'
 import './BoardComposer.css'
@@ -173,8 +174,8 @@ export function BoardComposer({
           {hasPoll && (
             <div className="composer-poll-editor">
               <div className="composer-poll-header">
-                <strong>투표</strong>
-                <button className="text-button" type="button" onClick={onClearPoll}>삭제</button>
+                <strong><BarChart3Icon />투표</strong>
+                <button className="text-button icon-text-button" type="button" onClick={onClearPoll}><Trash2Icon />삭제</button>
               </div>
               <div className="composer-poll-options">
                 {pollOptions.map((option, index) => (
@@ -187,27 +188,27 @@ export function BoardComposer({
                       onChange={(event) => onPollOptionChange(index, event.target.value)}
                     />
                     {pollOptions.length > 2 && (
-                      <button className="text-button" type="button" onClick={() => onRemovePollOption(index)}>삭제</button>
+                      <button className="text-button icon-text-button" type="button" onClick={() => onRemovePollOption(index)}><Trash2Icon />삭제</button>
                     )}
                   </div>
                 ))}
               </div>
               {pollOptions.length < 5 && (
-                <button className="ghost-button composer-poll-add" type="button" onClick={onAddPollOption}>선택지 추가</button>
+                <button className="ghost-button composer-poll-add icon-text-button" type="button" onClick={onAddPollOption}><PlusIcon />선택지 추가</button>
               )}
             </div>
           )}
 
           <div className="composer-input-shell" ref={attachmentShellRef}>
             <button
-              className="composer-attach-button"
+              className="composer-attach-button icon-only-button"
               type="button"
               aria-label="첨부 메뉴"
               aria-expanded={isAttachmentMenuOpen}
               onClick={() => setIsAttachmentMenuOpen((isOpen) => !isOpen)}
               disabled={isUploadingImage}
             >
-              +
+              <PlusIcon />
             </button>
             <input
               className="composer-nickname-input"
@@ -229,14 +230,15 @@ export function BoardComposer({
               placeholder="무슨 일이 있었나요?"
               aria-label="게시글 내용"
             />
-            <button className="composer-submit-button" type="submit" disabled={isSubmitting || isUploadingImage}>
-              {isSubmitting ? '등록 중' : '게시'}
+            <button className="composer-submit-button icon-text-button" type="submit" disabled={isSubmitting || isUploadingImage}>
+              <SendIcon />{isSubmitting ? '등록 중' : '게시'}
             </button>
 
             {isAttachmentMenuOpen && (
               <div className="composer-attachment-menu" role="menu">
                 <label className={`composer-attachment-option ${isUploadingImage ? 'disabled' : ''}`}>
-                  <span>사진 첨부하기</span>
+                  <CameraIcon />
+                  <span>사진 첨부</span>
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/gif,image/webp"
@@ -246,7 +248,8 @@ export function BoardComposer({
                   />
                 </label>
                 <button className="composer-attachment-option" type="button" onClick={handleStartPoll} disabled={hasPoll}>
-                  투표 만들기
+                  <BarChart3Icon />
+                  <span>투표 만들기</span>
                 </button>
               </div>
             )}
