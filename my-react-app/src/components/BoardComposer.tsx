@@ -236,8 +236,9 @@ export function BoardComposer({
 
             {isAttachmentMenuOpen && (
               <div className="composer-attachment-menu" role="menu">
-                <label className={`composer-attachment-option icon-only-button ${isUploadingImage ? 'disabled' : ''}`} aria-label="사진 첨부">
+                <label className={`composer-attachment-option ${isUploadingImage ? 'disabled' : ''}`} aria-label="사진 첨부">
                   <CameraIcon />
+                  <span>사진</span>
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/gif,image/webp"
@@ -246,8 +247,9 @@ export function BoardComposer({
                     disabled={isUploadingImage}
                   />
                 </label>
-                <button className="composer-attachment-option icon-only-button" type="button" onClick={handleStartPoll} disabled={hasPoll} aria-label="투표 만들기">
+                <button className="composer-attachment-option" type="button" onClick={handleStartPoll} disabled={hasPoll} aria-label="투표 만들기">
                   <BarChart3Icon />
+                  <span>투표</span>
                 </button>
               </div>
             )}
