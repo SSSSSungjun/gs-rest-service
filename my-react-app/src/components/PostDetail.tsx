@@ -14,6 +14,7 @@ import './PostDetail.css'
 interface PostDetailProps {
   post: Post
   searchQuery: string
+  searchMode: 'posts' | 'comments'
   commentDraft: BoardDraft
   replyDrafts: Record<number, BoardDraft>
   activeReplyCommentId: number | null
@@ -53,6 +54,7 @@ interface PostDetailProps {
 export function PostDetail({
   post,
   searchQuery,
+  searchMode,
   commentDraft,
   replyDrafts,
   activeReplyCommentId,
@@ -91,6 +93,8 @@ export function PostDetail({
   const postImages = post.images ?? []
   const pollOptions = post.pollOptions ?? []
   const isPopular = isPopularPost(post.likeCount)
+  const postSearchQuery = searchMode === 'posts' ? searchQuery : ''
+  const commentSearchQuery = searchMode === 'comments' ? searchQuery : ''
 
   return (
     <article className={`post-card detail-card ${isPopular ? 'popular-post' : ''}`} key={post.id}>
@@ -100,7 +104,7 @@ export function PostDetail({
       <header className="post-header">
         <div>
           <div className="post-title-row">
-            <strong><HighlightedText text={post.nickname || '익명'} query={searchQuery} /></strong>
+            <strong><HighlightedText text={post.nickname || '익명'} query={postSearchQuery} /></strong>
             {isPopular && <span className="popular-badge">인기</span>}
           </div>
           <time dateTime={post.createdAt}>
@@ -133,7 +137,7 @@ export function PostDetail({
         />
       ) : (
         <>
-          <p className="detail-content"><HighlightedText text={post.content} query={searchQuery} /></p>
+          <p className="detail-content"><HighlightedText text={post.content} query={postSearchQuery} /></p>
           {post.showImagesInContent && <PostImageGallery images={postImages} variant="detail" />}
           {pollOptions.length > 0 && (
             <PollBlock
@@ -193,13 +197,13 @@ export function PostDetail({
                 <>
                   <div className="comment-body">
                     <div>
-                      <strong>{comment.nickname || '익명'}</strong>
+                      <strong><HighlightedText text={comment.nickname || '익명'} query={commentSearchQuery} /></strong>
                       <time dateTime={comment.createdAt}>
                         {formatDate(comment.createdAt)}
                         {wasEdited(comment.createdAt, comment.updatedAt) && <span className="edited-label">(수정됨)</span>}
                       </time>
                       {isReply && <span className="reply-target-label">@{replyToNickname}에게</span>}
-                      <p>{comment.content}</p>
+                      <p><HighlightedText text={comment.content} query={commentSearchQuery} /></p>
                     </div>
                     {comment.ownedByMe && (
                       <ActionMenu
