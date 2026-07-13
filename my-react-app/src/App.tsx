@@ -497,6 +497,7 @@ function App() {
         showSystemMessage('게시글을 삭제했습니다.')
         return
       }
+
       await boardApi.deleteComment(pendingDelete.id)
       dispatch({ type: 'delete/canceled' })
       showSystemMessage('댓글을 삭제했습니다.')
