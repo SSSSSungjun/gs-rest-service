@@ -80,6 +80,7 @@
     width: 100%;
     justify-content: flex-start;
   }
+
   .feed-search-field {
     flex: 1 1 100%;
   }
