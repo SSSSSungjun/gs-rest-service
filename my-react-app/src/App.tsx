@@ -12,7 +12,7 @@ import type { CommentNotification } from './commentNotifications'
 import { BoardComposer } from './components/BoardComposer'
 import { CommentNotificationBar, CommentNotificationList } from './components/CommentNotificationBar'
 import { ConfirmDialog } from './components/ConfirmDialog'
-import { RefreshCwIcon } from './components/Icons'
+import { RefreshCwIcon, SearchIcon } from './components/Icons'
 import { Pagination } from './components/Pagination'
 import { PostDetail } from './components/PostDetail'
 import { PostList } from './components/PostList'
@@ -26,6 +26,7 @@ function App() {
   const [state, dispatch] = useReducer(boardReducer, initialBoardState)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [feedSort, setFeedSort] = useState<FeedSort>('latest')
+  const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [commentNotifications, setCommentNotifications] = useState<CommentNotification[]>([])
   const [isNotificationViewOpen, setIsNotificationViewOpen] = useState(false)
@@ -118,6 +119,7 @@ function App() {
       await boardApi.increasePostView(postId)
       await fetchPosts(false)
     } catch (error) {
+      dispatch({ type: 'posts/viewCountIncrementRolledBack', payload: postId })
       console.error(error)
     }
   }, [fetchPosts])
@@ -129,6 +131,7 @@ function App() {
     }
     setIsNotificationViewOpen(false)
     dispatch({ type: 'posts/detailOpened', payload: postId })
+    dispatch({ type: 'posts/viewCountIncremented', payload: postId })
     void recordPostView(postId)
   }, [recordPostView])
 
@@ -141,7 +144,8 @@ function App() {
   }, [])
 
   const handleBoardTitleClick = useCallback(() => {
-    const isDefaultFeed = !isDetailView && !isNotificationView && feedSort === 'latest' && currentPage === 1 && !searchQuery.trim()
+    const isDefaultFeed = !isDetailView && !isNotificationView && feedSort === 'latest'
+      && currentPage === 1 && !searchInput.trim() && !searchQuery.trim()
     if (isDefaultFeed) {
       void fetchPosts(false)
       return
@@ -151,11 +155,12 @@ function App() {
       window.history.replaceState(null, '', window.location.pathname + window.location.search)
     }
     setFeedSort('latest')
+    setSearchInput('')
     setSearchQuery('')
     setIsNotificationViewOpen(false)
     dispatch({ type: 'pagination/pageChanged', payload: 1 })
     dispatch({ type: 'posts/detailClosed' })
-  }, [currentPage, feedSort, fetchPosts, isDetailView, isNotificationView, searchQuery])
+  }, [currentPage, feedSort, fetchPosts, isDetailView, isNotificationView, searchInput, searchQuery])
 
   const dismissCommentNotifications = useCallback((commentIds: number[]) => {
     markCommentNotificationsSeen(commentIds)
@@ -186,7 +191,14 @@ function App() {
   }
 
   const handleSearchQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value)
+    setSearchInput(event.target.value)
+  }
+
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const nextQuery = searchInput.trim()
+    setSearchInput(nextQuery)
+    setSearchQuery(nextQuery)
     setIsNotificationViewOpen(false)
     dispatch({ type: 'pagination/pageChanged', payload: 1 })
   }
@@ -532,15 +544,20 @@ function App() {
           </div>
           <div className="feed-toolbar-actions">
             {!isDetailView && !isNotificationView && (
-              <label className="feed-search-field">
+              <form className="feed-search-field" role="search" onSubmit={handleSearchSubmit}>
                 <span>검색</span>
-                <input
-                  value={searchQuery}
-                  onChange={handleSearchQueryChange}
-                  placeholder="검색어"
-                  aria-label="게시글 검색"
-                />
-              </label>
+                <div className="feed-search-control">
+                  <input
+                    value={searchInput}
+                    onChange={handleSearchQueryChange}
+                    placeholder="검색어"
+                    aria-label="게시글 검색어"
+                  />
+                  <button className="feed-search-button" type="submit" aria-label="게시글 검색 실행">
+                    <SearchIcon />
+                  </button>
+                </div>
+              </form>
             )}
             {!isDetailView && !isNotificationView && (
               <label className="feed-sort-select">

@@ -39,6 +39,8 @@ export type BoardAction =
   | { type: 'posts/toggled'; payload: number }
   | { type: 'posts/detailOpened'; payload: number }
   | { type: 'posts/detailClosed' }
+  | { type: 'posts/viewCountIncremented'; payload: number }
+  | { type: 'posts/viewCountIncrementRolledBack'; payload: number }
   | { type: 'composer/nicknameChanged'; payload: string }
   | { type: 'composer/contentChanged'; payload: string }
   | { type: 'composer/imageAdded'; payload: PostImage }
@@ -145,6 +147,20 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
       return { ...state, expandedPostId: action.payload }
     case 'posts/detailClosed':
       return { ...state, expandedPostId: null }
+    case 'posts/viewCountIncremented':
+      return {
+        ...state,
+        posts: state.posts.map((post) => post.id === action.payload
+          ? { ...post, viewCount: post.viewCount + 1 }
+          : post),
+      }
+    case 'posts/viewCountIncrementRolledBack':
+      return {
+        ...state,
+        posts: state.posts.map((post) => post.id === action.payload
+          ? { ...post, viewCount: Math.max(0, post.viewCount - 1) }
+          : post),
+      }
     case 'composer/nicknameChanged':
       return { ...state, nickname: action.payload }
     case 'composer/contentChanged':
