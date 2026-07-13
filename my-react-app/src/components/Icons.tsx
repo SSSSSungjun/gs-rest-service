@@ -56,7 +56,8 @@ export function ArrowLeftIcon(props: IconProps) {
       <path d="m12 19-7-7 7-7" />
       <path d="M19 12H5" />
     </IconBase>
-  )}
+  )
+}
 
 export function PlusIcon(props: IconProps) {
   return (
@@ -105,7 +106,8 @@ export function EyeIcon(props: IconProps) {
 export function MessageCircleIcon(props: IconProps) {
   return (
     <IconBase {...props}>
-      <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.8 8.8 0 0 1-4-.9L3 21l1.7-4.5A8.3 8.3 0 0 1 3 11.5a8.5 8.5 0 0 1 18 0" />    </IconBase>
+      <path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 8.8 8.8 0 0 1-4-.9L3 21l1.7-4.5A8.3 8.3 0 0 1 3 11.5a8.5 8.5 0 0 1 18 0" />
+    </IconBase>
   )
 }
 
@@ -154,7 +156,8 @@ export function PencilIcon(props: IconProps) {
     <IconBase {...props}>
       <path d="M17 3a2.8 2.8 0 0 1 4 4L7 21l-4 1 1-4Z" />
       <path d="m15 5 4 4" />
-    </IconBase>  )
+    </IconBase>
+  )
 }
 
 export function Trash2Icon(props: IconProps) {
