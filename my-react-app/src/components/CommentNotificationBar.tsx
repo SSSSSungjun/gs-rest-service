@@ -1,4 +1,5 @@
 import type { CommentNotification } from '../commentNotifications'
+import { ArrowLeftIcon, BellIcon, CheckIcon } from './Icons'
 
 interface CommentNotificationBarProps {
   notifications: CommentNotification[]
@@ -24,6 +25,7 @@ export function CommentNotificationBar({ notifications, onOpenList }: CommentNot
         onClick={onOpenList}
         aria-label={hasNotifications ? `댓글 알림 ${notificationCount}개 보기` : '댓글 알림 보기'}
       >
+        <BellIcon />
         <span>알림</span>
         {hasNotifications && <span className="notification-count-badge">+{notificationCount}</span>}
       </button>
@@ -48,9 +50,9 @@ export function CommentNotificationList({
           <span>{hasNotifications ? `${notifications.length}개` : '0개'}</span>
         </div>
         <div className="inline-actions">
-          <button className="ghost-button" type="button" onClick={onBack}>목록</button>
+          <button className="ghost-button icon-text-button" type="button" onClick={onBack}><ArrowLeftIcon />목록</button>
           {hasNotifications && (
-            <button className="text-button" type="button" onClick={() => onDismiss(notificationIds)}>모두 읽음</button>
+            <button className="text-button icon-text-button" type="button" onClick={() => onDismiss(notificationIds)}><CheckIcon />모두 읽음</button>
           )}
         </div>
       </div>
@@ -70,11 +72,11 @@ export function CommentNotificationList({
               </button>
               <button
                 type="button"
-                className="notification-dismiss-button"
+                className="notification-dismiss-button icon-only-button"
                 onClick={() => onDismiss([notification.commentId])}
                 aria-label="댓글 알림 읽음 처리"
               >
-                읽음
+                <CheckIcon />
               </button>
             </li>
           ))}
