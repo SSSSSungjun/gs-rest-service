@@ -10,6 +10,13 @@
   display: inline-flex;
   gap: 4px;
   align-items: center;
+  margin: 0;
+}
+
+.feed-search-control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
 }
 
 .feed-search-field span {
@@ -25,7 +32,7 @@
   border-radius: 999px;
   background: #ffffff;
   color: #374151;
-  padding: 0 12px;
+  padding: 0 38px 0 12px;
   box-shadow: inset 0 0 0 1px #d7e7d6;
   font-size: 13px;
 }
@@ -34,6 +41,31 @@
 .feed-search-field input:focus {
   background: #f7fbf6;
   box-shadow: inset 0 0 0 1px #b8d8b6;
+}
+
+.feed-search-button {
+  position: absolute;
+  right: 3px;
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #45684d;
+  cursor: pointer;
+}
+
+.feed-search-button:hover,
+.feed-search-button:focus-visible {
+  background: #e8f3e6;
+}
+
+.feed-search-button svg {
+  width: 16px;
+  height: 16px;
 }
 
 .search-highlight {
@@ -48,9 +80,12 @@
     width: 100%;
     justify-content: flex-start;
   }
-
   .feed-search-field {
     flex: 1 1 100%;
+  }
+
+  .feed-search-control {
+    flex: 1;
   }
 
   .feed-search-field input {
