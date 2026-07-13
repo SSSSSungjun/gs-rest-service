@@ -66,3 +66,110 @@
     width: 100%;
   }
 }
+
+.composer-ai-mode {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #c9dfc7;
+  border-radius: 8px;
+  background: #f7fbf6;
+  padding: 12px;
+}
+
+.composer-ai-header,
+.composer-ai-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.composer-ai-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #173c2c;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.composer-ai-prompt {
+  width: 100%;
+  min-height: 72px;
+  max-height: 180px;
+  resize: vertical;
+  border: 1px solid #d7e7d6;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #263a31;
+  padding: 10px 12px;
+  line-height: 1.5;
+}
+
+.composer-ai-prompt:focus {
+  border-color: #72b879;
+  outline: 2px solid #dff2dc;
+}
+
+.composer-ai-cancel {
+  flex: 0 0 34px;
+  width: 34px;
+  min-height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #617468;
+}
+
+.composer-ai-cancel:hover {
+  background: #e8f2e6;
+  color: #173c2c;
+}
+
+.composer-ai-generate {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 0;
+  border-radius: 999px;
+  background: #1f8a4c;
+  color: #ffffff;
+  padding: 0 16px;
+  font-weight: 800;
+}
+
+.composer-ai-generate:hover:not(:disabled) {
+  background: #176f3c;
+}
+
+.composer-ai-generate:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.composer-ai-hint,
+.composer-ai-error {
+  margin: 0;
+  font-size: 12px;
+}
+
+.composer-ai-hint {
+  color: #617468;
+}
+
+.composer-ai-error {
+  color: #b42318;
+}
+
+@media (max-width: 720px) {
+  .composer-ai-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .composer-ai-generate {
+    width: 100%;
+  }
+}
