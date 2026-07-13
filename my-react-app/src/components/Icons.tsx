@@ -179,3 +179,22 @@ export function CheckIcon(props: IconProps) {
     </IconBase>
   )
 }
+
+export function SparklesIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="m12 3-1.2 3.3L7.5 7.5l3.3 1.2L12 12l1.2-3.3 3.3-1.2-3.3-1.2Z" />
+      <path d="m19 13-.8 2.2L16 16l2.2.8L19 19l.8-2.2L22 16l-2.2-.8Z" />
+      <path d="m5 14-1 2.5L1.5 17.5 4 18.5 5 21l1-2.5 2.5-1L6 16.5Z" />
+    </IconBase>
+  )
+}
+
+export function XIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M18 6 6 18" />
+      <path d="m6 6 12 12" />
+    </IconBase>
+  )
+}

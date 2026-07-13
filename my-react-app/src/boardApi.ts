@@ -56,7 +56,16 @@ export interface BoardWritePayload {
   parentCommentId?: number | null
 }
 
+export interface AiDraftResponse {
+  content: string
+}
+
 export const boardApi = {
+  async generateAiDraft(prompt: string, signal?: AbortSignal) {
+    const response = await apiClient.post<AiDraftResponse>('/ai/drafts', { prompt }, { signal })
+    return response.data.content
+  },
+
   async getPosts() {
     const response = await apiClient.get<Post[]>('/posts')
     return response.data

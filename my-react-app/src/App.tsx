@@ -797,6 +797,11 @@ function App() {
             type: 'composer/showImagesChanged',
             payload: nextShowImagesInContent,
           })}
+          onGenerateAiDraft={(prompt, signal) => boardApi.generateAiDraft(prompt, signal)}
+          onApplyAiDraft={(nextContent) => dispatch({
+            type: 'composer/contentChanged',
+            payload: nextContent,
+          })}
           onSubmit={handleSubmit}
         />
       )}
