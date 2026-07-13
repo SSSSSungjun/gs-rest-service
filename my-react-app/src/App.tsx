@@ -12,7 +12,7 @@ import type { CommentNotification } from './commentNotifications'
 import { BoardComposer } from './components/BoardComposer'
 import { CommentNotificationBar, CommentNotificationList } from './components/CommentNotificationBar'
 import { ConfirmDialog } from './components/ConfirmDialog'
-import { RefreshCwIcon } from './components/Icons'
+import { RefreshCwIcon, SearchIcon } from './components/Icons'
 import { Pagination } from './components/Pagination'
 import { PostDetail } from './components/PostDetail'
 import { PostList } from './components/PostList'
@@ -26,6 +26,7 @@ function App() {
   const [state, dispatch] = useReducer(boardReducer, initialBoardState)
   const [isUploadingImage, setIsUploadingImage] = useState(false)
   const [feedSort, setFeedSort] = useState<FeedSort>('latest')
+  const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
   const [commentNotifications, setCommentNotifications] = useState<CommentNotification[]>([])
   const [isNotificationViewOpen, setIsNotificationViewOpen] = useState(false)
@@ -48,7 +49,6 @@ function App() {
     isSubmitting,
     errorMessage,
   } = state
-
   const selectedPost = useMemo(
     () => posts.find((post) => post.id === expandedPostId) ?? null,
     [expandedPostId, posts],
@@ -97,7 +97,6 @@ function App() {
     if (showLoading) {
       dispatch({ type: 'posts/loadStarted' })
     }
-
     try {
       const data = await boardApi.getPosts()
       dispatch({ type: 'posts/loadSucceeded', payload: data })
@@ -118,6 +117,7 @@ function App() {
       await boardApi.increasePostView(postId)
       await fetchPosts(false)
     } catch (error) {
+      dispatch({ type: 'posts/viewCountIncrementRolledBack', payload: postId })
       console.error(error)
     }
   }, [fetchPosts])
@@ -129,6 +129,7 @@ function App() {
     }
     setIsNotificationViewOpen(false)
     dispatch({ type: 'posts/detailOpened', payload: postId })
+    dispatch({ type: 'posts/viewCountIncremented', payload: postId })
     void recordPostView(postId)
   }, [recordPostView])
 
@@ -141,21 +142,22 @@ function App() {
   }, [])
 
   const handleBoardTitleClick = useCallback(() => {
-    const isDefaultFeed = !isDetailView && !isNotificationView && feedSort === 'latest' && currentPage === 1 && !searchQuery.trim()
+    const isDefaultFeed = !isDetailView && !isNotificationView && feedSort === 'latest'
+      && currentPage === 1 && !searchInput.trim() && !searchQuery.trim()
     if (isDefaultFeed) {
       void fetchPosts(false)
       return
     }
 
-    if (window.location.hash.startsWith(POST_HASH_PREFIX)) {
-      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    if (window.location.hash.startsWith(POST_HASH_PREFIX)) {      window.history.replaceState(null, '', window.location.pathname + window.location.search)
     }
     setFeedSort('latest')
+    setSearchInput('')
     setSearchQuery('')
     setIsNotificationViewOpen(false)
     dispatch({ type: 'pagination/pageChanged', payload: 1 })
     dispatch({ type: 'posts/detailClosed' })
-  }, [currentPage, feedSort, fetchPosts, isDetailView, isNotificationView, searchQuery])
+  }, [currentPage, feedSort, fetchPosts, isDetailView, isNotificationView, searchInput, searchQuery])
 
   const dismissCommentNotifications = useCallback((commentIds: number[]) => {
     markCommentNotificationsSeen(commentIds)
@@ -186,7 +188,14 @@ function App() {
   }
 
   const handleSearchQueryChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setSearchQuery(event.target.value)
+    setSearchInput(event.target.value)
+  }
+
+  const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const nextQuery = searchInput.trim()
+    setSearchInput(nextQuery)
+    setSearchQuery(nextQuery)
     setIsNotificationViewOpen(false)
     dispatch({ type: 'pagination/pageChanged', payload: 1 })
   }
@@ -197,8 +206,7 @@ function App() {
   }
 
   const handleCommentChange = (event: ChangeEvent<HTMLTextAreaElement>, postId: number) => {
-    dispatch({
-      type: 'comments/contentChanged',
+    dispatch({      type: 'comments/contentChanged',
       payload: { postId, content: event.target.value },
     })
     resizeTextarea(event.currentTarget)
@@ -247,8 +255,7 @@ function App() {
   }
 
   const handleUploadComposerImages = async (files: File[]) => {
-    if (!ensureCanAddImages(images.length, files.length)) return
-    setIsUploadingImage(true)
+    if (!ensureCanAddImages(images.length, files.length)) return    setIsUploadingImage(true)
     try {
       for (const file of files) {
         const image = await boardApi.uploadPostImage(file)
@@ -297,7 +304,6 @@ function App() {
       console.error(error)
     }
   }
-
   const handleVotePollOption = async (postId: number, optionId: number) => {
     try {
       await boardApi.votePollOption(postId, optionId)
@@ -347,8 +353,7 @@ function App() {
       dispatch({ type: 'pagination/pageChanged', payload: 1 })
       setFeedSort('latest')
       setIsNotificationViewOpen(false)
-      showSystemMessage('게시글을 등록했습니다.')
-      await fetchPosts(false)
+      showSystemMessage('게시글을 등록했습니다.')      await fetchPosts(false)
     } catch (error) {
       const message = '게시글 등록에 실패했습니다.'
       dispatch({ type: 'error/set', payload: message })
@@ -397,8 +402,7 @@ function App() {
       return
     }
 
-    dispatch({ type: 'error/clear' })
-    try {
+    dispatch({ type: 'error/clear' })    try {
       await boardApi.createComment(postId, {
         nickname: draft.nickname,
         content: draft.content,
@@ -447,8 +451,7 @@ function App() {
 
     dispatch({ type: 'error/clear' })
     try {
-      if (pendingDelete.target === 'post') {
-        await boardApi.deletePost(pendingDelete.id)
+      if (pendingDelete.target === 'post') {        await boardApi.deletePost(pendingDelete.id)
         dispatch({ type: 'posts/deleted', payload: pendingDelete.id })
         if (window.location.hash === `${POST_HASH_PREFIX}${pendingDelete.id}`) {
           window.history.replaceState(null, '', window.location.pathname + window.location.search)
@@ -497,8 +500,7 @@ function App() {
 
     syncDetailFromHash()
     window.addEventListener('popstate', syncDetailFromHash)
-    return () => window.removeEventListener('popstate', syncDetailFromHash)
-  }, [])
+    return () => window.removeEventListener('popstate', syncDetailFromHash)  }, [])
 
   useEffect(() => {
     if (currentPage > pageCount) {
@@ -532,23 +534,27 @@ function App() {
           </div>
           <div className="feed-toolbar-actions">
             {!isDetailView && !isNotificationView && (
-              <label className="feed-search-field">
+              <form className="feed-search-field" role="search" onSubmit={handleSearchSubmit}>
                 <span>검색</span>
-                <input
-                  value={searchQuery}
-                  onChange={handleSearchQueryChange}
-                  placeholder="검색어"
-                  aria-label="게시글 검색"
-                />
-              </label>
+                <div className="feed-search-control">
+                  <input
+                    value={searchInput}
+                    onChange={handleSearchQueryChange}
+                    placeholder="검색어"
+                    aria-label="게시글 검색어"
+                  />
+                  <button className="feed-search-button" type="submit" aria-label="게시글 검색 실행">
+                    <SearchIcon />
+                  </button>
+                </div>
+              </form>
             )}
             {!isDetailView && !isNotificationView && (
               <label className="feed-sort-select">
                 <span>정렬</span>
                 <select value={feedSort} onChange={(event) => changeFeedSort(event.target.value as FeedSort)}>
                   <option value="latest">최신순</option>
-                  <option value="oldest">오래된순</option>
-                  <option value="popular">인기순</option>
+                  <option value="oldest">오래된순</option>                  <option value="popular">인기순</option>
                 </select>
               </label>
             )}
@@ -597,8 +603,7 @@ function App() {
               })}
               onPostEditAddImageUrl={handleAddPostEditImageUrl}
               onPostEditUploadImages={handleUploadPostEditImages}
-              onPostEditRemoveImage={(postId, index) => dispatch({
-                type: 'posts/editImageRemoved',
+              onPostEditRemoveImage={(postId, index) => dispatch({                type: 'posts/editImageRemoved',
                 payload: { postId, index },
               })}
               onPostEditShowImagesInContentChange={(postId, nextShowImagesInContent) => dispatch({
@@ -647,8 +652,7 @@ function App() {
               searchQuery={searchQuery}
               editingPosts={editingPosts}
               isUploadingImage={isUploadingImage}
-              onOpenPost={openPostDetail}
-              onStartEditPost={(post) => dispatch({ type: 'posts/editStarted', payload: post })}
+              onOpenPost={openPostDetail}              onStartEditPost={(post) => dispatch({ type: 'posts/editStarted', payload: post })}
               onRequestDeletePost={(postId) => dispatch({ type: 'delete/requested', payload: { target: 'post', id: postId } })}
               onTogglePostLike={handleTogglePostLike}
               onVotePollOption={handleVotePollOption}
@@ -697,8 +701,7 @@ function App() {
           errorMessage={errorMessage}
           onNicknameChange={(nextNickname) => dispatch({ type: 'composer/nicknameChanged', payload: nextNickname })}
           onContentChange={handleComposerChange}
-          onAddImageUrl={handleAddComposerImageUrl}
-          onUploadImages={handleUploadComposerImages}
+          onAddImageUrl={handleAddComposerImageUrl}          onUploadImages={handleUploadComposerImages}
           onRemoveImage={(index) => dispatch({ type: 'composer/imageRemoved', payload: index })}
           onStartPoll={() => dispatch({ type: 'composer/pollStarted' })}
           onPollOptionChange={(index, nextContent) => dispatch({
