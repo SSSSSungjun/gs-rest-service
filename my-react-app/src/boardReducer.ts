@@ -39,6 +39,8 @@ export type BoardAction =
   | { type: 'posts/toggled'; payload: number }
   | { type: 'posts/detailOpened'; payload: number }
   | { type: 'posts/detailClosed' }
+  | { type: 'posts/viewCountIncremented'; payload: number }
+  | { type: 'posts/viewCountIncrementRolledBack'; payload: number }
   | { type: 'composer/nicknameChanged'; payload: string }
   | { type: 'composer/contentChanged'; payload: string }
   | { type: 'composer/imageAdded'; payload: PostImage }
@@ -47,8 +49,7 @@ export type BoardAction =
   | { type: 'composer/pollOptionChanged'; payload: { index: number; content: string } }
   | { type: 'composer/pollOptionAdded' }
   | { type: 'composer/pollOptionRemoved'; payload: number }
-  | { type: 'composer/pollCleared' }
-  | { type: 'composer/showImagesChanged'; payload: boolean }
+  | { type: 'composer/pollCleared' }  | { type: 'composer/showImagesChanged'; payload: boolean }
   | { type: 'composer/submitStarted' }
   | { type: 'composer/submitFinished' }
   | { type: 'composer/resetContent' }
@@ -97,7 +98,6 @@ export const initialBoardState: BoardState = {
   isSubmitting: false,
   errorMessage: '',
 }
-
 function getDraft(drafts: Record<number, BoardDraft>, id: number): BoardDraft {
   return drafts[id] ?? { nickname: '', content: '', images: [], showImagesInContent: true }
 }
@@ -145,10 +145,23 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
       return { ...state, expandedPostId: action.payload }
     case 'posts/detailClosed':
       return { ...state, expandedPostId: null }
+    case 'posts/viewCountIncremented':
+      return {
+        ...state,
+        posts: state.posts.map((post) => post.id === action.payload
+          ? { ...post, viewCount: post.viewCount + 1 }
+          : post),
+      }
+    case 'posts/viewCountIncrementRolledBack':
+      return {
+        ...state,
+        posts: state.posts.map((post) => post.id === action.payload
+          ? { ...post, viewCount: Math.max(0, post.viewCount - 1) }
+          : post),
+      }
     case 'composer/nicknameChanged':
       return { ...state, nickname: action.payload }
-    case 'composer/contentChanged':
-      return { ...state, content: action.payload }
+    case 'composer/contentChanged':      return { ...state, content: action.payload }
     case 'composer/imageAdded':
       return { ...state, images: [...state.images, action.payload] }
     case 'composer/imageRemoved':
@@ -197,8 +210,7 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
       }
     }
     case 'comments/draftCleared':
-      return { ...state, commentDrafts: removeDraft(state.commentDrafts, action.payload) }
-    case 'comments/replyStarted':
+      return { ...state, commentDrafts: removeDraft(state.commentDrafts, action.payload) }    case 'comments/replyStarted':
       return {
         ...state,
         replyTargets: {
@@ -247,8 +259,7 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
             nickname: action.payload.nickname,
             content: action.payload.content,
             images: action.payload.images,
-            showImagesInContent: action.payload.showImagesInContent,
-          },
+            showImagesInContent: action.payload.showImagesInContent,          },
         },
       }
     case 'posts/editNicknameChanged': {
@@ -297,8 +308,7 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
         },
       }
     }
-    case 'posts/editShowImagesChanged': {
-      const currentDraft = getDraft(state.editingPosts, action.payload.postId)
+    case 'posts/editShowImagesChanged': {      const currentDraft = getDraft(state.editingPosts, action.payload.postId)
       return {
         ...state,
         editingPosts: {
@@ -347,8 +357,7 @@ export function boardReducer(state: BoardState, action: BoardAction): BoardState
     case 'delete/canceled':
       return { ...state, pendingDelete: null }
     case 'pagination/pageChanged':
-      return { ...state, currentPage: action.payload, expandedPostId: null }
-    case 'posts/deleted':
+      return { ...state, currentPage: action.payload, expandedPostId: null }    case 'posts/deleted':
       return {
         ...state,
         posts: state.posts.filter((post) => post.id !== action.payload),
