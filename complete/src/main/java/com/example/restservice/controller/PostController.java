@@ -62,6 +62,12 @@ public class PostController {
         return ResponseEntity.ok(postImageStorageService.store(file));
     }
 
+    @PostMapping("/{id}/views")
+    public ResponseEntity<Void> increaseViewCount(@PathVariable Long id) {
+        postService.increaseViewCount(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PatchMapping("/{id}")
     public ResponseEntity<PostResponseDto> updatePost(
             @PathVariable Long id,
