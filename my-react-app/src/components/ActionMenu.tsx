@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { MoreVerticalIcon, PencilIcon, Trash2Icon } from './Icons'
+import { MoreVerticalIcon } from './Icons'
 
 interface ActionMenuProps {
   label: string
@@ -57,8 +57,8 @@ export function ActionMenu({ label, onEdit, onDelete }: ActionMenuProps) {
         <MoreVerticalIcon />
       </summary>
       <div className="action-menu-panel">
-        <button onClick={handleEdit} type="button"><PencilIcon />수정</button>
-        <button className="danger-menu-button" onClick={handleDelete} type="button"><Trash2Icon />삭제</button>
+        <button onClick={handleEdit} type="button">수정</button>
+        <button className="danger-menu-button" onClick={handleDelete} type="button">삭제</button>
       </div>
     </details>
   )
