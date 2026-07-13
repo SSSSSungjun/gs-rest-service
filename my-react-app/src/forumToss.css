@@ -1,16 +1,17 @@
+html,
 body {
-  background: #ffffff;
+  background: #f5f6f8;
   color: #1f2933;
 }
 
 .board-shell {
   width: min(100%, 820px);
-  padding: 18px 22px 190px;
+  padding: 10px 22px 190px;
 }
 
 .board-hero {
   gap: 4px;
-  padding: 8px 0 12px;
+  padding: 2px 0 8px;
 }
 
 .eyebrow {
@@ -35,10 +36,10 @@ body {
 
 .composer,
 .detail-card {
-  border: 1px solid #e5e7eb;
+  border: 1px solid #e1e5ea;
   border-radius: 14px;
   background: #ffffff;
-  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.045);
 }
 
 .feed {
@@ -49,9 +50,9 @@ body {
   position: sticky;
   top: 0;
   z-index: 12;
-  border-bottom: 1px solid #e5e7eb;
-  background: rgba(255, 255, 255, 0.94);
-  padding: 8px 12px;
+  border-bottom: 1px solid #e1e5ea;
+  background: rgba(245, 246, 248, 0.94);
+  padding: 6px 12px;
   backdrop-filter: blur(10px);
 }
 
@@ -66,28 +67,28 @@ body {
 
 .post-card:not(.detail-card) {
   display: grid;
-  gap: 8px;
+  gap: 10px;
   border: 0;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e1e5ea;
   border-radius: 0;
-  background: transparent;
+  background: #ffffff;
   box-shadow: none;
-  padding: 15px 12px;
+  padding: 17px 14px;
   transition: background 140ms ease;
 }
 
 .post-card:not(.detail-card):hover {
-  background: #f7f8fa;
+  background: #f1f3f5;
   box-shadow: none;
   transform: none;
 }
 
 .post-card.popular-post:not(.detail-card) {
-  border-color: #d1d5db;
+  border-color: #d8dde3;
 }
 
 .detail-card {
-  padding: 16px;
+  padding: 18px;
 }
 
 .post-header {
@@ -113,9 +114,9 @@ time {
 .popular-badge,
 .reply-target-label {
   min-height: 22px;
-  border-color: #d1d5db;
+  border-color: #d8dde3;
   border-radius: 999px;
-  background: #f3f4f6;
+  background: #f1f3f5;
   color: #374151;
   padding: 0 8px;
   font-size: 11px;
@@ -144,7 +145,7 @@ time {
 .post-card-meta-row,
 .comment-action-row {
   gap: 12px;
-  margin-top: 7px;
+  margin-top: 8px;
 }
 
 .meta-pill,
@@ -194,7 +195,7 @@ time {
 .notification-entry-button:hover,
 .notification-dismiss-button:hover,
 .refresh-button:hover {
-  background: #f3f4f6;
+  background: #e9edf2;
   color: #111827;
 }
 
@@ -215,8 +216,11 @@ time {
 }
 
 .refresh-button::before,
-.refresh-button:disabled::before {
-  content: none;
+.refresh-button::after,
+.refresh-button:disabled::before,
+.refresh-button:disabled::after {
+  content: none !important;
+  display: none !important;
 }
 
 .feed-sort-select {
@@ -235,13 +239,13 @@ time {
   background: #ffffff;
   color: #374151;
   padding: 0 28px 0 12px;
-  box-shadow: inset 0 0 0 1px #e5e7eb;
+  box-shadow: inset 0 0 0 1px #dfe4ea;
 }
 
 .feed-sort-select select:hover,
 .feed-sort-select select:focus {
-  background: #f3f4f6;
-  box-shadow: inset 0 0 0 1px #d1d5db;
+  background: #f1f3f5;
+  box-shadow: inset 0 0 0 1px #cfd6dd;
 }
 
 .notification-entry-row {
@@ -250,7 +254,7 @@ time {
 
 .notification-entry-button {
   background: #ffffff;
-  box-shadow: inset 0 0 0 1px #e5e7eb;
+  box-shadow: inset 0 0 0 1px #dfe4ea;
 }
 
 .notification-entry-button.has-notifications {
@@ -280,13 +284,13 @@ time {
 }
 
 .action-menu summary:hover {
-  background: #f3f4f6;
+  background: #e9edf2;
   color: #111827;
 }
 
 .action-menu-panel {
   min-width: 96px;
-  border-color: #e5e7eb;
+  border-color: #dfe4ea;
   border-radius: 12px;
   box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
 }
@@ -302,19 +306,19 @@ time {
   right: max(10px, calc((100vw - 820px) / 2 + 22px));
   left: max(10px, calc((100vw - 820px) / 2 + 22px));
   border-radius: 18px;
-  padding: 8px;
+  padding: 10px;
 }
 
 .composer-input-shell {
   grid-template-columns: 34px 78px minmax(0, 1fr) 36px;
-  border-color: #e5e7eb;
+  border-color: #dfe4ea;
   border-radius: 16px;
   background: #ffffff;
-  padding: 5px;
+  padding: 6px;
 }
 
 .composer-input-shell:focus-within {
-  border-color: #d1d5db;
+  border-color: #cfd6dd;
   box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.06);
 }
 
@@ -323,7 +327,7 @@ time {
 }
 
 .composer-attach-button:hover {
-  background: #f3f4f6;
+  background: #e9edf2;
   color: #111827;
 }
 
@@ -343,8 +347,9 @@ time {
   display: flex;
   min-width: 96px;
   gap: 6px;
-  border-color: #e5e7eb;
+  border-color: #dfe4ea;
   border-radius: 18px;
+  background: #ffffff;
   box-shadow: 0 18px 42px rgba(15, 23, 42, 0.14);
 }
 
@@ -359,14 +364,15 @@ time {
 }
 
 .composer-attachment-option:hover {
-  background: #f3f4f6;
+  background: #f1f3f5;
 }
 
 .composer-poll-editor,
 .poll-block {
-  border-color: #e5e7eb;
+  border-color: #dfe4ea;
   border-radius: 14px;
   background: #ffffff;
+  padding: 14px;
 }
 
 .composer-poll-header strong {
@@ -379,33 +385,33 @@ time {
   border: 0;
   border-radius: 12px;
   background: #ffffff;
-  box-shadow: inset 0 0 0 1px #e5e7eb;
+  box-shadow: inset 0 0 0 1px #dfe4ea;
 }
 
 .poll-option:hover,
 .poll-option.selected {
-  background: #f3f4f6;
+  background: #f1f3f5;
   color: #111827;
 }
 
 .poll-option-fill {
-  background: #e5e7eb;
+  background: #e6eaf0;
 }
 
 .comments {
-  border-top-color: #e5e7eb;
+  border-top-color: #dfe4ea;
 }
 
 .comment {
   border-radius: 0;
   background: transparent;
-  padding: 10px 0;
+  padding: 12px 0;
 }
 
 .reply-comment {
   margin-left: 12px;
-  border-left-color: #d1d5db;
-  padding-left: 10px;
+  border-left-color: #cfd6dd;
+  padding-left: 12px;
 }
 
 .comment p {
@@ -416,25 +422,29 @@ time {
 
 .comment-form,
 .comment-edit-form {
-  gap: 8px;
+  gap: 10px;
 }
 
 input,
 textarea {
-  border-color: #e5e7eb;
+  border-color: #dfe4ea;
   border-radius: 12px;
   background: #ffffff;
 }
 
 input:focus,
 textarea:focus {
-  border-color: #d1d5db;
+  border-color: #cfd6dd;
   box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.06);
 }
 
 @media (max-width: 720px) {
   .board-shell {
-    padding: 14px 16px 206px;
+    padding: 8px 16px 206px;
+  }
+
+  .board-hero {
+    padding: 0 0 8px;
   }
 
   .board-hero h1 {
@@ -447,11 +457,11 @@ textarea:focus {
 
   .feed-toolbar {
     align-items: center;
-    padding: 8px 12px;
+    padding: 6px 12px;
   }
 
   .post-card:not(.detail-card) {
-    padding: 14px 12px;
+    padding: 16px 14px;
   }
 
   .composer-bottom {
