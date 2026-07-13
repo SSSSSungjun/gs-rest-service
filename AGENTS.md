@@ -55,7 +55,7 @@
 - 성격: 익명 게시판 + 댓글 중심 서비스
 - 소유권: 쿠키 기반 익명 세션으로 내가 쓴 글/댓글만 수정/삭제 가능
 - 기본 닉네임: 익명
-- 주요 기능: 글/댓글, 좋아요, 인기글, 페이지네이션, 이미지 첨부, 댓글 알림, 대댓글, 투표, 반응형 UI
+- 주요 기능: 글/댓글, 좋아요, 조회수, 검색, 인기글, 페이지네이션, 이미지 첨부, 댓글 알림, 대댓글, 투표, 반응형 UI
 - 기술 방향: Spring 계층 분리, React 컴포넌트/API/reducer/util 분리, PostgreSQL/nginx/CI-CD 확장 가능성 고려
 
 ## 문서화 기준
@@ -71,6 +71,7 @@
 - 모바일 사용성을 우선 고려한다.
 - 반복 입력 영역은 세로 공간을 아낀다.
 - 게시글 목록은 빠르게 스캔할 수 있게 메타, 본문, 이미지, 반응 수의 위계를 유지한다.
+- 검색 결과는 필터링만 하지 말고, 화면에 보이는 게시글 작성자/본문의 검색어를 `mark.search-highlight`로 형광 표시한다.
 - 알림, 메뉴, 모달은 바깥 클릭/ESC/액션 후 닫힘 같은 기본 상호작용을 챙긴다.
 
 ## 백엔드 작업 기준
@@ -88,6 +89,7 @@
 우선 확인 후보:
 
 - UI 배치/간격: `my-react-app/src/App.css`, `my-react-app/src/forumToss.css`, 관련 React component
+- 검색/조회수: `my-react-app/src/App.tsx`, `my-react-app/src/components/PostList.tsx`, `my-react-app/src/components/PostDetail.tsx`, `my-react-app/src/components/HighlightedText.tsx`, `my-react-app/src/search.css`, `complete/src/main/java/com/example/restservice/service/PostService.java`, post entity/DTO/controller
 - 게시글 목록/상세: post list/detail component, post API client
 - 글쓰기 입력창/이미지 첨부/투표: `my-react-app/src/components/BoardComposer.tsx`, `my-react-app/src/components/BoardComposer.css`, image attachment util/API
 - 투표 표시/집계: `my-react-app/src/components/PollBlock.tsx`, `complete/src/main/java/com/example/restservice/service/PollService.java`, poll entity/repository
@@ -108,6 +110,9 @@
 - PR #40은 PR #39 후속 디테일 보정으로, 중복 feed divider를 제거하고 전체 배경을 흰색으로 되돌리며 선택/hover/투표 선택 상태를 회색 계열로 조정하고, 목록 좌우 패딩과 본문-메타 간격을 넓힌 작업이다. 알림/작성/첨부/투표 만들기/게시 버튼은 아이콘만 남기고, 수정/삭제 메뉴는 아이콘 없이 텍스트만 남겼다.
 - PR #41은 PR #40 후속 색감 보정으로, 완전 흰색 바탕이 너무 쨍하게 느껴지는 문제를 줄이기 위해 전체 바탕을 아주 옅은 회색(`#f5f6f8`)으로 낮추고 게시글 행/컴포넌트는 흰색으로 유지했다. 새로고침 버튼은 `composerLayout.css`의 기존 `::before` 아이콘을 `forumToss.css`에서 `!important`로 차단해 SVG 아이콘만 보이게 했다.
 - PR #42는 UI 톤을 회색보다 연두/초록 계열이 살짝 도는 바탕(`#eef5ec`)으로 옮기고, 목록 게시글을 흰색 + 얇은 연두 보더 카드로 정리하며, 게시글/상세/작성/투표/댓글 패딩을 더 넉넉하게 조정한 작업이다. 작성창 첨부 메뉴는 아이콘만 있으면 애매하므로 `사진`, `투표` 짧은 텍스트를 다시 붙였다. 페이지네이션 구조는 1~5 숫자 + 직접 이동 기조를 유지했다.
+- PR #43은 일반 검색과 조회수를 추가한 작업이다. 검색은 게시글 작성자/본문과 댓글 작성자/본문을 대상으로 필터링하되, 현재 화면에 보이는 게시글 작성자/본문에는 `HighlightedText`로 검색어를 형광 표시한다. 조회수는 게시글 상세를 열 때 `POST /api/posts/{id}/views`로 증가시키고, 목록/상세 모두 눈 아이콘과 함께 표시한다. 조회수 증가가 `updatedAt`을 바꿔 `수정됨`으로 보이지 않도록 엔티티에서 view-count-only update를 분리했다.
+- 비속어 필터링은 현재 최후순위다. Spring AI로 검열하기보다 신고/관리자 삭제 모델이 더 적절할 수 있으므로 실제 운영 요구가 생기면 별도 설계한다.
+- 게시글 작성자가 삭제한 순간에 다른 사용자가 댓글/상세 진입 중인 레이스 처리는 지금 단계에서는 후순위다. 404/에러 UX가 필요해질 때 별도 작업한다.
 - 사용자는 디씨/펨코처럼 빠르게 스캔되는 게시판형 정보 밀도는 원하지만, 실제 간격과 버튼 감도는 토스처럼 조금 여유 있고 둥근 쪽을 선호한다.
 - 사용자는 목록까지 전부 무거운 카드로 감싸는 디자인은 싫어하지만, OKKY/커뮤니티 카드 리스트처럼 얇은 보더와 넉넉한 패딩으로 구분되는 흰 게시글 카드는 선호 쪽에 가깝다. 그림자는 약하게, 구분은 보더와 여백으로 한다.
 - 게시글 본문 카드/상세 카드/작성 카드에는 충분한 내부 패딩이 필요하다. 특히 게시글만 봐도 본문을 읽을 공간이 넉넉해야 한다.
