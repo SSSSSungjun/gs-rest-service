@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ChangeEvent, ClipboardEvent, DragEvent, FormEvent } from 'react'
 import type { PostImage } from '../boardApi'
-import { handleTextareaKeyDown, preventEnterSubmit } from '../boardUi'
-import { BarChart3Icon, CameraIcon, PlusIcon, SendIcon, Trash2Icon } from './Icons'
+import { handleTextareaKeyDown, preventEnterSubmit, resizeTextarea } from '../boardUi'
+import { BarChart3Icon, CameraIcon, PlusIcon, SendIcon, SparklesIcon, Trash2Icon, XIcon } from './Icons'
 import { ImageAttachmentFields } from './ImageAttachmentFields'
 import '../composerLayout.css'
 import './BoardComposer.css'
@@ -27,6 +27,8 @@ interface BoardComposerProps {
   onRemovePollOption: (index: number) => void
   onClearPoll: () => void
   onShowImagesInContentChange: (showImagesInContent: boolean) => void
+  onGenerateAiDraft: (prompt: string, signal: AbortSignal) => Promise<string>
+  onApplyAiDraft: (content: string) => void
   onSubmit: (event: FormEvent) => void
 }
 
@@ -47,7 +49,6 @@ function getPastedImageUrl(text: string) {
   } catch {
     return null
   }
-
   return null
 }
 
@@ -71,10 +72,18 @@ export function BoardComposer({
   onRemovePollOption,
   onClearPoll,
   onShowImagesInContentChange,
+  onGenerateAiDraft,
+  onApplyAiDraft,
   onSubmit,
 }: BoardComposerProps) {
   const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false)
+  const [isAiMode, setIsAiMode] = useState(false)
+  const [aiPrompt, setAiPrompt] = useState('')
+  const [isGeneratingAiDraft, setIsGeneratingAiDraft] = useState(false)
+  const [aiErrorMessage, setAiErrorMessage] = useState('')
   const attachmentShellRef = useRef<HTMLDivElement>(null)
+  const contentTextareaRef = useRef<HTMLTextAreaElement>(null)
+  const aiRequestRef = useRef<AbortController | null>(null)
   const hasImages = images.length > 0
   const hasPoll = pollOptions.length > 0
 
@@ -100,6 +109,10 @@ export function BoardComposer({
     }
   }, [isAttachmentMenuOpen])
 
+  useEffect(() => {
+    return () => aiRequestRef.current?.abort()
+  }, [])
+
   const uploadImages = (files: File[]) => {
     if (files.length === 0) return
     onUploadImages(files)
@@ -114,6 +127,71 @@ export function BoardComposer({
   const handleStartPoll = () => {
     onStartPoll()
     setIsAttachmentMenuOpen(false)
+  }
+
+  const handleStartAiMode = () => {
+    setIsAttachmentMenuOpen(false)
+    setAiErrorMessage('')
+    setIsAiMode(true)
+  }
+
+  const handleCancelAiMode = () => {
+    aiRequestRef.current?.abort()
+    aiRequestRef.current = null
+    setIsGeneratingAiDraft(false)
+    setAiErrorMessage('')
+    setAiPrompt('')
+    setIsAiMode(false)
+  }
+
+  const handleGenerateAiDraft = async () => {
+    const prompt = aiPrompt.trim()
+    if (!prompt) {
+      setAiErrorMessage('어떤 글을 쓸지 입력해주세요.')
+      return
+    }
+
+    const controller = new AbortController()
+    aiRequestRef.current?.abort()
+    aiRequestRef.current = controller
+    setIsGeneratingAiDraft(true)
+    setAiErrorMessage('')
+
+    try {
+      const draft = (await onGenerateAiDraft(prompt, controller.signal)).trim()
+      if (controller.signal.aborted) return
+      if (!draft) {
+        setAiErrorMessage('생성된 글이 비어 있습니다. 요청을 조금 더 구체적으로 적어주세요.')
+        return
+      }
+
+      onApplyAiDraft(draft)
+      setAiPrompt('')
+      setIsAiMode(false)
+      requestAnimationFrame(() => {
+        if (contentTextareaRef.current) {
+          resizeTextarea(contentTextareaRef.current)
+          contentTextareaRef.current.focus()
+        }
+      })
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        setAiErrorMessage('AI 글 생성에 실패했습니다. 잠시 후 다시 시도해주세요.')
+        console.error(error)
+      }
+    } finally {
+      if (aiRequestRef.current === controller) {
+        aiRequestRef.current = null
+        setIsGeneratingAiDraft(false)
+      }
+    }
+  }
+
+  const handleAiPromptKeyDown = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+      event.preventDefault()
+      void handleGenerateAiDraft()
+    }
   }
 
   const handlePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
@@ -199,6 +277,47 @@ export function BoardComposer({
             </div>
           )}
 
+          {isAiMode ? (
+            <div className="composer-ai-mode">
+              <div className="composer-ai-header">
+                <strong className="composer-ai-title"><SparklesIcon />AI 글쓰기</strong>
+                <button
+                  className="composer-ai-cancel icon-only-button"
+                  type="button"
+                  aria-label="AI 글쓰기 취소"
+                  title="AI 글쓰기 취소"
+                  onClick={handleCancelAiMode}
+                >
+                  <XIcon />
+                </button>
+              </div>
+              <textarea
+                className="composer-ai-prompt"
+                value={aiPrompt}
+                maxLength={2000}
+                rows={3}
+                placeholder="어떤 내용과 말투로 글을 쓸지 설명해주세요."
+                aria-label="AI 글쓰기 요청"
+                onChange={(event) => setAiPrompt(event.target.value)}
+                onKeyDown={handleAiPromptKeyDown}
+                autoFocus
+                disabled={isGeneratingAiDraft}
+              />
+              {aiErrorMessage && <p className="composer-ai-error" role="alert">{aiErrorMessage}</p>}
+              <div className="composer-ai-actions">
+                <p className="composer-ai-hint">생성된 글은 게시 전에 자유롭게 고칠 수 있습니다.</p>
+                <button
+                  className="composer-ai-generate"
+                  type="button"
+                  onClick={() => void handleGenerateAiDraft()}
+                  disabled={isGeneratingAiDraft || !aiPrompt.trim()}
+                >
+                  <SparklesIcon />
+                  {isGeneratingAiDraft ? '작성 중' : '글 생성'}
+                </button>
+              </div>
+            </div>
+          ) : (
           <div className="composer-input-shell" ref={attachmentShellRef}>
             <button
               className="composer-attach-button icon-only-button"
@@ -219,6 +338,7 @@ export function BoardComposer({
               aria-label="게시글 닉네임"
             />
             <textarea
+              ref={contentTextareaRef}
               className="composer-textarea"
               value={content}
               onChange={onContentChange}
@@ -251,9 +371,14 @@ export function BoardComposer({
                   <BarChart3Icon />
                   <span>투표</span>
                 </button>
+                <button className="composer-attachment-option" type="button" onClick={handleStartAiMode} aria-label="AI 글쓰기">
+                  <SparklesIcon />
+                  <span>AI 글쓰기</span>
+                </button>
               </div>
             )}
           </div>
+          )}
         </div>
 
         {errorMessage && <p className="form-error">{errorMessage}</p>}
