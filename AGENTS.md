@@ -91,7 +91,7 @@
 - UI 배치/간격: `my-react-app/src/App.css`, `my-react-app/src/forumToss.css`, 관련 React component
 - 검색/조회수: `my-react-app/src/App.tsx`, `my-react-app/src/components/PostList.tsx`, `my-react-app/src/components/PostDetail.tsx`, `my-react-app/src/components/HighlightedText.tsx`, `my-react-app/src/search.css`, `complete/src/main/java/com/example/restservice/service/PostService.java`, post entity/DTO/controller
 - 게시글 목록/상세: post list/detail component, post API client
-- 글쓰기 입력창/이미지 첨부/투표: `my-react-app/src/components/BoardComposer.tsx`, `my-react-app/src/components/BoardComposer.css`, image attachment util/API
+- 글쓰기 입력창/이미지 첨부/투표/AI 초안: `my-react-app/src/components/BoardComposer.tsx`, `my-react-app/src/components/BoardComposer.css`, `my-react-app/src/boardApi.ts`, `complete/src/main/java/com/example/restservice/service/AiDraftService.java`
 - 투표 표시/집계: `my-react-app/src/components/PollBlock.tsx`, `complete/src/main/java/com/example/restservice/service/PollService.java`, poll entity/repository
 - 댓글/알림: `my-react-app/src/components/CommentNotificationBar.tsx`, `my-react-app/src/components/PostDetail.tsx`, `my-react-app/src/commentNotifications.ts`, `my-react-app/src/App.tsx`
 - 버튼/액션 아이콘: `my-react-app/src/components/Icons.tsx`, 액션이 있는 각 컴포넌트
@@ -114,6 +114,7 @@
 - PR #44는 조회수 컬럼 추가 이전 게시글의 `view_count = NULL` 때문에 primitive `long` 필드 로딩이 실패하던 문제를 고친 핫픽스다. 엔티티는 레거시 `NULL`을 0으로 안전하게 읽고 증가시키며, 시작 시 기존 `NULL` 행을 0으로 일괄 보정한다. 같은 종류의 컬럼 추가 때는 기존 데이터 백필 여부를 먼저 확인한다.
 - PR #45는 검색 입력값과 적용 검색어를 분리해 돋보기 클릭/Enter에서만 목록 필터와 형광 강조가 실행되게 하고, 상세 진입 시 조회수를 화면에서 먼저 +1 한 뒤 서버 값으로 재동기화하는 작업이다.
 - PR #46은 검색 대상을 `게시글`과 `댓글`로 분리한 작업이다. 검색 대상과 텍스트는 돋보기/Enter 제출 시 함께 적용되며, 댓글 검색은 일치 댓글을 개별 결과로 표시하고 원문 상세 진입 시 댓글 작성자/본문만 강조한다. 댓글 결과도 기존 1~5 페이지네이션 기조를 사용한다.
+- PR #47은 게시글 작성 `+` 메뉴에 `AI 글쓰기`를 추가한 작업이다. 작성창은 취소 가능한 프롬프트 모드로 전환되고 생성 결과는 기존 본문 입력란에만 채워져 검토·수정 후 게시한다. OpenAI Responses API 호출은 Spring 백엔드의 `/api/ai/drafts`가 담당하며 키는 `OPENAI_API_KEY`, 모델은 `OPENAI_MODEL` 환경변수로 주입한다.
 - 현재 댓글 알림은 실시간이 아니다. 게시글 목록을 다시 가져온 시점에 내가 쓴 글의 댓글과 `localStorage` 읽음 ID를 비교해 계산하며, SSE/WebSocket/폴링은 없다. 실시간 기능을 추가한다면 댓글 생성 이벤트를 SSE로 전달하고 상세 화면에 `새 댓글 N개` 갱신 버튼을 제공하는 방향이 우선 후보이다.
 - 비속어 필터링은 현재 최후순위다. Spring AI로 검열하기보다 신고/관리자 삭제 모델이 더 적절할 수 있으므로 실제 운영 요구가 생기면 별도 설계한다.
 - 게시글 작성자가 삭제한 순간에 다른 사용자가 댓글/상세 진입 중인 레이스 처리는 지금 단계에서는 후순위다. 404/에러 UX가 필요해질 때 별도 작업한다.
@@ -138,5 +139,4 @@ AGENTS.md 기준으로 해줘.
 이번 목표: ...
 완료 후 PR 번호/머지 커밋/핵심 변경만 짧게.
 ```
-
 
