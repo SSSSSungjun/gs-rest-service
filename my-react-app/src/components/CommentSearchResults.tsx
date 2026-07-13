@@ -37,12 +37,12 @@ export function CommentSearchResults({ results, query, onOpenPost }: CommentSear
                 {wasEdited(comment.createdAt, comment.updatedAt) && <span className="edited-label">(수정됨)</span>}
               </time>
             </div>
-            <p className="comment-search-content">
+            <div className="comment-search-content">
               <HighlightedText text={comment.content} query={query} />
-            </p>
-            <p className="comment-search-origin">
+            </div>
+            <div className="comment-search-origin">
               <span>원문</span>{makePostPreview(postContent)}
-            </p>
+            </div>
           </button>
         </article>
       ))}
