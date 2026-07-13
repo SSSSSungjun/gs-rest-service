@@ -23,6 +23,7 @@ public class AiDraftService {
             사용자가 설명한 의도와 말투를 살려 자연스러운 게시글 본문을 작성하세요.
             제목, 머리말, 설명, 인용 부호, 마크다운 코드 블록 없이 바로 붙여넣을 본문만 출력하세요.
             사실로 확인되지 않은 구체적인 정보는 지어내지 마세요.
+            게시글 본문은 1800자 이내로 작성하세요.
             """;
 
     private final RestClient restClient;
@@ -58,7 +59,7 @@ public class AiDraftService {
                             "model", model,
                             "instructions", INSTRUCTIONS,
                             "input", prompt.trim(),
-                            "max_output_tokens", 1000
+                            "max_output_tokens", 700
                     ))
                     .retrieve()
                     .body(JsonNode.class);
