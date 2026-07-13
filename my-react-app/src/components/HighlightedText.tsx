@@ -15,8 +15,9 @@ export function HighlightedText({ text, query }: HighlightedTextProps) {
 
   const pattern = new RegExp(`(${escapeRegExp(normalizedQuery)})`, 'gi')
   const parts = text.split(pattern)
+  const normalizedQueryLowerCase = normalizedQuery.toLocaleLowerCase()
   const nodes: ReactNode[] = parts.map((part, index) => {
-    if (part.toLocaleLowerCase().includes(normalizedQuery.toLocaleLowerCase()) && part.length === normalizedQuery.length) {
+    if (part.toLocaleLowerCase() === normalizedQueryLowerCase) {
       return <mark className="search-highlight" key={`${part}-${index}`}>{part}</mark>
     }
     return part
