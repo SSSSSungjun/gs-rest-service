@@ -4,6 +4,7 @@ import type { BoardDraft } from '../boardReducer'
 import { formatDate, handleTextareaKeyDown, isPopularPost, preventEnterSubmit, wasEdited } from '../boardUi'
 import { ActionMenu } from './ActionMenu'
 import { CommentEditForm } from './CommentEditForm'
+import { ArrowLeftIcon, BarChart3Icon, HeartIcon, ImageIcon, MessageCircleIcon, ReplyIcon } from './Icons'
 import { PollBlock } from './PollBlock'
 import { PostEditForm } from './PostEditForm'
 import { PostImageGallery } from './PostImageGallery'
@@ -91,7 +92,7 @@ export function PostDetail({
   return (
     <article className={`post-card detail-card ${isPopular ? 'popular-post' : ''}`} key={post.id}>
       <div className="detail-toolbar">
-        <button className="back-button" type="button" onClick={onBack}>목록</button>
+        <button className="back-button icon-text-button" type="button" onClick={onBack}><ArrowLeftIcon />목록</button>
       </div>
       <header className="post-header">
         <div>
@@ -152,14 +153,14 @@ export function PostDetail({
             aria-pressed={post.likedByMe}
             onClick={() => onTogglePostLike(post.id)}
           >
-            좋아요 {post.likeCount}
+            <HeartIcon /> {post.likeCount}
           </button>
-          <span className="meta-pill" aria-label={`댓글 ${post.comments.length}개`}>댓글 {post.comments.length}</span>
+          <span className="meta-pill" aria-label={`댓글 ${post.comments.length}개`}><MessageCircleIcon /> {post.comments.length}</span>
           {postImages.length > 0 && (
-            <span className="meta-pill" aria-label={`사진 ${postImages.length}장`}>사진 {postImages.length}</span>
+            <span className="meta-pill" aria-label={`사진 ${postImages.length}장`}><ImageIcon /> {postImages.length}</span>
           )}
           {pollOptions.length > 0 && (
-            <span className="meta-pill" aria-label={`투표 ${post.pollTotalVoteCount ?? 0}표`}>투표 {post.pollTotalVoteCount ?? 0}</span>
+            <span className="meta-pill" aria-label={`투표 ${post.pollTotalVoteCount ?? 0}표`}><BarChart3Icon /> {post.pollTotalVoteCount ?? 0}</span>
           )}
         </div>
       )}
@@ -212,14 +213,14 @@ export function PostDetail({
                       aria-pressed={comment.likedByMe}
                       onClick={() => onToggleCommentLike(comment.id)}
                     >
-                      좋아요 {comment.likeCount}
+                      <HeartIcon /> {comment.likeCount}
                     </button>
                     <button
-                      className="text-button reply-button"
+                      className="text-button reply-button icon-text-button"
                       type="button"
                       onClick={() => onStartReply(post.id, comment.id)}
                     >
-                      답글
+                      <ReplyIcon />답글
                     </button>
                   </div>
                   {activeReplyCommentId === comment.id && (
