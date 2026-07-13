@@ -21,12 +21,11 @@ export function CommentNotificationBar({ notifications, onOpenList }: CommentNot
     <div className="notification-entry-row">
       <button
         type="button"
-        className={`notification-entry-button ${hasNotifications ? 'has-notifications' : ''}`}
+        className={`notification-entry-button icon-only-button ${hasNotifications ? 'has-notifications' : ''}`}
         onClick={onOpenList}
         aria-label={hasNotifications ? `댓글 알림 ${notificationCount}개 보기` : '댓글 알림 보기'}
       >
         <BellIcon />
-        <span>알림</span>
         {hasNotifications && <span className="notification-count-badge">+{notificationCount}</span>}
       </button>
     </div>
