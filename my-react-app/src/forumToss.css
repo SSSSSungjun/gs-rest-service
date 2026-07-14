@@ -595,3 +595,25 @@ textarea:focus {
     padding: 16px;
   }
 }
+
+.post-header > :first-child,
+.feed-toolbar > :first-child,
+.comment-body > :first-child {
+  min-width: 0;
+}
+
+.post-header strong,
+.comment strong,
+.feed-toolbar strong,
+.notification-list-button strong,
+.notification-list-button span {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .board-shell input,
+  .board-shell textarea,
+  .board-shell select {
+    font-size: 16px;
+  }
+}
