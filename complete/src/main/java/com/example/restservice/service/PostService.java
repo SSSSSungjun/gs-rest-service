@@ -7,6 +7,7 @@ import com.example.restservice.entity.PollOption;
 import com.example.restservice.entity.Post;
 import com.example.restservice.entity.PostImage;
 import com.example.restservice.exception.ForbiddenOperationException;
+import com.example.restservice.exception.ResourceNotFoundException;
 import com.example.restservice.repository.CommentLikeRepository;
 import com.example.restservice.repository.LikeCountProjection;
 import com.example.restservice.repository.PollVoteRepository;
@@ -94,9 +95,9 @@ public class PostService {
 
     @Transactional
     public void increaseViewCount(Long id) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
-        post.increaseViewCount();
+        if (postRepository.incrementViewCount(id) == 0) {
+            throw new ResourceNotFoundException("삭제되었거나 존재하지 않는 글입니다.");
+        }
     }
 
     @Transactional
@@ -104,8 +105,8 @@ public class PostService {
         validateContent(requestDto.getContent());
         validateImages(requestDto.getImages());
 
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
+        Post post = postRepository.findWithLockById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("삭제되었거나 존재하지 않는 글입니다."));
         validateOwner(post, sessionId);
 
         post.update(normalizeNickname(requestDto.getNickname()), requestDto.getContent().trim(), requestDto.isShowImagesInContent());
@@ -115,8 +116,8 @@ public class PostService {
 
     @Transactional
     public void deletePost(Long id, String sessionId) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
+        Post post = postRepository.findWithLockById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("삭제되었거나 존재하지 않는 글입니다."));
         validateOwner(post, sessionId);
 
         commentLikeRepository.deleteByPostId(id);
