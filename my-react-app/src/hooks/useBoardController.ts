@@ -47,7 +47,8 @@ export function useBoardController() {
       dispatch({ type: 'posts/loadSucceeded', payload: data })
       setIsActivityStreamEnabled(true)
       acknowledgeRefresh(refreshMarker)
-    } catch (error) {      const message = '게시글을 불러오지 못했습니다.'
+    } catch (error) {
+      const message = '게시글을 불러오지 못했습니다.'
       if (showLoading) {
         dispatch({ type: 'posts/loadFailed', payload: message })
       } else {
@@ -97,7 +98,8 @@ export function useBoardController() {
     commentNotifications.dismiss(commentIds)
     feed.changeFeedSort('latest')
     screen.closeNotificationView()
-    openPostDetail(postId)  }, [
+    openPostDetail(postId)
+  }, [
     commentNotifications.dismiss,
     feed.changeFeedSort,
     openPostDetail,
@@ -146,7 +148,8 @@ export function useBoardController() {
   }
 
   const handleComposerChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    dispatch({ type: 'composer/contentChanged', payload: event.target.value })    resizeTextarea(event.currentTarget)
+    dispatch({ type: 'composer/contentChanged', payload: event.target.value })
+    resizeTextarea(event.currentTarget)
   }
 
   const handleCommentChange = (event: ChangeEvent<HTMLTextAreaElement>, postId: number) => {
@@ -196,6 +199,7 @@ export function useBoardController() {
       console.error(error)
     }
   }
+
   const handleToggleCommentLike = async (commentId: number) => {
     try {
       await boardApi.toggleCommentLike(commentId)
@@ -244,7 +248,8 @@ export function useBoardController() {
       showSystemMessage('게시글을 등록했습니다.')
       await fetchPosts(false)
     } catch (error) {
-      const message = '게시글 등록에 실패했습니다.'      dispatch({ type: 'error/set', payload: message })
+      const message = '게시글 등록에 실패했습니다.'
+      dispatch({ type: 'error/set', payload: message })
       showSystemMessage(message)
       console.error(error)
     } finally {
@@ -293,7 +298,8 @@ export function useBoardController() {
     const draft = parentCommentId === undefined
       ? state.commentDrafts[postId] ?? { nickname: '', content: '' }
       : state.replyDrafts[parentCommentId] ?? { nickname: '', content: '' }
-    if (!draft.content.trim()) {      showSystemMessage(parentCommentId === undefined
+    if (!draft.content.trim()) {
+      showSystemMessage(parentCommentId === undefined
         ? '댓글 내용을 입력해주세요.'
         : '답글 내용을 입력해주세요.')
       return
@@ -343,6 +349,7 @@ export function useBoardController() {
       showSystemMessage('댓글 내용을 입력해주세요.')
       return
     }
+
     dispatch({ type: 'error/clear' })
     try {
       await boardApi.updateComment(commentId, draft)
@@ -391,7 +398,8 @@ export function useBoardController() {
         const deletedTarget = state.pendingDelete.target
         dispatch({ type: 'delete/canceled' })
         if (deletedTarget === 'post') {
-          await recoverFromDeletedPost()        } else {
+          await recoverFromDeletedPost()
+        } else {
           showSystemMessage('댓글이 이미 삭제되었습니다. 목록을 새로 불러옵니다.')
           await fetchPosts(false)
         }
@@ -440,7 +448,8 @@ export function useBoardController() {
     actions: {
       fetchPosts,
       handleBoardTitleClick,
-      changeFeedSort,      submitSearch,
+      changeFeedSort,
+      submitSearch,
       handleComposerChange,
       handleCommentChange,
       handleReplyChange,
