@@ -1,0 +1,42 @@
+.activity-refresh-button {
+  display: inline-flex;
+  min-height: 36px;
+  max-width: min(100%, 240px);
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  background: #168447;
+  color: #ffffff;
+  padding: 0 12px;
+  box-shadow: 0 4px 12px rgba(22, 132, 71, 0.16);
+  font-size: 12px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.activity-refresh-button:hover:not(:disabled) {
+  background: #116b3a;
+}
+
+.activity-refresh-button:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
+.activity-refresh-button span {
+  overflow: hidden;
+  color: inherit;
+  font-size: inherit;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 360px) {
+  .activity-refresh-button {
+    max-width: 150px;
+    padding: 0 9px;
+    font-size: 11px;
+  }
+}
