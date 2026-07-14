@@ -45,7 +45,8 @@ export function useBoardImages(
     setIsUploadingImage(true)
     try {
       for (const file of files) {
-        const image = await boardApi.uploadPostImage(file)        dispatch({ type: 'composer/imageAdded', payload: image })
+        const image = await boardApi.uploadPostImage(file)
+        dispatch({ type: 'composer/imageAdded', payload: image })
       }
     } catch (error) {
       showMessage('이미지 업로드에 실패했습니다.')
