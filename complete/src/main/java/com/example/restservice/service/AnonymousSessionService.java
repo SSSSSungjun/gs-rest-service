@@ -36,8 +36,19 @@ public class AnonymousSessionService {
         return Arrays.stream(cookies)
                 .filter(cookie -> COOKIE_NAME.equals(cookie.getName()))
                 .map(Cookie::getValue)
-                .filter(value -> value != null && !value.isBlank())
+                .filter(this::isValidSessionId)
                 .findFirst();
+    }
+
+    private boolean isValidSessionId(String value) {
+        if (value == null || value.length() != 36) {
+            return false;
+        }
+        try {
+            return UUID.fromString(value).toString().equals(value);
+        } catch (IllegalArgumentException exception) {
+            return false;
+        }
     }
 
     private String issueSessionCookie(HttpServletResponse response) {
