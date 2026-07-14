@@ -1,118 +1,312 @@
-.composer-poll-editor {
+.composer-launcher.composer-bottom {
+  max-height: none;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  backdrop-filter: none;
+}
+
+.composer-launcher-button {
+  width: 100%;
+  min-height: 56px;
+  border: 1px solid #d8dfda;
+  border-radius: 18px;
+  background: #ffffff;
+  color: #78837c;
+  padding: 0 20px;
+  text-align: left;
+  font-size: 15px;
+  box-shadow: 0 8px 24px rgba(36, 54, 43, 0.1);
+}
+
+.composer-launcher-button:hover {
+  border-color: #a9c9ae;
+  background: #f8faf8;
+  color: #3f5147;
+}
+
+.composer-launcher-button:focus-visible {
+  outline: 3px solid rgba(31, 138, 76, 0.18);
+  outline-offset: 2px;
+}
+
+.composer-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  overflow: hidden;
+  background: #edf1ed;
+}
+
+.composer-screen-form {
   display: grid;
-  gap: 8px;
-  border: 1px solid #dcebd8;
-  border-radius: 8px;
-  background: #fbfef8;
-  padding: 10px;
+  width: min(100%, 840px);
+  height: 100dvh;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 0;
+  margin: 0 auto;
+  background: #ffffff;
+  box-shadow: 0 0 0 1px rgba(34, 55, 42, 0.06);
 }
 
-.composer-poll-header {
-  display: flex;
-  gap: 8px;
+.composer-screen-header {
+  display: grid;
+  min-height: 66px;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 12px;
   align-items: center;
-  justify-content: space-between;
+  border-bottom: 1px solid #e7ebe8;
+  background: rgba(255, 255, 255, 0.96);
+  padding: max(8px, env(safe-area-inset-top)) 24px 8px;
 }
 
-.composer-poll-header strong {
-  color: #12301f;
+.composer-screen-header > strong {
+  overflow: hidden;
+  color: #17231c;
+  font-size: 18px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.composer-screen-back {
+  width: 42px;
+  min-height: 42px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #2f4036;
+}
+
+.composer-screen-back:hover {
+  background: #f0f3f0;
+}
+
+.composer-screen-submit {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 0;
+  border-radius: 999px;
+  background: #198747;
+  color: #ffffff;
+  padding: 0 17px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.composer-screen-submit:hover:not(:disabled) {
+  background: #126f39;
+}
+
+.composer-screen-submit:disabled {
+  cursor: not-allowed;
+  background: #dfe5e0;
+  color: #99a39c;
+}
+
+.composer-screen-scroll {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 26px 32px 48px;
+  scrollbar-width: thin;
+}
+
+.composer-author-row {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.composer-author-mark {
+  display: inline-grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border-radius: 50%;
+  background: #e2f2e3;
+  color: #187040;
   font-size: 13px;
   font-weight: 900;
 }
 
-.composer-poll-header .text-button {
-  min-height: 28px;
-  padding: 0 9px;
-  font-size: 12px;
+.composer-screen-nickname {
+  width: min(100%, 260px);
+  min-height: 40px;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: #203028;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 700;
 }
 
-.composer-poll-options {
-  display: grid;
-  gap: 6px;
+.composer-screen-nickname:hover,
+.composer-screen-nickname:focus {
+  border-bottom-color: #c9d7cc;
+  outline: 0;
 }
 
-.composer-poll-option-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 6px;
-  align-items: center;
+.composer-screen-textarea {
+  display: block;
+  width: 100%;
+  min-height: 260px;
+  max-height: none;
+  overflow: hidden;
+  resize: none;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #17231c;
+  padding: 0;
+  font-size: 17px;
+  line-height: 1.75;
 }
 
-.composer-poll-option-row input {
-  min-height: 36px;
-  padding: 0 10px;
-  font-size: 13px;
+.composer-screen-textarea:focus {
+  outline: 0;
 }
 
-.composer-poll-option-row .text-button,
-.composer-poll-add {
-  min-height: 34px;
-  padding: 0 10px;
-  font-size: 12px;
+.composer-screen-textarea::placeholder {
+  color: #9aa39d;
 }
 
-.composer-attachment-option:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
-@media (max-width: 720px) {
-  .composer-poll-option-row {
-    grid-template-columns: 1fr;
-  }
-
-  .composer-poll-option-row .text-button,
-  .composer-poll-add {
-    width: 100%;
-  }
-}
-
+.composer-screen-section,
+.composer-poll-editor,
 .composer-ai-mode {
-  display: grid;
-  gap: 10px;
-  border: 1px solid #c9dfc7;
-  border-radius: 8px;
-  background: #f7fbf6;
-  padding: 12px;
+  margin-top: 26px;
+  border-top: 1px solid #e4e9e5;
+  border-bottom: 1px solid #e4e9e5;
+  background: #f7f9f7;
+  padding: 18px;
 }
 
+.composer-screen-section .image-attachment-fields {
+  gap: 12px;
+}
+
+.composer-poll-editor {
+  display: grid;
+  gap: 12px;
+}
+
+.composer-poll-header,
 .composer-ai-header,
 .composer-ai-actions {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 10px;
 }
 
+.composer-poll-header strong,
 .composer-ai-title {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  color: #173c2c;
-  font-size: 13px;
+  gap: 7px;
+  color: #20362a;
+  font-size: 14px;
   font-weight: 900;
 }
 
-.composer-ai-prompt {
-  width: 100%;
-  min-height: 72px;
-  max-height: 180px;
-  resize: vertical;
-  border: 1px solid #d7e7d6;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #263a31;
-  padding: 10px 12px;
-  line-height: 1.5;
+.composer-poll-header .text-button {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 12px;
 }
 
-.composer-ai-prompt:focus {
-  border-color: #72b879;
-  outline: 2px solid #dff2dc;
+.composer-poll-options {
+  display: grid;
+  gap: 8px;
+}
+
+.composer-poll-option-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 36px;
+  gap: 8px;
+  align-items: center;
+}
+
+.composer-poll-option-row input {
+  min-height: 44px;
+  border-color: #d9e2db;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0 13px;
+  font-size: 14px;
+}
+
+.composer-poll-option-row .icon-only-button {
+  width: 36px;
+  min-height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #738078;
+}
+
+.composer-poll-option-row .icon-only-button:hover {
+  background: #e8ece8;
+  color: #9c2d2d;
+}
+
+.composer-poll-add {
+  width: fit-content;
+  min-height: 38px;
+  padding: 0 13px;
+  font-size: 13px;
+}
+
+.composer-ai-mode {
+  display: grid;
+  gap: 12px;
+}
+
+.composer-ai-cancel {
+  flex: 0 0 36px;
+  width: 36px;
+  min-height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #68766d;
+}
+
+.composer-ai-cancel:hover {
+  background: #e8ede8;
+  color: #20362a;
 }
 
 .composer-ai-prompt-shell {
   position: relative;
+}
+
+.composer-ai-prompt {
+  width: 100%;
+  min-height: 116px;
+  max-height: 260px;
+  resize: vertical;
+  border: 1px solid #d6e0d8;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #263a31;
+  padding: 13px 14px;
+  line-height: 1.6;
+}
+
+.composer-ai-prompt:focus {
+  border-color: #71ad7b;
+  outline: 3px solid rgba(31, 138, 76, 0.12);
 }
 
 .composer-ai-prompt:disabled {
@@ -127,7 +321,7 @@
   justify-content: center;
   gap: 9px;
   border-radius: 7px;
-  background: rgba(247, 251, 246, 0.94);
+  background: rgba(247, 249, 247, 0.96);
   color: #315b3e;
   font-size: 13px;
   font-weight: 800;
@@ -151,27 +345,12 @@
   }
 }
 
-.composer-ai-cancel {
-  flex: 0 0 34px;
-  width: 34px;
-  min-height: 34px;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: #617468;
-}
-
-.composer-ai-cancel:hover {
-  background: #e8f2e6;
-  color: #173c2c;
-}
-
 .composer-ai-generate {
   display: inline-flex;
-  min-height: 38px;
+  min-height: 40px;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 7px;
   border: 0;
   border-radius: 999px;
   background: #1f8a4c;
@@ -203,6 +382,53 @@
   color: #b42318;
 }
 
+.composer-screen-toolbar {
+  display: flex;
+  min-height: 74px;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid #e3e8e4;
+  background: rgba(252, 253, 252, 0.98);
+  padding: 10px 24px max(10px, env(safe-area-inset-bottom));
+}
+
+.composer-tool-button {
+  display: inline-flex;
+  min-width: 92px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  background: transparent;
+  color: #46564d;
+  padding: 0 14px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.composer-tool-button:hover {
+  background: #edf2ee;
+  color: #1d6e3c;
+}
+
+.composer-tool-button.active {
+  border-color: #c4dec8;
+  background: #e5f3e5;
+  color: #166b39;
+}
+
+.composer-tool-button.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.composer-tool-button input {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .composer-ai-spinner {
     animation: none;
@@ -210,6 +436,43 @@
 }
 
 @media (max-width: 720px) {
+  .composer-screen {
+    background: #ffffff;
+  }
+
+  .composer-screen-header {
+    min-height: 58px;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .composer-screen-header > strong {
+    font-size: 16px;
+  }
+
+  .composer-screen-submit {
+    min-height: 38px;
+    padding: 0 14px;
+  }
+
+  .composer-screen-scroll {
+    padding: 22px 18px 40px;
+  }
+
+  .composer-screen-textarea {
+    min-height: 220px;
+    font-size: 16px;
+  }
+
+  .composer-screen-section,
+  .composer-poll-editor,
+  .composer-ai-mode {
+    margin-right: -18px;
+    margin-left: -18px;
+    padding: 16px 18px;
+  }
+
   .composer-ai-actions {
     align-items: stretch;
     flex-direction: column;
@@ -217,5 +480,35 @@
 
   .composer-ai-generate {
     width: 100%;
+  }
+
+  .composer-screen-toolbar {
+    justify-content: space-around;
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .composer-tool-button {
+    min-width: 0;
+    flex: 1 1 0;
+    padding: 0 8px;
+  }
+}
+
+@media (max-width: 420px) {
+  .composer-launcher-button {
+    min-height: 52px;
+    padding: 0 16px;
+  }
+
+  .composer-tool-button {
+    flex-direction: column;
+    gap: 2px;
+    font-size: 11px;
+  }
+
+  .composer-tool-button svg {
+    width: 19px;
+    height: 19px;
   }
 }
