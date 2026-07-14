@@ -111,6 +111,46 @@
   outline: 2px solid #dff2dc;
 }
 
+.composer-ai-prompt-shell {
+  position: relative;
+}
+
+.composer-ai-prompt:disabled {
+  opacity: 1;
+}
+
+.composer-ai-thinking {
+  position: absolute;
+  inset: 1px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  border-radius: 7px;
+  background: rgba(247, 251, 246, 0.94);
+  color: #315b3e;
+  font-size: 13px;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+.composer-ai-spinner {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  box-sizing: border-box;
+  border: 2px solid #c5dac4;
+  border-top-color: #1f8a4c;
+  border-radius: 50%;
+  animation: composer-ai-spin 850ms linear infinite;
+}
+
+@keyframes composer-ai-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .composer-ai-cancel {
   flex: 0 0 34px;
   width: 34px;
@@ -161,6 +201,12 @@
 
 .composer-ai-error {
   color: #b42318;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .composer-ai-spinner {
+    animation: none;
+  }
 }
 
 @media (max-width: 720px) {
