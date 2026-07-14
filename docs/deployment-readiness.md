@@ -45,3 +45,9 @@
 - 인기 게시글 하나에 좋아요가 몰릴 때 비관적 잠금 대기 시간을 확인한다.
 - DB deadlock 또는 lock timeout은 재시도 가능한 409/503 정책을 별도로 정한다.
 - AI 호출은 일반 API 부하 테스트와 분리해 provider quota와 서버 thread 점유를 확인한다.
+
+## 참고 기준
+
+- [Spring Data JPA Locking](https://docs.spring.io/spring-data/jpa/reference/jpa/locking.html)
+- [OWASP File Upload Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html)
+- [OWASP REST Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html)
