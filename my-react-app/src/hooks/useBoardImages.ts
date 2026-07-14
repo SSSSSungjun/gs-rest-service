@@ -6,16 +6,6 @@ import type { BoardAction, BoardDraft } from '../boardReducer'
 
 const MAX_IMAGE_COUNT = 10
 
-function createUrlImage(url: string): PostImage | null {
-  try {
-    const parsedUrl = new URL(url)
-    if (!['http:', 'https:'].includes(parsedUrl.protocol)) return null
-    return { sourceType: 'URL', url: parsedUrl.toString(), originalFilename: null }
-  } catch {
-    return null
-  }
-}
-
 export function useBoardImages(
   composerImages: PostImage[],
   editingPosts: Record<number, BoardDraft>,
@@ -30,10 +20,18 @@ export function useBoardImages(
     return false
   }, [showMessage])
 
-  const parseImageUrl = useCallback((url: string) => {
-    const image = createUrlImage(url)
-    if (!image) showMessage('이미지 URL 형식이 올바르지 않습니다.')
-    return image
+  const parseImageUrl = useCallback((url: string): PostImage | null => {
+    try {
+      const parsedUrl = new URL(url)
+      if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+        showMessage('이미지 URL은 http 또는 https로 시작해야 합니다.')
+        return null
+      }
+      return { sourceType: 'URL', url: parsedUrl.toString(), originalFilename: null }
+    } catch {
+      showMessage('이미지 URL 형식이 올바르지 않습니다.')
+      return null
+    }
   }, [showMessage])
 
   const addComposerImageUrl = useCallback((url: string) => {
@@ -47,8 +45,7 @@ export function useBoardImages(
     setIsUploadingImage(true)
     try {
       for (const file of files) {
-        const image = await boardApi.uploadPostImage(file)
-        dispatch({ type: 'composer/imageAdded', payload: image })
+        const image = await boardApi.uploadPostImage(file)        dispatch({ type: 'composer/imageAdded', payload: image })
       }
     } catch (error) {
       showMessage('이미지 업로드에 실패했습니다.')
