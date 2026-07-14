@@ -14,7 +14,7 @@
 - 업로드 파일의 저장 확장자는 원본 파일명이 아니라 검증한 MIME type으로 결정한다.
 - 익명 세션 쿠키는 canonical UUID만 허용하고, 잘못된 값은 새 세션으로 교체한다.
 - 운영 프로필은 DB 정보와 CORS origin을 환경변수로 강제하고 secure cookie, schema validate, Swagger/H2 비활성화를 적용한다.
-- AI provider 호출은 연결 5초, 응답 90초 timeout을 둔다. 브라우저의 `그만 기다리기`는 화면과 클라이언트 요청을 즉시 취소하지만 이미 전송된 provider 연산 중단까지 보장하지는 않는다.
+- AI provider 호출은 서버 연결/응답 timeout과 브라우저의 X 닫기 요청 취소를 함께 사용한다. 운영 timeout은 provider 지연 분포를 측정한 뒤 조정한다.
 
 ## 삭제와 동시 요청의 결과
 
@@ -47,7 +47,14 @@
 - AI 호출은 일반 API 부하 테스트와 분리해 provider quota와 서버 thread 점유를 확인한다.
 
 ## 참고 기준
-
 - [Spring Data JPA Locking](https://docs.spring.io/spring-data/jpa/reference/jpa/locking.html)
 - [OWASP File Upload Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/File_Upload_Cheat_Sheet.html)
 - [OWASP REST Security Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/REST_Security_Cheat_Sheet.html)
+
+## SSE 활동 신호 배포 점검
+
+- nginx나 배포 프록시에서 `/api/activity/stream` 응답 버퍼링을 끄고, proxy read timeout을 25초 하트비트보다 충분히 길게 둔다. 애플리케이션도 `X-Accel-Buffering: no`와 `Cache-Control: no-cache, no-store`를 보낸다.
+- 브라우저 탭 하나당 SSE 연결 하나가 유지된다. 행사 예상 사용자 200명뿐 아니라 여러 탭과 재연결을 포함한 동시 연결 수로 부하 검증한다.
+- 현재 최근 200개 replay와 subscriber 목록은 인스턴스 메모리에 있다. 단일 인스턴스에서는 충분하지만 수평 확장 시 인스턴스 간 이벤트 공유가 없으므로 shared pub/sub 또는 sticky routing을 먼저 결정한다.
+- SSE는 선택적 갱신 힌트다. 연결 실패나 이벤트 유실이 게시글·댓글 데이터 정합성을 깨뜨리지 않는지, 수동 새로고침과 다음 전체 조회로 항상 복구되는지 확인한다.
+- 부하 검증에는 게시글·댓글 쓰기 응답 시간, SSE 구독 200개 이상 유지, 하트비트 재연결, bounded executor queue 포화 시 쓰기 경로 보호를 포함한다.

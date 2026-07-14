@@ -4,12 +4,14 @@ import './App.css'
 import './feedSort.css'
 import './forumToss.css'
 import './search.css'
+import './activityRefresh.css'
 import { boardApi } from './boardApi'
 import { getApiErrorMessage, isApiErrorStatus } from './apiClient'
 import type { PostImage } from './boardApi'
 import { boardReducer, initialBoardState } from './boardReducer'
 import { getUnreadCommentNotifications, markCommentNotificationsSeen } from './commentNotifications'
 import type { CommentNotification } from './commentNotifications'
+import { ActivityRefreshButton } from './components/ActivityRefreshButton'
 import { BoardComposer } from './components/BoardComposer'
 import { CommentNotificationBar, CommentNotificationList } from './components/CommentNotificationBar'
 import { CommentSearchResults } from './components/CommentSearchResults'
@@ -19,6 +21,7 @@ import { Pagination } from './components/Pagination'
 import { PostDetail } from './components/PostDetail'
 import { PostList } from './components/PostList'
 import { getPostIdFromHash, POST_HASH_PREFIX, POSTS_PER_PAGE, resizeTextarea } from './boardUi'
+import { useBoardActivity } from './useBoardActivity'
 
 type FeedSort = 'latest' | 'oldest' | 'popular'
 type SearchMode = 'posts' | 'comments'
@@ -37,6 +40,8 @@ function App() {
   const [commentNotifications, setCommentNotifications] = useState<CommentNotification[]>([])
   const [isNotificationViewOpen, setIsNotificationViewOpen] = useState(false)
   const [isComposerViewOpen, setIsComposerViewOpen] = useState(false)
+  const [isActivityRefreshing, setIsActivityRefreshing] = useState(false)
+  const [isActivityStreamEnabled, setIsActivityStreamEnabled] = useState(false)
   const {
     posts,
     nickname,
@@ -62,6 +67,11 @@ function App() {
     [expandedPostId, posts],
   )
   const isDetailView = selectedPost !== null
+  const {
+    summary: boardActivity,
+    captureRefreshMarker,
+    acknowledgeRefresh,
+  } = useBoardActivity(selectedPost?.id ?? null, isActivityStreamEnabled)
   const isNotificationView = isNotificationViewOpen && !isDetailView
   const hasActivePostEdit = Object.keys(editingPosts).length > 0
   const sortedPosts = useMemo(() => {
@@ -119,6 +129,7 @@ function App() {
   }, [])
 
   const fetchPosts = useCallback(async (showLoading = true) => {
+    const refreshMarker = captureRefreshMarker()
     if (showLoading) {
       dispatch({ type: 'posts/loadStarted' })
     }
@@ -126,6 +137,8 @@ function App() {
     try {
       const data = await boardApi.getPosts()
       dispatch({ type: 'posts/loadSucceeded', payload: data })
+      setIsActivityStreamEnabled(true)
+      acknowledgeRefresh(refreshMarker)
     } catch (error) {
       const message = '게시글을 불러오지 못했습니다.'
       if (showLoading) {
@@ -136,7 +149,16 @@ function App() {
       showSystemMessage(message)
       console.error(error)
     }
-  }, [showSystemMessage])
+  }, [acknowledgeRefresh, captureRefreshMarker, showSystemMessage])
+
+  const handleActivityRefresh = useCallback(async () => {
+    setIsActivityRefreshing(true)
+    try {
+      await fetchPosts(false)
+    } finally {
+      setIsActivityRefreshing(false)
+    }
+  }, [fetchPosts])
 
   const recoverFromDeletedPost = useCallback(async () => {
     if (window.location.hash.startsWith(POST_HASH_PREFIX)) {
@@ -720,9 +742,17 @@ function App() {
                 </select>
               </label>
             )}
-            <button className="refresh-button icon-only-button" type="button" onClick={() => fetchPosts(false)} disabled={isLoading} aria-label="게시글 새로고침">
-              <RefreshCwIcon />
-            </button>
+            {boardActivity.visible && !isNotificationView ? (
+              <ActivityRefreshButton
+                summary={boardActivity}
+                isRefreshing={isActivityRefreshing}
+                onRefresh={() => void handleActivityRefresh()}
+              />
+            ) : (
+              <button className="refresh-button icon-only-button" type="button" onClick={() => fetchPosts(false)} disabled={isLoading} aria-label="게시글 새로고침">
+                <RefreshCwIcon />
+              </button>
+            )}
           </div>
         </div>
 

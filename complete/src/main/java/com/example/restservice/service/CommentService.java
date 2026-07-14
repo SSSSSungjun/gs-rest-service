@@ -4,12 +4,14 @@ import com.example.restservice.dto.request.CommentRequestDto;
 import com.example.restservice.dto.response.CommentResponseDto;
 import com.example.restservice.entity.Comment;
 import com.example.restservice.entity.Post;
+import com.example.restservice.event.BoardActivityCreatedEvent;
 import com.example.restservice.exception.ForbiddenOperationException;
 import com.example.restservice.exception.ResourceNotFoundException;
 import com.example.restservice.repository.CommentLikeRepository;
 import com.example.restservice.repository.CommentRepository;
 import com.example.restservice.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +24,7 @@ public class CommentService {
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final CommentLikeRepository commentLikeRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public CommentResponseDto createComment(Long postId, CommentRequestDto requestDto, String sessionId) {
@@ -39,7 +42,13 @@ public class CommentService {
                 .ownerSessionId(sessionId)
                 .build();
 
-        return CommentResponseDto.from(commentRepository.save(comment), sessionId);
+        Comment savedComment = commentRepository.save(comment);
+        eventPublisher.publishEvent(new BoardActivityCreatedEvent(
+                BoardActivityCreatedEvent.Type.COMMENT,
+                postId,
+                sessionId
+        ));
+        return CommentResponseDto.from(savedComment, sessionId);
     }
 
     @Transactional

@@ -9,18 +9,15 @@ interface PostImageGalleryProps {
 export function PostImageGallery({ images, variant }: PostImageGalleryProps) {
   if (images.length === 0) return null
 
-  const visibleImages = variant === 'list' ? images.slice(0, 2) : images
-  const hiddenCount = images.length - visibleImages.length
+  const visibleImages = variant === 'list' ? images.slice(0, 1) : images
   const galleryClassName = [
     'post-image-gallery',
-    variant === 'list' ? 'list-image-gallery' : 'detail-image-gallery',
-    variant === 'list' && visibleImages.length === 1 ? 'single-image-gallery' : '',
-    variant === 'list' && visibleImages.length > 1 ? 'multi-image-gallery' : '',
-  ].filter(Boolean).join(' ')
+    variant === 'list' ? 'list-image-gallery single-image-gallery' : 'detail-image-gallery',
+  ].join(' ')
   const galleryStyle = variant === 'list'
     ? {
-      width: visibleImages.length === 1 ? '52px' : '110px',
-      gridTemplateColumns: `repeat(${visibleImages.length}, 52px)`,
+      width: '52px',
+      gridTemplateColumns: '52px',
     }
     : undefined
 
@@ -29,9 +26,6 @@ export function PostImageGallery({ images, variant }: PostImageGalleryProps) {
       {visibleImages.map((image, index) => (
         <figure className="post-image-frame" key={`${image.url}-${index}`}>
           <img src={resolveImageUrl(image.url)} alt={image.originalFilename || `첨부 이미지 ${index + 1}`} loading="lazy" />
-          {variant === 'list' && hiddenCount > 0 && index === visibleImages.length - 1 && (
-            <figcaption className="image-count-overlay">+{hiddenCount}</figcaption>
-          )}
         </figure>
       ))}
     </div>

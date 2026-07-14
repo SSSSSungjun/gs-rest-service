@@ -6,6 +6,7 @@ import com.example.restservice.dto.response.PostResponseDto;
 import com.example.restservice.entity.PollOption;
 import com.example.restservice.entity.Post;
 import com.example.restservice.entity.PostImage;
+import com.example.restservice.event.BoardActivityCreatedEvent;
 import com.example.restservice.exception.ForbiddenOperationException;
 import com.example.restservice.exception.ResourceNotFoundException;
 import com.example.restservice.repository.CommentLikeRepository;
@@ -14,6 +15,7 @@ import com.example.restservice.repository.PollVoteRepository;
 import com.example.restservice.repository.PostLikeRepository;
 import com.example.restservice.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +39,7 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final PollVoteRepository pollVoteRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     public List<PostResponseDto> getAllPosts(String sessionId) {
         List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc();
@@ -90,7 +93,13 @@ public class PostService {
         post.replaceImages(toPostImages(post, requestDto.getImages()));
         post.replacePollOptions(toPollOptions(post, pollOptions));
 
-        return PostResponseDto.from(postRepository.save(post), sessionId);
+        Post savedPost = postRepository.save(post);
+        eventPublisher.publishEvent(new BoardActivityCreatedEvent(
+                BoardActivityCreatedEvent.Type.POST,
+                savedPost.getId(),
+                sessionId
+        ));
+        return PostResponseDto.from(savedPost, sessionId);
     }
 
     @Transactional
