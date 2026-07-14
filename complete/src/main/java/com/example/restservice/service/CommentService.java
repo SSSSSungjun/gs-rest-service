@@ -5,6 +5,7 @@ import com.example.restservice.dto.response.CommentResponseDto;
 import com.example.restservice.entity.Comment;
 import com.example.restservice.entity.Post;
 import com.example.restservice.exception.ForbiddenOperationException;
+import com.example.restservice.exception.ResourceNotFoundException;
 import com.example.restservice.repository.CommentLikeRepository;
 import com.example.restservice.repository.CommentRepository;
 import com.example.restservice.repository.PostRepository;
@@ -26,8 +27,8 @@ public class CommentService {
     public CommentResponseDto createComment(Long postId, CommentRequestDto requestDto, String sessionId) {
         validateContent(requestDto.getContent());
 
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
+        Post post = postRepository.findWithLockById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("삭제되었거나 존재하지 않는 글입니다."));
         Comment parentComment = findParentComment(post, requestDto.getParentCommentId());
 
         Comment comment = Comment.builder()
@@ -45,8 +46,8 @@ public class CommentService {
     public CommentResponseDto updateComment(Long commentId, CommentRequestDto requestDto, String sessionId) {
         validateContent(requestDto.getContent());
 
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+        Comment comment = commentRepository.findWithLockById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException("삭제되었거나 존재하지 않는 댓글입니다."));
         validateOwner(comment, sessionId);
 
         comment.update(normalizeNickname(requestDto.getNickname()), requestDto.getContent().trim());
@@ -55,8 +56,8 @@ public class CommentService {
 
     @Transactional
     public void deleteComment(Long commentId, String sessionId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+        Comment comment = commentRepository.findWithLockById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException("삭제되었거나 존재하지 않는 댓글입니다."));
         validateOwner(comment, sessionId);
 
         commentRepository.findByParentCommentId(commentId)
@@ -70,8 +71,8 @@ public class CommentService {
             return null;
         }
 
-        Comment parentComment = commentRepository.findById(parentCommentId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+        Comment parentComment = commentRepository.findWithLockById(parentCommentId)
+                .orElseThrow(() -> new ResourceNotFoundException("삭제되었거나 존재하지 않는 댓글입니다."));
         if (!parentComment.getPost().getId().equals(post.getId())) {
             throw new IllegalArgumentException("같은 글의 댓글에만 답글을 남길 수 있습니다.");
         }
