@@ -5,7 +5,7 @@ import './feedSort.css'
 import './forumToss.css'
 import './search.css'
 import { boardApi } from './boardApi'
-import { isApiErrorStatus } from './apiClient'
+import { getApiErrorMessage, isApiErrorStatus } from './apiClient'
 import type { PostImage } from './boardApi'
 import { boardReducer, initialBoardState } from './boardReducer'
 import { getUnreadCommentNotifications, markCommentNotificationsSeen } from './commentNotifications'
@@ -400,6 +400,11 @@ function App() {
       await boardApi.toggleCommentLike(commentId)
       await fetchPosts(false)
     } catch (error) {
+      if (isApiErrorStatus(error, 404)) {
+        showSystemMessage('댓글이 이미 삭제되었습니다. 목록을 새로 불러옵니다.')
+        await fetchPosts(false)
+        return
+      }
       showSystemMessage('댓글 좋아요 처리에 실패했습니다.')
       console.error(error)
     }
@@ -468,6 +473,10 @@ function App() {
       showSystemMessage('게시글을 수정했습니다.')
       await fetchPosts(false)
     } catch (error) {
+      if (isApiErrorStatus(error, 404)) {
+        await recoverFromDeletedPost()
+        return
+      }
       const message = '내가 작성한 글만 수정할 수 있습니다.'
       dispatch({ type: 'error/set', payload: message })
       showSystemMessage(message)
@@ -501,7 +510,12 @@ function App() {
       await fetchPosts(false)
     } catch (error) {
       if (isApiErrorStatus(error, 404)) {
-        await recoverFromDeletedPost()
+        if (getApiErrorMessage(error)?.includes('댓글')) {
+          showSystemMessage('답글 대상 댓글이 삭제되었습니다. 댓글을 새로 불러옵니다.')
+          await fetchPosts(false)
+        } else {
+          await recoverFromDeletedPost()
+        }
         return
       }
       const message = parentCommentId === undefined ? '댓글 등록에 실패했습니다.' : '답글 등록에 실패했습니다.'
@@ -527,6 +541,12 @@ function App() {
       showSystemMessage('댓글을 수정했습니다.')
       await fetchPosts(false)
     } catch (error) {
+      if (isApiErrorStatus(error, 404)) {
+        dispatch({ type: 'comments/editCanceled', payload: commentId })
+        showSystemMessage('댓글이 이미 삭제되었습니다. 목록을 새로 불러옵니다.')
+        await fetchPosts(false)
+        return
+      }
       const message = '내가 작성한 댓글만 수정할 수 있습니다.'
       dispatch({ type: 'error/set', payload: message })
       showSystemMessage(message)
@@ -554,6 +574,17 @@ function App() {
       showSystemMessage('댓글을 삭제했습니다.')
       await fetchPosts(false)
     } catch (error) {
+      if (isApiErrorStatus(error, 404)) {
+        const deletedTarget = pendingDelete.target
+        dispatch({ type: 'delete/canceled' })
+        if (deletedTarget === 'post') {
+          await recoverFromDeletedPost()
+        } else {
+          showSystemMessage('댓글이 이미 삭제되었습니다. 목록을 새로 불러옵니다.')
+          await fetchPosts(false)
+        }
+        return
+      }
       const message = pendingDelete.target === 'post'
         ? '내가 작성한 글만 삭제할 수 있습니다.'
         : '내가 작성한 댓글만 삭제할 수 있습니다.'
