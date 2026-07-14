@@ -47,7 +47,8 @@
   min-height: 0;
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 0;
-  margin: 0 auto;  background: #ffffff;
+  margin: 0 auto;
+  background: #ffffff;
   box-shadow: 0 0 0 1px rgba(34, 55, 42, 0.06);
 }
 
@@ -96,7 +97,8 @@
   color: #ffffff;
   padding: 0 17px;
   font-size: 14px;
-  font-weight: 800;}
+  font-weight: 800;
+}
 
 .composer-screen-submit:hover:not(:disabled) {
   background: #126f39;
@@ -145,7 +147,8 @@
   background: transparent;
   color: #203028;
   padding: 0;
-  font-size: 14px;  font-weight: 700;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .composer-screen-nickname:hover,
@@ -214,7 +217,8 @@
 
 .composer-poll-editor {
   display: grid;
-  gap: 12px;}
+  gap: 12px;
+}
 
 .composer-poll-header,
 .composer-ai-header,
@@ -263,7 +267,8 @@
 }
 
 .composer-poll-option-row .icon-only-button {
-  width: 36px;  min-height: 36px;
+  width: 36px;
+  min-height: 36px;
   border: 0;
   border-radius: 50%;
   background: transparent;
@@ -312,7 +317,8 @@
   max-height: 260px;
   resize: vertical;
   border: 1px solid #d6e0d8;
-  border-radius: 8px;  background: #ffffff;
+  border-radius: 8px;
+  background: #ffffff;
   color: #263a31;
   padding: 13px 14px;
   line-height: 1.6;
@@ -386,6 +392,7 @@
   margin: 0;
   font-size: 12px;
 }
+
 .composer-ai-hint {
   color: #617468;
 }
@@ -434,7 +441,8 @@
 
 .composer-tool-button.disabled {
   cursor: not-allowed;
-  opacity: 0.5;}
+  opacity: 0.5;
+}
 
 .composer-tool-button input {
   display: none;
@@ -484,6 +492,7 @@
     margin-left: -18px;
     padding: 16px 18px;
   }
+
   .composer-ai-actions {
     align-items: stretch;
     flex-direction: column;
