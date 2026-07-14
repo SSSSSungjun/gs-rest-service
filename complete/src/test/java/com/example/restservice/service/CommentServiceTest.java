@@ -8,6 +8,7 @@ import com.example.restservice.event.BoardActivityCreatedEvent;
 import com.example.restservice.repository.CommentLikeRepository;
 import com.example.restservice.repository.CommentRepository;
 import com.example.restservice.repository.PostRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -41,6 +42,7 @@ class CommentServiceTest {
     private CommentService commentService;
 
     @Test
+    @DisplayName("댓글 생성 시 게시글을 잠금 조회하고 활동 이벤트를 발행한다")
     void createCommentUsesLockedPostAndPublishesActivityEvent() {
         Post post = post(21L);
         CommentRequestDto request = CommentRequestDto.builder()
@@ -76,6 +78,7 @@ class CommentServiceTest {
     }
 
     @Test
+    @DisplayName("다른 게시글의 댓글에는 답글을 작성할 수 없다")
     void createReplyRejectsParentFromAnotherPost() {
         Post targetPost = post(21L);
         Post otherPost = post(22L);
@@ -102,6 +105,7 @@ class CommentServiceTest {
     }
 
     @Test
+    @DisplayName("댓글 내용이 비어 있으면 게시글을 조회하지 않는다")
     void createCommentRejectsBlankContentBeforeLockingPost() {
         CommentRequestDto request = CommentRequestDto.builder()
                 .content(" ")

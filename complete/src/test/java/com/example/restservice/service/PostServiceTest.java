@@ -9,6 +9,7 @@ import com.example.restservice.repository.CommentLikeRepository;
 import com.example.restservice.repository.PollVoteRepository;
 import com.example.restservice.repository.PostLikeRepository;
 import com.example.restservice.repository.PostRepository;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -44,6 +45,7 @@ class PostServiceTest {
     private PostService postService;
 
     @Test
+    @DisplayName("게시글 생성 시 입력값을 정규화하고 활동 이벤트를 발행한다")
     void createPostNormalizesInputAndPublishesActivityEvent() {
         PostRequestDto request = PostRequestDto.builder()
                 .nickname("  ")
@@ -81,6 +83,7 @@ class PostServiceTest {
     }
 
     @Test
+    @DisplayName("게시글 내용이 비어 있으면 저장하지 않는다")
     void createPostRejectsBlankContentBeforeSaving() {
         PostRequestDto request = PostRequestDto.builder()
                 .content("   ")
