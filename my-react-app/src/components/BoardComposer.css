@@ -42,7 +42,10 @@
 
 .composer-screen-form {
   display: grid;
-  width: min(100%, 840px);
+  width: 100%;
+  max-width: 840px;
+  height: 100vh;
+  height: 100svh;
   height: 100dvh;
   min-height: 0;
   grid-template-rows: auto minmax(0, 1fr) auto;
@@ -160,7 +163,7 @@
 .composer-screen-textarea {
   display: block;
   width: 100%;
-  min-height: 260px;
+  min-height: clamp(180px, 34vh, 260px);
   max-height: none;
   overflow: hidden;
   resize: none;
@@ -480,7 +483,13 @@
   }
 
   .composer-screen-textarea {
-    min-height: 220px;
+    min-height: clamp(180px, 34vh, 220px);
+    font-size: 16px;
+  }
+
+  .composer-screen-nickname,
+  .composer-ai-prompt,
+  .composer-poll-option-row input {
     font-size: 16px;
   }
 
@@ -530,5 +539,79 @@
   .composer-tool-button svg {
     width: 19px;
     height: 19px;
+  }
+}
+
+@media (max-width: 340px) {
+  .composer-screen-header {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    gap: 6px;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .composer-screen-back {
+    width: 36px;
+    min-height: 36px;
+  }
+
+  .composer-screen-submit {
+    gap: 4px;
+    padding: 0 10px;
+  }
+
+  .composer-screen-scroll {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .composer-screen-section,
+  .composer-poll-editor,
+  .composer-preserved-poll,
+  .composer-ai-mode {
+    margin-right: -12px;
+    margin-left: -12px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .composer-preserved-poll {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .composer-preserved-poll span {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .composer-screen-toolbar {
+    gap: 2px;
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .composer-screen-header {
+    min-height: 52px;
+  }
+
+  .composer-screen-scroll {
+    padding-top: 14px;
+    padding-bottom: 20px;
+  }
+
+  .composer-screen-textarea {
+    min-height: 140px;
+  }
+
+  .composer-screen-toolbar {
+    min-height: 58px;
+    padding-top: 6px;
+    padding-bottom: max(6px, env(safe-area-inset-bottom));
+  }
+
+  .composer-tool-button {
+    min-height: 38px;
   }
 }
