@@ -81,7 +81,9 @@ export function BoardComposer({
   const [isAiMode, setIsAiMode] = useState(false)
   const [aiPrompt, setAiPrompt] = useState('')
   const [isGeneratingAiDraft, setIsGeneratingAiDraft] = useState(false)
+  const [aiGenerationSeconds, setAiGenerationSeconds] = useState(0)
   const [aiErrorMessage, setAiErrorMessage] = useState('')
+  const composerRef = useRef<HTMLElement>(null)
   const attachmentShellRef = useRef<HTMLDivElement>(null)
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null)
   const aiRequestRef = useRef<AbortController | null>(null)
@@ -114,10 +116,48 @@ export function BoardComposer({
     return () => aiRequestRef.current?.abort()
   }, [])
 
+  useEffect(() => {
+    if (!isGeneratingAiDraft) {
+      setAiGenerationSeconds(0)
+      return
+    }
+
+    const startedAt = Date.now()
+    const timer = window.setInterval(() => {
+      setAiGenerationSeconds(Math.max(1, Math.floor((Date.now() - startedAt) / 1000)))
+    }, 1000)
+
+    return () => window.clearInterval(timer)
+  }, [isGeneratingAiDraft])
+
   useLayoutEffect(() => {
     if (isAiMode || !contentTextareaRef.current) return
     resizeTextarea(contentTextareaRef.current)
   }, [content, isAiMode])
+
+  useLayoutEffect(() => {
+    const composer = composerRef.current
+    const boardShell = composer?.closest<HTMLElement>('.board-shell')
+    if (!composer || !boardShell) return
+
+    const syncReservedHeight = () => {
+      boardShell.style.setProperty(
+        '--composer-reserved-height',
+        `${Math.ceil(composer.getBoundingClientRect().height)}px`,
+      )
+    }
+
+    syncReservedHeight()
+    const observer = new ResizeObserver(syncReservedHeight)
+    observer.observe(composer)
+    window.addEventListener('resize', syncReservedHeight)
+
+    return () => {
+      observer.disconnect()
+      window.removeEventListener('resize', syncReservedHeight)
+      boardShell.style.removeProperty('--composer-reserved-height')
+    }
+  }, [])
 
   const uploadImages = (files: File[]) => {
     if (files.length === 0) return
@@ -232,7 +272,7 @@ export function BoardComposer({
   }
 
   return (
-    <section className="composer composer-bottom" aria-label="게시글 작성">
+    <section ref={composerRef} className="composer composer-bottom" aria-label="게시글 작성">
       <form onSubmit={onSubmit} onKeyDown={preventEnterSubmit}>
         <div className="composer-draft-box">
           {hasImages && (
@@ -292,18 +332,30 @@ export function BoardComposer({
                   <XIcon />
                 </button>
               </div>
-              <textarea
-                className="composer-ai-prompt"
-                value={aiPrompt}
-                maxLength={2000}
-                rows={3}
-                placeholder="어떤 내용과 말투로 글을 쓸지 설명해주세요."
-                aria-label="AI 글쓰기 요청"
-                onChange={(event) => setAiPrompt(event.target.value)}
-                onKeyDown={handleAiPromptKeyDown}
-                autoFocus
-                disabled={isGeneratingAiDraft}
-              />
+              <div className="composer-ai-prompt-shell">
+                <textarea
+                  className="composer-ai-prompt"
+                  value={aiPrompt}
+                  maxLength={2000}
+                  rows={3}
+                  placeholder="어떤 내용과 말투로 글을 쓸지 설명해주세요."
+                  aria-label="AI 글쓰기 요청"
+                  aria-busy={isGeneratingAiDraft}
+                  onChange={(event) => setAiPrompt(event.target.value)}
+                  onKeyDown={handleAiPromptKeyDown}
+                  autoFocus
+                  disabled={isGeneratingAiDraft}
+                />
+                {isGeneratingAiDraft && (
+                  <div className="composer-ai-thinking" role="status" aria-live="polite">
+                    <span className="composer-ai-spinner" aria-hidden="true" />
+                    <span>
+                      초안을 생각하고 있어요
+                      {aiGenerationSeconds > 0 ? ` · ${aiGenerationSeconds}초` : '...'}
+                    </span>
+                  </div>
+                )}
+              </div>
               {aiErrorMessage && <p className="composer-ai-error" role="alert">{aiErrorMessage}</p>}
               <div className="composer-ai-actions">
                 <p className="composer-ai-hint">생성된 글은 게시 전에 자유롭게 고칠 수 있습니다.</p>
