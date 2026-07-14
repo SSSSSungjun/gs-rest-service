@@ -47,8 +47,7 @@
 - 동일한 빌드 에러나 린트 에러가 3회 이상 반복되면 자율 수정을 중단하고, 에러 로그와 함께 사용자에게 즉시 질문한다.
 - 로컬 빌드나 실행이 불가능하면 가능한 정적 검증 범위를 명확히 말한다.
 - 사용자 변경이나 기존 작업을 되돌리지 않는다.
-- 기존 코드 스타일과 책임 분리를 우선한다.
-## 프로젝트 요약
+- 기존 코드 스타일과 책임 분리를 우선한다.## 프로젝트 요약
 
 - 프로젝트명: 대나무숲
 - 성격: 익명 게시판 + 댓글 중심 서비스
@@ -88,7 +87,7 @@
 우선 확인 후보:
 
 - UI 배치/간격: `my-react-app/src/App.css`, `my-react-app/src/forumToss.css`, 관련 React component
-- 검색/조회수: `my-react-app/src/App.tsx`, `my-react-app/src/components/PostList.tsx`, `my-react-app/src/components/PostDetail.tsx`, `my-react-app/src/components/HighlightedText.tsx`, `my-react-app/src/search.css`, `complete/src/main/java/com/example/restservice/service/PostService.java`, post entity/DTO/controller
+- 검색/조회수: `my-react-app/src/hooks/useFeedView.ts`, `my-react-app/src/feedSelectors.ts`, `my-react-app/src/components/BoardFeed.tsx`, `my-react-app/src/components/HighlightedText.tsx`, `my-react-app/src/search.css`, `complete/src/main/java/com/example/restservice/service/PostService.java`, post entity/DTO/controller
 - 게시글 목록/상세: post list/detail component, post API client
 - 글쓰기 입력창/이미지 첨부/투표/AI 초안: `my-react-app/src/components/BoardComposer.tsx`, `my-react-app/src/components/BoardComposer.css`, `my-react-app/src/boardApi.ts`, `complete/src/main/java/com/example/restservice/service/AiDraftService.java`
 - 투표 표시/집계: `my-react-app/src/components/PollBlock.tsx`, `complete/src/main/java/com/example/restservice/service/PollService.java`, poll entity/repository
@@ -97,8 +96,7 @@
 - 백엔드 API 변경: controller/service/dto/entity 순서로 최소 확인
 
 현재 판단:
-- PR #32는 댓글 상세의 접기/펼치기를 제거해 댓글을 항상 표시하고, 댓글 알림을 상단 배너 대신 알림 버튼 + 별도 목록 화면으로 바꾸는 작업이다.
-- PR #33은 댓글 알림 목록 상단의 박스형 헤더를 제거하고, `댓글 알림` 텍스트와 개수/액션만 가로 배치로 남긴 작업이다.
+- PR #32는 댓글 상세의 접기/펼치기를 제거해 댓글을 항상 표시하고, 댓글 알림을 상단 배너 대신 알림 버튼 + 별도 목록 화면으로 바꾸는 작업이다.- PR #33은 댓글 알림 목록 상단의 박스형 헤더를 제거하고, `댓글 알림` 텍스트와 개수/액션만 가로 배치로 남긴 작업이다.
 - PR #34는 목록 썸네일의 빈 2번째 그리드 칸으로 생기던 큰 여백을 줄이고, 상세 이미지 최대 크기와 `object-fit: contain`을 적용하는 작업이다.
 - PR #35는 PR #34 후속 보정으로, 상세 이미지 프레임이 고정 폭을 먹어 생긴 좌우 빈 여백을 제거하고 목록 썸네일 그리드를 실제 썸네일 폭만 차지하게 재조정하는 작업이다.
 - PR #36은 목록 이미지 여백의 구조 원인을 `PostImageGallery`가 이미지 개수와 무관한 갤러리 컨테이너 폭을 부모 그리드에 넘기는 문제로 보고, 리스트 이미지 1장/2장 폭을 컴포넌트에서 52px/110px로 확정하는 작업이다.
@@ -123,6 +121,7 @@
 - PR #56은 게시글 수정을 인라인 폼에서 전용 `BoardComposer`의 edit 모드로 통합한 작업이다. 저장은 기존 게시글에 PATCH하므로 ID·댓글·좋아요·조회수·기존 투표를 유지하고, 수정 중에도 사진과 AI 초안을 사용할 수 있다. AI 생성은 별도 `그만 기다리기` 버튼 없이 기존 X/화면 닫기의 요청 취소만 사용한다.
 - PR #57은 320px 문서 최소 폭을 제거하고 모바일 툴바·카드 패딩·검색·페이지네이션·작성 화면을 Fold 커버, 구형 소형 폰, 태블릿과 짧은 가로 화면에 맞춘 반응형 호환성 작업이다. 터치 버튼 크기는 유지하되 컨테이너는 `clamp()`/`minmax()`로 유동화하고, 1~5 페이지 + 직접 이동 구조는 유지한다.
 - PR #58은 게시글·댓글 생성 커밋 후 SSE 활동 신호를 보내고, 최근 20초에 활동이 몰릴 때만 기존 새로고침 자리를 `새 글/댓글 N` 버튼으로 바꾸는 작업이다. 자동 삽입·스크롤 이동·토스트는 없으며, 작성자 본인 이벤트를 제외하고 갱신 성공 후 20초 쿨다운을 둔다. 목록 사진은 첫 번째 한 장만 표시하고 전체 개수는 메타 숫자로만 보여준다.
+- PR #59는 약 940줄의 `App.tsx`를 `useBoardController` + `BoardPage` 조립으로 축소하고, 피드 selector·화면 전환·알림·이미지를 역할별 훅으로 분리한 리팩터링이다. Spring 서비스 테스트 5개와 backend/frontend 독립 Application checks를 추가했으며 기능·UI 계약은 유지한다.
 - PR #58의 SSE는 전체 게시판에서 활동이 급증했다는 선택적 갱신 신호다. 새 글·댓글을 자동 반영하지 않으며 연결이나 이벤트가 유실되어도 다음 전체 조회로 복구되어야 한다.
 - 내가 쓴 글의 기존 댓글 알림 목록은 별도 실시간 push가 아니다. 게시글 목록을 다시 가져온 시점에 댓글과 `localStorage` 읽음 ID를 비교해 계산하므로, 활동 SSE 버튼으로 갱신한 뒤 함께 최신화된다.
 - 비속어 필터링은 현재 최후순위다. Spring AI로 검열하기보다 신고/관리자 삭제 모델이 더 적절할 수 있으므로 실제 운영 요구가 생기면 별도 설계한다.
@@ -136,6 +135,7 @@
 - 사용자는 실시간 신호가 모바일·웹에서 읽기를 방해하면 안 된다고 본다. 활동 알림은 여러 건이 짧게 몰릴 때만 기존 툴바 자리에서 작게 표시하고, 자동 목록 삽입·스크롤 이동·본문 오버레이·반복 토스트를 피한다.
 - 알림 버튼은 새 알림이 있을 때 `+N` 배지와 초록 강조색을 사용한다.
 - 알림 목록 화면에서는 개별 알림 읽음 처리, 모두 읽음, 원문 게시글 열기를 제공한다.
+- 프론트 component test runner는 아직 없고 TypeScript/Vite production build를 회귀 기준으로 사용한다. Spring 서비스 테스트는 `complete/src/test/java/com/example/restservice/service`에 있으며 `.github/workflows/backend-tests.yml`이 Gradle 테스트와 프론트 build를 각각 실행한다.
 - GitHub PR에 Vercel 상태 체크가 자동으로 붙어 있으며, Codex가 Vercel을 별도 실행하는 것은 아니다.
 - `AGENTS.md`는 Codex 작업 규칙과 컨텍스트 캐시의 첫 진입점으로 충분하다.
 - 기술적인 의사결정과 트러블슈팅은 `docs/technical-notes.md`에 남기고, `AGENTS.md`에는 다음 작업자가 어디부터 보면 되는지만 짧게 남긴다.
