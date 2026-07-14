@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -57,8 +58,15 @@ public class AiDraftService {
             @Value("${app.gemini.model:gemini-3.5-flash}") String geminiModel,
             @Value("${app.gemini.thinking-level:medium}") String geminiThinkingLevel,
             @Value("${app.ai.max-output-tokens:8192}") int maxOutputTokens,
+            @Value("${app.ai.connect-timeout-ms:5000}") int connectTimeoutMs,
+            @Value("${app.ai.read-timeout-ms:90000}") int readTimeoutMs,
             @Value("${app.gemini.base-url:https://generativelanguage.googleapis.com}") String geminiBaseUrl
     ) {
+        SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
+        requestFactory.setConnectTimeout(connectTimeoutMs);
+        requestFactory.setReadTimeout(readTimeoutMs);
+        restClientBuilder.requestFactory(requestFactory);
+
         this.openAiRestClient = restClientBuilder.baseUrl(openAiBaseUrl).build();
         this.geminiRestClient = restClientBuilder.baseUrl(geminiBaseUrl).build();
         this.provider = provider;
