@@ -11,7 +11,28 @@ class AiDraftServiceTest {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
-    void extractsTextWithoutAssumingTheFirstOutputItemIsTheMessage() throws Exception {
+    void extractsGeminiCandidateText() throws Exception {
+        JsonNode response = objectMapper.readTree("""
+                {
+                  "candidates": [
+                    {
+                      "content": {
+                        "parts": [
+                          { "text": "첫 문단" },
+                          { "text": "둘째 문단" }
+                        ]
+                      }
+                    }
+                  ]
+                }
+                """);
+
+        assertThat(AiDraftService.extractGeminiOutputText(response))
+                .isEqualTo("첫 문단\n둘째 문단");
+    }
+
+    @Test
+    void extractsOpenAiTextWithoutAssumingTheFirstOutputItemIsTheMessage() throws Exception {
         JsonNode response = objectMapper.readTree("""
                 {
                   "output": [
@@ -27,7 +48,7 @@ class AiDraftServiceTest {
                 }
                 """);
 
-        assertThat(AiDraftService.extractOutputText(response))
+        assertThat(AiDraftService.extractOpenAiOutputText(response))
                 .isEqualTo("첫 문단\n둘째 문단");
     }
 }
