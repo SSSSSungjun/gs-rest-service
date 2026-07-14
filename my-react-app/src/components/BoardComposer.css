@@ -317,15 +317,40 @@
   position: absolute;
   inset: 1px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 9px;
+  gap: 12px;
   border-radius: 7px;
   background: rgba(247, 249, 247, 0.96);
   color: #315b3e;
   font-size: 13px;
   font-weight: 800;
-  pointer-events: none;
+}
+
+.composer-ai-thinking-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  text-align: center;
+}
+
+.composer-ai-stop {
+  min-height: 34px;
+  border: 1px solid #b9c9bc;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #3f5147;
+  padding: 0 13px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.composer-ai-stop:hover {
+  border-color: #8eaa93;
+  background: #edf3ee;
+  color: #1f6f3d;
 }
 
 .composer-ai-spinner {
