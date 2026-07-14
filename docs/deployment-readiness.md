@@ -33,7 +33,7 @@
 
 1. AI endpoint에 세션별 rate limit, 전체 동시 실행 제한, 일일 비용 한도를 둔다. 현재는 키를 브라우저에 노출하지 않지만 API 자체는 공개 호출 가능하다.
 2. 게시글 API를 서버 페이지네이션으로 바꾼다. 현재 batch fetch 50으로 N+1 부담은 낮췄지만 전체 게시글과 댓글을 매번 전송한다.
-3. 업로드를 로컬 디스크에서 object storage로 옮기고, 게시글에 연결되지 않은 임시 업로드를 만료 삭제한다.
+3. 업로드 파일의 실제 signature를 검사하고, 로컬 디스크에서 object storage로 옮기며, 게시글에 연결되지 않은 임시 업로드를 만료 삭제한다.
 4. HTTPS와 trusted proxy 설정을 확인하고 `prod` profile을 활성화한다. `app.cookie.secure=true`가 실제 HTTPS 요청에서 동작해야 한다.
 5. `ddl-auto=update` 대신 Flyway/Liquibase migration을 사용하고 DB 백업·복구 절차를 검증한다.
 6. 허용 origin을 실제 프런트 주소로 제한하고, 별도 도메인 구성이라면 Origin/CSRF 정책을 다시 검토한다.
