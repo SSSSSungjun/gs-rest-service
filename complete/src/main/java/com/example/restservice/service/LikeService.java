@@ -4,6 +4,7 @@ import com.example.restservice.entity.Comment;
 import com.example.restservice.entity.CommentLike;
 import com.example.restservice.entity.Post;
 import com.example.restservice.entity.PostLike;
+import com.example.restservice.exception.ResourceNotFoundException;
 import com.example.restservice.repository.CommentLikeRepository;
 import com.example.restservice.repository.CommentRepository;
 import com.example.restservice.repository.PostLikeRepository;
@@ -24,34 +25,34 @@ public class LikeService {
 
     @Transactional
     public void togglePostLike(Long postId, String sessionId) {
+        Post post = postRepository.findWithLockById(postId)
+                .orElseThrow(() -> new ResourceNotFoundException("삭제되었거나 존재하지 않는 글입니다."));
         postLikeRepository.findByPostIdAndOwnerSessionId(postId, sessionId)
                 .ifPresentOrElse(
                         postLikeRepository::delete,
-                        () -> createPostLike(postId, sessionId)
+                        () -> createPostLike(post, sessionId)
                 );
     }
 
     @Transactional
     public void toggleCommentLike(Long commentId, String sessionId) {
+        Comment comment = commentRepository.findWithLockById(commentId)
+                .orElseThrow(() -> new ResourceNotFoundException("삭제되었거나 존재하지 않는 댓글입니다."));
         commentLikeRepository.findByCommentIdAndOwnerSessionId(commentId, sessionId)
                 .ifPresentOrElse(
                         commentLikeRepository::delete,
-                        () -> createCommentLike(commentId, sessionId)
+                        () -> createCommentLike(comment, sessionId)
                 );
     }
 
-    private void createPostLike(Long postId, String sessionId) {
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
+    private void createPostLike(Post post, String sessionId) {
         postLikeRepository.save(PostLike.builder()
                 .post(post)
                 .ownerSessionId(sessionId)
                 .build());
     }
 
-    private void createCommentLike(Long commentId, String sessionId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+    private void createCommentLike(Comment comment, String sessionId) {
         commentLikeRepository.save(CommentLike.builder()
                 .comment(comment)
                 .ownerSessionId(sessionId)
