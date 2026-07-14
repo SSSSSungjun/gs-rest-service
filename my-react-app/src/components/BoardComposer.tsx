@@ -439,11 +439,18 @@ export function BoardComposer({
                 />
                 {isGeneratingAiDraft && (
                   <div className="composer-ai-thinking" role="status" aria-live="polite">
-                    <span className="composer-ai-spinner" aria-hidden="true" />
-                    <span>
-                      초안을 생각하고 있어요
-                      {aiGenerationSeconds > 0 ? ` · ${aiGenerationSeconds}초` : '...'}
-                    </span>
+                    <div className="composer-ai-thinking-copy">
+                      <span className="composer-ai-spinner" aria-hidden="true" />
+                      <span>
+                        {aiGenerationSeconds >= 8 ? '생성이 평소보다 오래 걸리고 있어요' : '초안을 생각하고 있어요'}
+                        {aiGenerationSeconds > 0 ? ` · ${aiGenerationSeconds}초` : '...'}
+                      </span>
+                    </div>
+                    {aiGenerationSeconds >= 8 && (
+                      <button className="composer-ai-stop" type="button" onClick={resetAiMode}>
+                        그만 기다리기
+                      </button>
+                    )}
                   </div>
                 )}
               </div>
