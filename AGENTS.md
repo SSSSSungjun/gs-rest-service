@@ -48,7 +48,6 @@
 - 로컬 빌드나 실행이 불가능하면 가능한 정적 검증 범위를 명확히 말한다.
 - 사용자 변경이나 기존 작업을 되돌리지 않는다.
 - 기존 코드 스타일과 책임 분리를 우선한다.
-
 ## 프로젝트 요약
 
 - 프로젝트명: 대나무숲
@@ -93,12 +92,11 @@
 - 게시글 목록/상세: post list/detail component, post API client
 - 글쓰기 입력창/이미지 첨부/투표/AI 초안: `my-react-app/src/components/BoardComposer.tsx`, `my-react-app/src/components/BoardComposer.css`, `my-react-app/src/boardApi.ts`, `complete/src/main/java/com/example/restservice/service/AiDraftService.java`
 - 투표 표시/집계: `my-react-app/src/components/PollBlock.tsx`, `complete/src/main/java/com/example/restservice/service/PollService.java`, poll entity/repository
-- 댓글/알림: `my-react-app/src/components/CommentNotificationBar.tsx`, `my-react-app/src/components/PostDetail.tsx`, `my-react-app/src/commentNotifications.ts`, `my-react-app/src/App.tsx`
+- 댓글/알림/활동 신호: `my-react-app/src/components/CommentNotificationBar.tsx`, `my-react-app/src/components/ActivityRefreshButton.tsx`, `my-react-app/src/useBoardActivity.ts`, `my-react-app/src/commentNotifications.ts`, `my-react-app/src/App.tsx`, `complete/src/main/java/com/example/restservice/service/BoardActivityStreamService.java`
 - 버튼/액션 아이콘: `my-react-app/src/components/Icons.tsx`, 액션이 있는 각 컴포넌트
 - 백엔드 API 변경: controller/service/dto/entity 순서로 최소 확인
 
 현재 판단:
-
 - PR #32는 댓글 상세의 접기/펼치기를 제거해 댓글을 항상 표시하고, 댓글 알림을 상단 배너 대신 알림 버튼 + 별도 목록 화면으로 바꾸는 작업이다.
 - PR #33은 댓글 알림 목록 상단의 박스형 헤더를 제거하고, `댓글 알림` 텍스트와 개수/액션만 가로 배치로 남긴 작업이다.
 - PR #34는 목록 썸네일의 빈 2번째 그리드 칸으로 생기던 큰 여백을 줄이고, 상세 이미지 최대 크기와 `object-fit: contain`을 적용하는 작업이다.
@@ -124,7 +122,9 @@
 - PR #54는 삭제 레이스를 404 + 화면 복구로 정리하고, 조회수 원자 증가와 글/댓글 행 잠금, batch fetch를 적용한 런타임 안정화 작업이다. 업로드 확장자·익명 세션·운영 프로필·보안 헤더도 보강했으며, AI 생성 취소와 서버 provider 연결/응답 timeout을 둔다. 공개 배포 전 남은 rate limit·서버 페이지네이션·object storage 점검은 `docs/deployment-readiness.md`를 먼저 본다.
 - PR #56은 게시글 수정을 인라인 폼에서 전용 `BoardComposer`의 edit 모드로 통합한 작업이다. 저장은 기존 게시글에 PATCH하므로 ID·댓글·좋아요·조회수·기존 투표를 유지하고, 수정 중에도 사진과 AI 초안을 사용할 수 있다. AI 생성은 별도 `그만 기다리기` 버튼 없이 기존 X/화면 닫기의 요청 취소만 사용한다.
 - PR #57은 320px 문서 최소 폭을 제거하고 모바일 툴바·카드 패딩·검색·페이지네이션·작성 화면을 Fold 커버, 구형 소형 폰, 태블릿과 짧은 가로 화면에 맞춘 반응형 호환성 작업이다. 터치 버튼 크기는 유지하되 컨테이너는 `clamp()`/`minmax()`로 유동화하고, 1~5 페이지 + 직접 이동 구조는 유지한다.
-- 현재 댓글 알림은 실시간이 아니다. 게시글 목록을 다시 가져온 시점에 내가 쓴 글의 댓글과 `localStorage` 읽음 ID를 비교해 계산하며, SSE/WebSocket/폴링은 없다. 실시간 기능을 추가한다면 댓글 생성 이벤트를 SSE로 전달하고 상세 화면에 `새 댓글 N개` 갱신 버튼을 제공하는 방향이 우선 후보이다.
+- PR #58은 게시글·댓글 생성 커밋 후 SSE 활동 신호를 보내고, 최근 20초에 활동이 몰릴 때만 기존 새로고침 자리를 `새 글/댓글 N` 버튼으로 바꾸는 작업이다. 자동 삽입·스크롤 이동·토스트는 없으며, 작성자 본인 이벤트를 제외하고 갱신 성공 후 20초 쿨다운을 둔다. 목록 사진은 첫 번째 한 장만 표시하고 전체 개수는 메타 숫자로만 보여준다.
+- PR #58의 SSE는 전체 게시판에서 활동이 급증했다는 선택적 갱신 신호다. 새 글·댓글을 자동 반영하지 않으며 연결이나 이벤트가 유실되어도 다음 전체 조회로 복구되어야 한다.
+- 내가 쓴 글의 기존 댓글 알림 목록은 별도 실시간 push가 아니다. 게시글 목록을 다시 가져온 시점에 댓글과 `localStorage` 읽음 ID를 비교해 계산하므로, 활동 SSE 버튼으로 갱신한 뒤 함께 최신화된다.
 - 비속어 필터링은 현재 최후순위다. Spring AI로 검열하기보다 신고/관리자 삭제 모델이 더 적절할 수 있으므로 실제 운영 요구가 생기면 별도 설계한다.
 - 사용자는 디씨/펨코처럼 빠르게 스캔되는 게시판형 정보 밀도는 원하지만, 실제 간격과 버튼 감도는 토스처럼 조금 여유 있고 둥근 쪽을 선호한다.
 - 사용자는 목록까지 전부 무거운 카드로 감싸는 디자인은 싫어하지만, OKKY/커뮤니티 카드 리스트처럼 얇은 보더와 넉넉한 패딩으로 구분되는 흰 게시글 카드는 선호 쪽에 가깝다. 그림자는 약하게, 구분은 보더와 여백으로 한다.
@@ -133,6 +133,7 @@
 - 사용자는 버튼을 텍스트만으로 처리하는 것을 싫어하며, 가능한 경우 아이콘/에셋 기반 버튼을 선호한다. 단, 첨부 메뉴처럼 아이콘만으로 의미가 애매한 경우에는 `사진`, `투표`처럼 짧은 텍스트를 같이 둔다. 수정/삭제 메뉴는 아이콘보다 텍스트만 있는 쪽을 선호한다. 현재는 lockfile 변동을 피하려고 `lucide-react` 대신 로컬 SVG 아이콘 컴포넌트를 사용했다.
 - 페이지네이션은 숫자 1~5 정도를 보여주고, 사용자가 원하는 페이지로 직접 이동하는 현재 구조를 반드시 유지한다.
 - 공기업 행사용 커뮤니티 배포 이야기는 실제 클라우드 배포로 추진하지 않고, 백엔드 보안·트랜잭션·동시성·운영 리스크를 설명하기 위한 가상 시나리오로만 다룬다.
+- 사용자는 실시간 신호가 모바일·웹에서 읽기를 방해하면 안 된다고 본다. 활동 알림은 여러 건이 짧게 몰릴 때만 기존 툴바 자리에서 작게 표시하고, 자동 목록 삽입·스크롤 이동·본문 오버레이·반복 토스트를 피한다.
 - 알림 버튼은 새 알림이 있을 때 `+N` 배지와 초록 강조색을 사용한다.
 - 알림 목록 화면에서는 개별 알림 읽음 처리, 모두 읽음, 원문 게시글 열기를 제공한다.
 - GitHub PR에 Vercel 상태 체크가 자동으로 붙어 있으며, Codex가 Vercel을 별도 실행하는 것은 아니다.
