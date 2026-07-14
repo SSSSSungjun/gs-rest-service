@@ -308,14 +308,14 @@ export function BoardComposer({
   }
 
   return (
-    <section className="composer-screen" aria-label="게시글 작성">
+    <section className="composer-screen" aria-label={mode === 'edit' ? '게시글 수정' : '게시글 작성'}>
       <form className="composer-screen-form" onSubmit={onSubmit} onKeyDown={preventEnterSubmit}>
         <header className="composer-screen-header">
           <button
             className="composer-screen-back icon-only-button"
             type="button"
-            aria-label="작성 화면 닫기"
-            title="작성 화면 닫기"
+            aria-label={mode === 'edit' ? '수정 화면 닫기' : '작성 화면 닫기'}
+            title={mode === 'edit' ? '수정 화면 닫기' : '작성 화면 닫기'}
             onClick={handleCloseComposer}
           >
             <ArrowLeftIcon />
@@ -505,3 +505,13 @@ export function BoardComposer({
             className={`composer-tool-button ${isAiMode ? 'active' : ''}`}
             type="button"
             aria-pressed={isAiMode}
+            onClick={handleStartAiMode}
+          >
+            <SparklesIcon />
+            <span>AI 글쓰기</span>
+          </button>
+        </footer>
+      </form>
+    </section>
+  )
+}
