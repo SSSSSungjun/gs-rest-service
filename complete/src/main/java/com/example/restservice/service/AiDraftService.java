@@ -1,6 +1,8 @@
 package com.example.restservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -19,6 +21,7 @@ import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 
 @Service
 public class AiDraftService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AiDraftService.class);
     private static final String GEMINI_PROVIDER = "gemini";
     private static final String OPENAI_PROVIDER = "openai";
     private static final String INSTRUCTIONS = """
@@ -26,6 +29,8 @@ public class AiDraftService {
             사용자가 설명한 의도와 말투를 살려 자연스러운 게시글 본문을 작성하세요.
             제목, 머리말, 설명, 인용 부호, 마크다운 코드 블록 없이 바로 붙여넣을 본문만 출력하세요.
             사실로 확인되지 않은 구체적인 정보는 지어내지 마세요.
+            사용자에게 답하거나 설명하는 챗봇 말투 대신, 게시글 작성자가 직접 쓴 자연스러운 본문으로 작성하세요.
+            사용자가 분량을 지정하지 않았다면 내용을 충분히 풀어 5문장 이상 작성하고, 짧게 요청한 경우에는 그 요청을 따르세요.
             게시글 본문은 1800자 이내로 작성하세요.
             """;
 
@@ -36,6 +41,8 @@ public class AiDraftService {
     private final String openAiModel;
     private final String geminiApiKey;
     private final String geminiModel;
+    private final String geminiThinkingLevel;
+    private final int maxOutputTokens;
 
     public AiDraftService(
             RestClient.Builder restClientBuilder,
@@ -45,6 +52,8 @@ public class AiDraftService {
             @Value("${app.openai.base-url:https://api.openai.com}") String openAiBaseUrl,
             @Value("${app.gemini.api-key:}") String geminiApiKey,
             @Value("${app.gemini.model:gemini-3.5-flash}") String geminiModel,
+            @Value("${app.gemini.thinking-level:medium}") String geminiThinkingLevel,
+            @Value("${app.ai.max-output-tokens:2000}") int maxOutputTokens,
             @Value("${app.gemini.base-url:https://generativelanguage.googleapis.com}") String geminiBaseUrl
     ) {
         this.openAiRestClient = restClientBuilder.baseUrl(openAiBaseUrl).build();
@@ -54,11 +63,15 @@ public class AiDraftService {
         this.openAiModel = openAiModel;
         this.geminiApiKey = geminiApiKey;
         this.geminiModel = geminiModel;
+        this.geminiThinkingLevel = geminiThinkingLevel;
+        this.maxOutputTokens = maxOutputTokens;
     }
 
     public String generateDraft(String prompt) {
+        String selectedProvider = provider.trim().toLowerCase(Locale.ROOT);
+        long startedAt = System.nanoTime();
         try {
-            return switch (provider.trim().toLowerCase(Locale.ROOT)) {
+            String draft = switch (selectedProvider) {
                 case GEMINI_PROVIDER -> generateWithGemini(prompt);
                 case OPENAI_PROVIDER -> generateWithOpenAi(prompt);
                 default -> throw new ResponseStatusException(
@@ -66,6 +79,12 @@ public class AiDraftService {
                         "지원하지 않는 AI provider입니다: " + provider
                 );
             };
+            LOGGER.info(
+                    "AI draft generated: provider={}, durationMs={}",
+                    selectedProvider,
+                    (System.nanoTime() - startedAt) / 1_000_000
+            );
+            return draft;
         } catch (ResponseStatusException exception) {
             throw exception;
         } catch (RestClientException exception) {
@@ -98,7 +117,10 @@ public class AiDraftService {
                                 "role", "user",
                                 "parts", List.of(Map.of("text", prompt.trim()))
                         )),
-                        "generationConfig", Map.of("maxOutputTokens", 700)
+                        "generationConfig", Map.of(
+                                "maxOutputTokens", maxOutputTokens,
+                                "thinkingConfig", Map.of("thinkingLevel", geminiThinkingLevel)
+                        )
                 ))
                 .retrieve()
                 .body(JsonNode.class);
@@ -123,7 +145,7 @@ public class AiDraftService {
                         "model", openAiModel,
                         "instructions", INSTRUCTIONS,
                         "input", prompt.trim(),
-                        "max_output_tokens", 700
+                        "max_output_tokens", maxOutputTokens
                 ))
                 .retrieve()
                 .body(JsonNode.class);
