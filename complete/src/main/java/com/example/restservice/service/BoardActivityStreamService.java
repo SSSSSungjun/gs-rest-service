@@ -2,6 +2,7 @@ package com.example.restservice.service;
 
 import com.example.restservice.dto.response.BoardActivityResponseDto;
 import com.example.restservice.event.BoardActivityCreatedEvent;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.event.TransactionPhase;
@@ -42,6 +43,7 @@ public class BoardActivityStreamService {
         return emitter;
     }
 
+    @Async("boardActivityExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void publishAfterCommit(BoardActivityCreatedEvent event) {
         long nextSequence = sequence.incrementAndGet();
