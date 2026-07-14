@@ -47,8 +47,7 @@
   min-height: 0;
   grid-template-rows: auto minmax(0, 1fr) auto;
   gap: 0;
-  margin: 0 auto;
-  background: #ffffff;
+  margin: 0 auto;  background: #ffffff;
   box-shadow: 0 0 0 1px rgba(34, 55, 42, 0.06);
 }
 
@@ -97,8 +96,7 @@
   color: #ffffff;
   padding: 0 17px;
   font-size: 14px;
-  font-weight: 800;
-}
+  font-weight: 800;}
 
 .composer-screen-submit:hover:not(:disabled) {
   background: #126f39;
@@ -147,8 +145,7 @@
   background: transparent;
   color: #203028;
   padding: 0;
-  font-size: 14px;
-  font-weight: 700;
+  font-size: 14px;  font-weight: 700;
 }
 
 .composer-screen-nickname:hover,
@@ -183,6 +180,7 @@
 
 .composer-screen-section,
 .composer-poll-editor,
+.composer-preserved-poll,
 .composer-ai-mode {
   margin-top: 26px;
   border-top: 1px solid #e4e9e5;
@@ -195,10 +193,28 @@
   gap: 12px;
 }
 
+.composer-preserved-poll {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  color: #31503d;
+  font-size: 13px;
+}
+
+.composer-preserved-poll strong {
+  font-weight: 800;
+}
+
+.composer-preserved-poll span {
+  justify-self: end;
+  color: #6d7a72;
+  font-size: 12px;
+}
+
 .composer-poll-editor {
   display: grid;
-  gap: 12px;
-}
+  gap: 12px;}
 
 .composer-poll-header,
 .composer-ai-header,
@@ -247,8 +263,7 @@
 }
 
 .composer-poll-option-row .icon-only-button {
-  width: 36px;
-  min-height: 36px;
+  width: 36px;  min-height: 36px;
   border: 0;
   border-radius: 50%;
   background: transparent;
@@ -297,8 +312,7 @@
   max-height: 260px;
   resize: vertical;
   border: 1px solid #d6e0d8;
-  border-radius: 8px;
-  background: #ffffff;
+  border-radius: 8px;  background: #ffffff;
   color: #263a31;
   padding: 13px 14px;
   line-height: 1.6;
@@ -317,40 +331,14 @@
   position: absolute;
   inset: 1px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 9px;
   border-radius: 7px;
   background: rgba(247, 249, 247, 0.96);
   color: #315b3e;
   font-size: 13px;
   font-weight: 800;
-}
-
-.composer-ai-thinking-copy {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  text-align: center;
-}
-
-.composer-ai-stop {
-  min-height: 34px;
-  border: 1px solid #b9c9bc;
-  border-radius: 999px;
-  background: #ffffff;
-  color: #3f5147;
-  padding: 0 13px;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.composer-ai-stop:hover {
-  border-color: #8eaa93;
-  background: #edf3ee;
-  color: #1f6f3d;
 }
 
 .composer-ai-spinner {
@@ -398,7 +386,6 @@
   margin: 0;
   font-size: 12px;
 }
-
 .composer-ai-hint {
   color: #617468;
 }
@@ -447,8 +434,7 @@
 
 .composer-tool-button.disabled {
   cursor: not-allowed;
-  opacity: 0.5;
-}
+  opacity: 0.5;}
 
 .composer-tool-button input {
   display: none;
@@ -492,12 +478,12 @@
 
   .composer-screen-section,
   .composer-poll-editor,
+  .composer-preserved-poll,
   .composer-ai-mode {
     margin-right: -18px;
     margin-left: -18px;
     padding: 16px 18px;
   }
-
   .composer-ai-actions {
     align-items: stretch;
     flex-direction: column;
