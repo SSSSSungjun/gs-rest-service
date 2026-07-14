@@ -5,6 +5,7 @@ import './feedSort.css'
 import './forumToss.css'
 import './search.css'
 import { boardApi } from './boardApi'
+import { isApiErrorStatus } from './apiClient'
 import type { PostImage } from './boardApi'
 import { boardReducer, initialBoardState } from './boardReducer'
 import { getUnreadCommentNotifications, markCommentNotificationsSeen } from './commentNotifications'
@@ -137,15 +138,29 @@ function App() {
     }
   }, [showSystemMessage])
 
+  const recoverFromDeletedPost = useCallback(async () => {
+    if (window.location.hash.startsWith(POST_HASH_PREFIX)) {
+      window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    }
+    setIsNotificationViewOpen(false)
+    dispatch({ type: 'posts/detailClosed' })
+    showSystemMessage('게시글이 삭제되었습니다. 목록을 새로 불러옵니다.')
+    await fetchPosts(false)
+  }, [fetchPosts, showSystemMessage])
+
   const recordPostView = useCallback(async (postId: number) => {
     try {
       await boardApi.increasePostView(postId)
       await fetchPosts(false)
     } catch (error) {
       dispatch({ type: 'posts/viewCountIncrementRolledBack', payload: postId })
+      if (isApiErrorStatus(error, 404)) {
+        await recoverFromDeletedPost()
+        return
+      }
       console.error(error)
     }
-  }, [fetchPosts])
+  }, [fetchPosts, recoverFromDeletedPost])
 
   const openPostDetail = useCallback((postId: number) => {
     const nextHash = `${POST_HASH_PREFIX}${postId}`
@@ -357,6 +372,10 @@ function App() {
       await boardApi.togglePostLike(postId)
       await fetchPosts(false)
     } catch (error) {
+      if (isApiErrorStatus(error, 404)) {
+        await recoverFromDeletedPost()
+        return
+      }
       showSystemMessage('좋아요 처리에 실패했습니다.')
       console.error(error)
     }
@@ -367,6 +386,10 @@ function App() {
       await boardApi.votePollOption(postId, optionId)
       await fetchPosts(false)
     } catch (error) {
+      if (isApiErrorStatus(error, 404)) {
+        await recoverFromDeletedPost()
+        return
+      }
       showSystemMessage('투표 처리에 실패했습니다.')
       console.error(error)
     }
@@ -477,6 +500,10 @@ function App() {
       showSystemMessage(parentCommentId === undefined ? '댓글을 등록했습니다.' : '답글을 등록했습니다.')
       await fetchPosts(false)
     } catch (error) {
+      if (isApiErrorStatus(error, 404)) {
+        await recoverFromDeletedPost()
+        return
+      }
       const message = parentCommentId === undefined ? '댓글 등록에 실패했습니다.' : '답글 등록에 실패했습니다.'
       dispatch({ type: 'error/set', payload: message })
       showSystemMessage(message)
