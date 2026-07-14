@@ -14,6 +14,7 @@
 - 업로드 파일의 저장 확장자는 원본 파일명이 아니라 검증한 MIME type으로 결정한다.
 - 익명 세션 쿠키는 canonical UUID만 허용하고, 잘못된 값은 새 세션으로 교체한다.
 - 운영 프로필은 DB 정보와 CORS origin을 환경변수로 강제하고 secure cookie, schema validate, Swagger/H2 비활성화를 적용한다.
+- AI provider 호출은 연결 5초, 응답 90초 timeout을 둔다. 브라우저의 `그만 기다리기`는 화면과 클라이언트 요청을 즉시 취소하지만 이미 전송된 provider 연산 중단까지 보장하지는 않는다.
 
 ## 삭제와 동시 요청의 결과
 
