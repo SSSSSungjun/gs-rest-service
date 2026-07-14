@@ -183,6 +183,7 @@
 
 .composer-screen-section,
 .composer-poll-editor,
+.composer-preserved-poll,
 .composer-ai-mode {
   margin-top: 26px;
   border-top: 1px solid #e4e9e5;
@@ -193,6 +194,25 @@
 
 .composer-screen-section .image-attachment-fields {
   gap: 12px;
+}
+
+.composer-preserved-poll {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+  color: #31503d;
+  font-size: 13px;
+}
+
+.composer-preserved-poll strong {
+  font-weight: 800;
+}
+
+.composer-preserved-poll span {
+  justify-self: end;
+  color: #6d7a72;
+  font-size: 12px;
 }
 
 .composer-poll-editor {
@@ -317,40 +337,14 @@
   position: absolute;
   inset: 1px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 9px;
   border-radius: 7px;
   background: rgba(247, 249, 247, 0.96);
   color: #315b3e;
   font-size: 13px;
   font-weight: 800;
-}
-
-.composer-ai-thinking-copy {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 9px;
-  text-align: center;
-}
-
-.composer-ai-stop {
-  min-height: 34px;
-  border: 1px solid #b9c9bc;
-  border-radius: 999px;
-  background: #ffffff;
-  color: #3f5147;
-  padding: 0 13px;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.composer-ai-stop:hover {
-  border-color: #8eaa93;
-  background: #edf3ee;
-  color: #1f6f3d;
 }
 
 .composer-ai-spinner {
@@ -492,6 +486,7 @@
 
   .composer-screen-section,
   .composer-poll-editor,
+  .composer-preserved-poll,
   .composer-ai-mode {
     margin-right: -18px;
     margin-left: -18px;

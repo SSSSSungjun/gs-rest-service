@@ -32,6 +32,7 @@ interface PostDetailProps {
   onPostEditUploadImages: (postId: number, files: File[]) => void
   onPostEditRemoveImage: (postId: number, index: number) => void
   onPostEditShowImagesInContentChange: (postId: number, showImagesInContent: boolean) => void
+  onGenerateAiDraft: (prompt: string, signal: AbortSignal) => Promise<string>
   onSubmitPostEdit: (event: FormEvent, postId: number) => void
   onCancelPostEdit: (postId: number) => void
   onStartEditComment: (comment: Post['comments'][number]) => void
@@ -72,6 +73,7 @@ export function PostDetail({
   onPostEditUploadImages,
   onPostEditRemoveImage,
   onPostEditShowImagesInContentChange,
+  onGenerateAiDraft,
   onSubmitPostEdit,
   onCancelPostEdit,
   onStartEditComment,
@@ -125,6 +127,7 @@ export function PostDetail({
         <PostEditForm
           postId={post.id}
           draft={postEditDraft}
+          pollOptionCount={pollOptions.length}
           isUploadingImage={isUploadingImage}
           onNicknameChange={onPostEditNicknameChange}
           onContentChange={onPostEditContentChange}
@@ -132,6 +135,7 @@ export function PostDetail({
           onUploadImages={onPostEditUploadImages}
           onRemoveImage={onPostEditRemoveImage}
           onShowImagesInContentChange={onPostEditShowImagesInContentChange}
+          onGenerateAiDraft={onGenerateAiDraft}
           onSubmit={onSubmitPostEdit}
           onCancel={onCancelPostEdit}
         />
@@ -288,3 +292,4 @@ export function PostDetail({
     </article>
   )
 }
+

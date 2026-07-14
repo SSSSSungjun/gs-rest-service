@@ -774,6 +774,7 @@ function App() {
                 type: 'posts/editShowImagesChanged',
                 payload: { postId, showImagesInContent: nextShowImagesInContent },
               })}
+              onGenerateAiDraft={(prompt, signal) => boardApi.generateAiDraft(prompt, signal)}
               onSubmitPostEdit={handleUpdatePost}
               onCancelPostEdit={(postId) => dispatch({ type: 'posts/editCanceled', payload: postId })}
               onStartEditComment={(comment) => dispatch({ type: 'comments/editStarted', payload: comment })}
@@ -845,6 +846,7 @@ function App() {
                 type: 'posts/editShowImagesChanged',
                 payload: { postId, showImagesInContent: nextShowImagesInContent },
               })}
+              onGenerateAiDraft={(prompt, signal) => boardApi.generateAiDraft(prompt, signal)}
               onSubmitPostEdit={handleUpdatePost}
               onCancelPostEdit={(postId) => dispatch({ type: 'posts/editCanceled', payload: postId })}
             />

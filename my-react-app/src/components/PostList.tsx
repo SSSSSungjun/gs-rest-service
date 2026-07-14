@@ -25,6 +25,7 @@ interface PostListProps {
   onPostEditUploadImages: (postId: number, files: File[]) => void
   onPostEditRemoveImage: (postId: number, index: number) => void
   onPostEditShowImagesInContentChange: (postId: number, showImagesInContent: boolean) => void
+  onGenerateAiDraft: (prompt: string, signal: AbortSignal) => Promise<string>
   onSubmitPostEdit: (event: FormEvent, postId: number) => void
   onCancelPostEdit: (postId: number) => void
 }
@@ -45,6 +46,7 @@ export function PostList({
   onPostEditUploadImages,
   onPostEditRemoveImage,
   onPostEditShowImagesInContentChange,
+  onGenerateAiDraft,
   onSubmitPostEdit,
   onCancelPostEdit,
 }: PostListProps) {
@@ -91,6 +93,7 @@ export function PostList({
               <PostEditForm
                 postId={post.id}
                 draft={postEditDraft}
+                pollOptionCount={pollOptions.length}
                 isUploadingImage={isUploadingImage}
                 onNicknameChange={onPostEditNicknameChange}
                 onContentChange={onPostEditContentChange}
@@ -98,6 +101,7 @@ export function PostList({
                 onUploadImages={onPostEditUploadImages}
                 onRemoveImage={onPostEditRemoveImage}
                 onShowImagesInContentChange={onPostEditShowImagesInContentChange}
+                onGenerateAiDraft={onGenerateAiDraft}
                 onSubmit={onSubmitPostEdit}
                 onCancel={onCancelPostEdit}
               />
