@@ -22,7 +22,7 @@ test -n "$GEMINI_API_KEY" && echo "Gemini key ready" || echo "Gemini key missing
 
 기본 provider가 Gemini이므로 `AI_PROVIDER`는 따로 설정하지 않아도 된다. 기본 모델은 `gemini-3.5-flash`다.
 
-기본 추론 수준은 `medium`, provider 공통 출력 예산은 2000 tokens다. 짧고 빠른 응답이 우선이면 `minimal` 또는 `low`, 더 깊은 추론이 필요하면 `high`로 바꿀 수 있다. 추론 수준은 글의 길이 자체가 아니라 모델이 답을 만들기 전에 생각하는 깊이와 지연 시간에 영향을 준다.
+기본 추론 수준은 `medium`, provider 공통 출력 예산은 8192 tokens다. 짧고 빠른 응답이 우선이면 `minimal` 또는 `low`, 더 깊은 추론이 필요하면 `high`로 바꿀 수 있다. 추론 수준은 글의 길이 자체가 아니라 모델이 답을 만들기 전에 생각하는 깊이와 지연 시간에 영향을 준다.
 
 모델을 바꾸려면 Codespaces 터미널에서 다음과 같이 설정하고 Spring Boot를 다시 시작한다.
 
@@ -60,7 +60,7 @@ export AI_PROVIDER='gemini'
 | 환경변수 | 기본값 | 용도 |
 | --- | --- | --- |
 | `AI_PROVIDER` | `gemini` | `gemini` 또는 `openai` 선택 |
-| `AI_MAX_OUTPUT_TOKENS` | `2000` | 추론과 최종 본문에 사용할 최대 출력 예산 |
+| `AI_MAX_OUTPUT_TOKENS` | `8192` | 추론과 최종 본문에 사용할 최대 출력 예산 |
 | `GEMINI_API_KEY` | 없음 | Gemini 서버 API 키 |
 | `GEMINI_MODEL` | `gemini-3.5-flash` | Gemini 모델 |
 | `GEMINI_THINKING_LEVEL` | `medium` | `minimal`, `low`, `medium`, `high` 중 추론 수준 |
@@ -72,3 +72,5 @@ export AI_PROVIDER='gemini'
 API 키는 React `.env`, `application.properties`, 소스 코드, Git 커밋에 직접 적지 않는다. Codespaces Secret 또는 서버 환경변수로만 주입한다.
 
 Gemini 무료 티어에는 개인정보, 회사 기밀, 실제 내부 업무 내용을 입력하지 않는다. 무료 티어의 데이터 처리 조건은 실제 사용자 테스트 전에 별도로 확인한다.
+
+Gemini 응답이 `MAX_TOKENS`나 안전 필터로 중단되면 잘린 텍스트를 성공으로 사용하지 않는다. 서버 로그의 `finishReason`, `thoughtsTokens`, `candidateTokens`로 실제 중단 원인을 확인한다.

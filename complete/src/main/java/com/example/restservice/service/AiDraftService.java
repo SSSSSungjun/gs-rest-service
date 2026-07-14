@@ -55,7 +55,7 @@ public class AiDraftService {
             @Value("${app.gemini.api-key:}") String geminiApiKey,
             @Value("${app.gemini.model:gemini-3.5-flash}") String geminiModel,
             @Value("${app.gemini.thinking-level:medium}") String geminiThinkingLevel,
-            @Value("${app.ai.max-output-tokens:2000}") int maxOutputTokens,
+            @Value("${app.ai.max-output-tokens:8192}") int maxOutputTokens,
             @Value("${app.gemini.base-url:https://generativelanguage.googleapis.com}") String geminiBaseUrl
     ) {
         this.openAiRestClient = restClientBuilder.baseUrl(openAiBaseUrl).build();
@@ -127,6 +127,7 @@ public class AiDraftService {
                 .retrieve()
                 .body(JsonNode.class);
 
+        logGeminiResponse(response);
         return extractGeminiOutputText(response);
     }
 
@@ -160,6 +161,20 @@ public class AiDraftService {
             throw emptyResponse();
         }
 
+        String finishReason = response.path("candidates").path(0).path("finishReason").asText("");
+        if ("MAX_TOKENS".equals(finishReason)) {
+            throw new ResponseStatusException(
+                    BAD_GATEWAY,
+                    "Gemini 응답이 출력 토큰 한도에 도달해 중단되었습니다."
+            );
+        }
+        if (!finishReason.isBlank() && !"STOP".equals(finishReason)) {
+            throw new ResponseStatusException(
+                    BAD_GATEWAY,
+                    "Gemini 응답이 정상적으로 완료되지 않았습니다: " + finishReason
+            );
+        }
+
         List<String> textParts = new ArrayList<>();
         for (JsonNode candidate : response.path("candidates")) {
             for (JsonNode part : candidate.path("content").path("parts")) {
@@ -187,6 +202,21 @@ public class AiDraftService {
             }
         }
         return requireOutputText(textParts);
+    }
+
+    private static void logGeminiResponse(JsonNode response) {
+        if (response == null) {
+            return;
+        }
+
+        JsonNode usage = response.path("usageMetadata");
+        LOGGER.info(
+                "Gemini response: finishReason={}, thoughtsTokens={}, candidateTokens={}, totalTokens={}",
+                response.path("candidates").path(0).path("finishReason").asText(""),
+                usage.path("thoughtsTokenCount").asInt(0),
+                usage.path("candidatesTokenCount").asInt(0),
+                usage.path("totalTokenCount").asInt(0)
+        );
     }
 
     private static void addTextPart(List<String> textParts, JsonNode item) {
