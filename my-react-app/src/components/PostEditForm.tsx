@@ -1,11 +1,11 @@
-import type { ChangeEvent, FormEvent } from 'react'
+import type { FormEvent } from 'react'
 import type { BoardDraft } from '../boardReducer'
-import { handleTextareaKeyDown, preventEnterSubmit, resizeTextarea } from '../boardUi'
-import { ImageAttachmentFields } from './ImageAttachmentFields'
+import { BoardComposer } from './BoardComposer'
 
 interface PostEditFormProps {
   postId: number
   draft: BoardDraft
+  pollOptionCount: number
   isUploadingImage: boolean
   onNicknameChange: (postId: number, nickname: string) => void
   onContentChange: (postId: number, content: string) => void
@@ -13,6 +13,7 @@ interface PostEditFormProps {
   onUploadImages: (postId: number, files: File[]) => void
   onRemoveImage: (postId: number, index: number) => void
   onShowImagesInContentChange: (postId: number, showImagesInContent: boolean) => void
+  onGenerateAiDraft: (prompt: string, signal: AbortSignal) => Promise<string>
   onSubmit: (event: FormEvent, postId: number) => void
   onCancel: (postId: number) => void
 }
@@ -20,49 +21,49 @@ interface PostEditFormProps {
 export function PostEditForm({
   postId,
   draft,
+  pollOptionCount,
   isUploadingImage,
   onNicknameChange,
   onContentChange,
+  onAddImageUrl,
   onUploadImages,
   onRemoveImage,
   onShowImagesInContentChange,
+  onGenerateAiDraft,
   onSubmit,
   onCancel,
 }: PostEditFormProps) {
-  const handleContentChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
-    onContentChange(postId, event.target.value)
-    resizeTextarea(event.currentTarget)
-  }
-
   return (
-    <form className="edit-form post-edit-form" onSubmit={(event) => onSubmit(event, postId)} onKeyDown={preventEnterSubmit}>
-      <div className="edit-status-row">게시글 수정 중</div>
-      <input
-        value={draft.nickname}
-        onChange={(event) => onNicknameChange(postId, event.target.value)}
-        maxLength={40}
-        placeholder="익명"
-        aria-label="게시글 수정 닉네임"
-      />
-      <textarea
-        value={draft.content}
-        onChange={handleContentChange}
-        onKeyDown={handleTextareaKeyDown}
-        rows={3}
-        aria-label="게시글 수정 내용"
-      />
-      <ImageAttachmentFields
-        images={draft.images ?? []}
-        showImagesInContent={draft.showImagesInContent ?? true}
-        isUploading={isUploadingImage}
-        onUploadFiles={(files) => onUploadImages(postId, files)}
-        onRemoveImage={(index) => onRemoveImage(postId, index)}
-        onShowImagesInContentChange={(showImagesInContent) => onShowImagesInContentChange(postId, showImagesInContent)}
-      />
-      <div className="inline-actions">
-        <button type="submit" disabled={isUploadingImage}>수정 완료</button>
-        <button className="ghost-button" type="button" onClick={() => onCancel(postId)}>취소</button>
-      </div>
-    </form>
+    <BoardComposer
+      mode="edit"
+      preservedPollOptionCount={pollOptionCount}
+      isOpen
+      nickname={draft.nickname}
+      content={draft.content}
+      images={draft.images ?? []}
+      pollOptions={[]}
+      showImagesInContent={draft.showImagesInContent ?? true}
+      isSubmitting={false}
+      isUploadingImage={isUploadingImage}
+      errorMessage=""
+      onOpen={() => undefined}
+      onClose={() => onCancel(postId)}
+      onNicknameChange={(nickname) => onNicknameChange(postId, nickname)}
+      onContentChange={(event) => onContentChange(postId, event.target.value)}
+      onAddImageUrl={(url) => onAddImageUrl(postId, url)}
+      onUploadImages={(files) => onUploadImages(postId, files)}
+      onRemoveImage={(index) => onRemoveImage(postId, index)}
+      onStartPoll={() => undefined}
+      onPollOptionChange={() => undefined}
+      onAddPollOption={() => undefined}
+      onRemovePollOption={() => undefined}
+      onClearPoll={() => undefined}
+      onShowImagesInContentChange={(showImagesInContent) => (
+        onShowImagesInContentChange(postId, showImagesInContent)
+      )}
+      onGenerateAiDraft={onGenerateAiDraft}
+      onApplyAiDraft={(content) => onContentChange(postId, content)}
+      onSubmit={(event) => onSubmit(event, postId)}
+    />
   )
 }
