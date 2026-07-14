@@ -22,6 +22,8 @@ test -n "$GEMINI_API_KEY" && echo "Gemini key ready" || echo "Gemini key missing
 
 기본 provider가 Gemini이므로 `AI_PROVIDER`는 따로 설정하지 않아도 된다. 기본 모델은 `gemini-3.5-flash`다.
 
+기본 추론 수준은 `medium`, provider 공통 출력 예산은 2000 tokens다. 짧고 빠른 응답이 우선이면 `minimal` 또는 `low`, 더 깊은 추론이 필요하면 `high`로 바꿀 수 있다. 추론 수준은 글의 길이 자체가 아니라 모델이 답을 만들기 전에 생각하는 깊이와 지연 시간에 영향을 준다.
+
 모델을 바꾸려면 Codespaces 터미널에서 다음과 같이 설정하고 Spring Boot를 다시 시작한다.
 
 ```bash
@@ -58,8 +60,10 @@ export AI_PROVIDER='gemini'
 | 환경변수 | 기본값 | 용도 |
 | --- | --- | --- |
 | `AI_PROVIDER` | `gemini` | `gemini` 또는 `openai` 선택 |
+| `AI_MAX_OUTPUT_TOKENS` | `2000` | 추론과 최종 본문에 사용할 최대 출력 예산 |
 | `GEMINI_API_KEY` | 없음 | Gemini 서버 API 키 |
 | `GEMINI_MODEL` | `gemini-3.5-flash` | Gemini 모델 |
+| `GEMINI_THINKING_LEVEL` | `medium` | `minimal`, `low`, `medium`, `high` 중 추론 수준 |
 | `GEMINI_BASE_URL` | Google Gemini API | Gemini 호환 서버 주소 |
 | `OPENAI_API_KEY` | 없음 | OpenAI 서버 API 키 |
 | `OPENAI_MODEL` | `gpt-5.4-mini` | OpenAI 모델 |
