@@ -1,0 +1,53 @@
+name: Application checks
+
+on:
+  pull_request:
+    paths:
+      - 'complete/**'
+      - 'my-react-app/**'
+      - '.github/workflows/backend-tests.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'complete/**'
+      - 'my-react-app/**'
+      - '.github/workflows/backend-tests.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: complete
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - name: Run Spring tests
+        run: ./gradlew test
+
+  frontend-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: my-react-app
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Type-check and build
+        run: npm run build
