@@ -16,6 +16,10 @@ export function resolveApiOrigin() {
   return baseUrl.replace(/\/api\/?$/, '')
 }
 
+export function isApiErrorStatus(error: unknown, status: number) {
+  return axios.isAxiosError(error) && error.response?.status === status
+}
+
 const apiClient = axios.create({
   baseURL: resolveApiBaseUrl(),
   withCredentials: true,
