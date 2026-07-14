@@ -23,6 +23,7 @@ type FeedSort = 'latest' | 'oldest' | 'popular'
 type SearchMode = 'posts' | 'comments'
 
 const MAX_IMAGE_COUNT = 10
+const COMPOSE_HASH = '#compose'
 
 function App() {
   const [state, dispatch] = useReducer(boardReducer, initialBoardState)
@@ -34,6 +35,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [commentNotifications, setCommentNotifications] = useState<CommentNotification[]>([])
   const [isNotificationViewOpen, setIsNotificationViewOpen] = useState(false)
+  const [isComposerViewOpen, setIsComposerViewOpen] = useState(false)
   const {
     posts,
     nickname,
@@ -150,6 +152,7 @@ function App() {
     if (window.location.hash !== nextHash) {
       window.history.pushState({ postId }, '', nextHash)
     }
+    setIsComposerViewOpen(false)
     setIsNotificationViewOpen(false)
     dispatch({ type: 'posts/detailOpened', payload: postId })
     dispatch({ type: 'posts/viewCountIncremented', payload: postId })
@@ -162,6 +165,26 @@ function App() {
     }
     setIsNotificationViewOpen(false)
     dispatch({ type: 'posts/detailClosed' })
+  }, [])
+
+  const openComposer = useCallback(() => {
+    if (window.location.hash !== COMPOSE_HASH) {
+      window.history.pushState({ composer: true }, '', COMPOSE_HASH)
+    }
+    setIsNotificationViewOpen(false)
+    dispatch({ type: 'posts/detailClosed' })
+    setIsComposerViewOpen(true)
+  }, [])
+
+  const closeComposer = useCallback(() => {
+    setIsComposerViewOpen(false)
+    if (window.location.hash !== COMPOSE_HASH) return
+
+    if (window.history.state?.composer) {
+      window.history.back()
+      return
+    }
+    window.history.replaceState(null, '', window.location.pathname + window.location.search)
   }, [])
 
   const handleBoardTitleClick = useCallback(() => {
@@ -388,6 +411,7 @@ function App() {
       dispatch({ type: 'pagination/pageChanged', payload: 1 })
       setFeedSort('latest')
       setIsNotificationViewOpen(false)
+      closeComposer()
       showSystemMessage('게시글을 등록했습니다.')
       await fetchPosts(false)
     } catch (error) {
@@ -527,6 +551,14 @@ function App() {
 
   useEffect(() => {
     const syncDetailFromHash = () => {
+      const isComposerHash = window.location.hash === COMPOSE_HASH
+      setIsComposerViewOpen(isComposerHash)
+      if (isComposerHash) {
+        setIsNotificationViewOpen(false)
+        dispatch({ type: 'posts/detailClosed' })
+        return
+      }
+
       const postId = getPostIdFromHash()
       if (postId === null) {
         dispatch({ type: 'posts/detailClosed' })
@@ -772,6 +804,7 @@ function App() {
 
       {!isDetailView && !isNotificationView && !hasActivePostEdit && (
         <BoardComposer
+          isOpen={isComposerViewOpen}
           nickname={nickname}
           content={content}
           images={images}
@@ -780,6 +813,8 @@ function App() {
           isSubmitting={isSubmitting}
           isUploadingImage={isUploadingImage}
           errorMessage={errorMessage}
+          onOpen={openComposer}
+          onClose={closeComposer}
           onNicknameChange={(nextNickname) => dispatch({ type: 'composer/nicknameChanged', payload: nextNickname })}
           onContentChange={handleComposerChange}
           onAddImageUrl={handleAddComposerImageUrl}
