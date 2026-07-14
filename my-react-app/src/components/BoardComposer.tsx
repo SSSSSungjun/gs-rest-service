@@ -17,6 +17,8 @@ import '../composerLayout.css'
 import './BoardComposer.css'
 
 interface BoardComposerProps {
+  mode?: 'create' | 'edit'
+  preservedPollOptionCount?: number
   isOpen: boolean
   nickname: string
   content: string
@@ -66,6 +68,8 @@ function getPastedImageUrl(text: string) {
 }
 
 export function BoardComposer({
+  mode = 'create',
+  preservedPollOptionCount = 0,
   isOpen,
   nickname,
   content,
@@ -316,14 +320,14 @@ export function BoardComposer({
           >
             <ArrowLeftIcon />
           </button>
-          <strong>글쓰기</strong>
+          <strong>{mode === 'edit' ? '글 수정' : '글쓰기'}</strong>
           <button
             className="composer-screen-submit"
             type="submit"
             disabled={isSubmitting || isUploadingImage || !content.trim()}
           >
             <SendIcon />
-            {isSubmitting ? '게시 중' : '게시'}
+            {isSubmitting ? '저장 중' : mode === 'edit' ? '수정' : '게시'}
           </button>
         </header>
 
@@ -409,6 +413,14 @@ export function BoardComposer({
             </section>
           )}
 
+          {mode === 'edit' && preservedPollOptionCount > 0 && (
+            <section className="composer-preserved-poll" aria-label="기존 투표 유지">
+              <BarChart3Icon />
+              <strong>기존 투표 유지</strong>
+              <span>{preservedPollOptionCount}개 선택지</span>
+            </section>
+          )}
+
           {isAiMode && (
             <section className="composer-ai-mode" aria-label="AI 글쓰기">
               <div className="composer-ai-header">
@@ -439,18 +451,11 @@ export function BoardComposer({
                 />
                 {isGeneratingAiDraft && (
                   <div className="composer-ai-thinking" role="status" aria-live="polite">
-                    <div className="composer-ai-thinking-copy">
-                      <span className="composer-ai-spinner" aria-hidden="true" />
-                      <span>
-                        {aiGenerationSeconds >= 8 ? '생성이 평소보다 오래 걸리고 있어요' : '초안을 생각하고 있어요'}
-                        {aiGenerationSeconds > 0 ? ` · ${aiGenerationSeconds}초` : '...'}
-                      </span>
-                    </div>
-                    {aiGenerationSeconds >= 8 && (
-                      <button className="composer-ai-stop" type="button" onClick={resetAiMode}>
-                        그만 기다리기
-                      </button>
-                    )}
+                    <span className="composer-ai-spinner" aria-hidden="true" />
+                    <span>
+                      초안을 생각하고 있어요
+                      {aiGenerationSeconds > 0 ? ` · ${aiGenerationSeconds}초` : '...'}
+                    </span>
                   </div>
                 )}
               </div>
@@ -485,26 +490,18 @@ export function BoardComposer({
               disabled={isUploadingImage}
             />
           </label>
-          <button
-            className={`composer-tool-button ${hasPoll ? 'active' : ''}`}
-            type="button"
-            aria-pressed={hasPoll}
-            onClick={onStartPoll}
-          >
-            <BarChart3Icon />
-            <span>투표</span>
-          </button>
+          {mode === 'create' && (
+            <button
+              className={`composer-tool-button ${hasPoll ? 'active' : ''}`}
+              type="button"
+              aria-pressed={hasPoll}
+              onClick={onStartPoll}
+            >
+              <BarChart3Icon />
+              <span>투표</span>
+            </button>
+          )}
           <button
             className={`composer-tool-button ${isAiMode ? 'active' : ''}`}
             type="button"
             aria-pressed={isAiMode}
-            onClick={handleStartAiMode}
-          >
-            <SparklesIcon />
-            <span>AI 글쓰기</span>
-          </button>
-        </footer>
-      </form>
-    </section>
-  )
-}
