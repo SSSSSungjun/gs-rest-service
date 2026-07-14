@@ -41,6 +41,7 @@ function App() {
   const [isNotificationViewOpen, setIsNotificationViewOpen] = useState(false)
   const [isComposerViewOpen, setIsComposerViewOpen] = useState(false)
   const [isActivityRefreshing, setIsActivityRefreshing] = useState(false)
+  const [isActivityStreamEnabled, setIsActivityStreamEnabled] = useState(false)
   const {
     posts,
     nickname,
@@ -70,7 +71,7 @@ function App() {
     summary: boardActivity,
     captureRefreshMarker,
     acknowledgeRefresh,
-  } = useBoardActivity(selectedPost?.id ?? null)
+  } = useBoardActivity(selectedPost?.id ?? null, isActivityStreamEnabled)
   const isNotificationView = isNotificationViewOpen && !isDetailView
   const hasActivePostEdit = Object.keys(editingPosts).length > 0
   const sortedPosts = useMemo(() => {
@@ -136,6 +137,7 @@ function App() {
     try {
       const data = await boardApi.getPosts()
       dispatch({ type: 'posts/loadSucceeded', payload: data })
+      setIsActivityStreamEnabled(true)
       acknowledgeRefresh(refreshMarker)
     } catch (error) {
       const message = '게시글을 불러오지 못했습니다.'
