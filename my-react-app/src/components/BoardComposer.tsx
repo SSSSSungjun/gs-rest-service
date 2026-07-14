@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ChangeEvent, ClipboardEvent, DragEvent, FormEvent, KeyboardEvent as ReactKeyboardEvent } from 'react'
 import type { PostImage } from '../boardApi'
 import { handleTextareaKeyDown, preventEnterSubmit, resizeTextarea } from '../boardUi'
@@ -114,6 +114,11 @@ export function BoardComposer({
     return () => aiRequestRef.current?.abort()
   }, [])
 
+  useLayoutEffect(() => {
+    if (isAiMode || !contentTextareaRef.current) return
+    resizeTextarea(contentTextareaRef.current)
+  }, [content, isAiMode])
+
   const uploadImages = (files: File[]) => {
     if (files.length === 0) return
     onUploadImages(files)
@@ -169,12 +174,7 @@ export function BoardComposer({
       onApplyAiDraft(draft)
       setAiPrompt('')
       setIsAiMode(false)
-      requestAnimationFrame(() => {
-        if (contentTextareaRef.current) {
-          resizeTextarea(contentTextareaRef.current)
-          contentTextareaRef.current.focus()
-        }
-      })
+      requestAnimationFrame(() => contentTextareaRef.current?.focus())
     } catch (error) {
       if (!controller.signal.aborted) {
         setAiErrorMessage('AI 글 생성에 실패했습니다. 잠시 후 다시 시도해주세요.')
