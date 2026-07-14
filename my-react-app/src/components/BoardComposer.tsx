@@ -2,12 +2,22 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ChangeEvent, ClipboardEvent, DragEvent, FormEvent, KeyboardEvent as ReactKeyboardEvent } from 'react'
 import type { PostImage } from '../boardApi'
 import { handleTextareaKeyDown, preventEnterSubmit, resizeTextarea } from '../boardUi'
-import { BarChart3Icon, CameraIcon, PlusIcon, SendIcon, SparklesIcon, Trash2Icon, XIcon } from './Icons'
+import {
+  ArrowLeftIcon,
+  BarChart3Icon,
+  CameraIcon,
+  PlusIcon,
+  SendIcon,
+  SparklesIcon,
+  Trash2Icon,
+  XIcon,
+} from './Icons'
 import { ImageAttachmentFields } from './ImageAttachmentFields'
 import '../composerLayout.css'
 import './BoardComposer.css'
 
 interface BoardComposerProps {
+  isOpen: boolean
   nickname: string
   content: string
   images: PostImage[]
@@ -16,6 +26,8 @@ interface BoardComposerProps {
   isSubmitting: boolean
   isUploadingImage: boolean
   errorMessage: string
+  onOpen: () => void
+  onClose: () => void
   onNicknameChange: (nickname: string) => void
   onContentChange: (event: ChangeEvent<HTMLTextAreaElement>) => void
   onAddImageUrl: (url: string) => void
@@ -54,6 +66,7 @@ function getPastedImageUrl(text: string) {
 }
 
 export function BoardComposer({
+  isOpen,
   nickname,
   content,
   images,
@@ -62,6 +75,8 @@ export function BoardComposer({
   isSubmitting,
   isUploadingImage,
   errorMessage,
+  onOpen,
+  onClose,
   onNicknameChange,
   onContentChange,
   onAddImageUrl,
@@ -77,44 +92,65 @@ export function BoardComposer({
   onApplyAiDraft,
   onSubmit,
 }: BoardComposerProps) {
-  const [isAttachmentMenuOpen, setIsAttachmentMenuOpen] = useState(false)
   const [isAiMode, setIsAiMode] = useState(false)
   const [aiPrompt, setAiPrompt] = useState('')
   const [isGeneratingAiDraft, setIsGeneratingAiDraft] = useState(false)
   const [aiGenerationSeconds, setAiGenerationSeconds] = useState(0)
   const [aiErrorMessage, setAiErrorMessage] = useState('')
-  const composerRef = useRef<HTMLElement>(null)
-  const attachmentShellRef = useRef<HTMLDivElement>(null)
+  const launcherRef = useRef<HTMLElement>(null)
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null)
   const aiRequestRef = useRef<AbortController | null>(null)
   const hasImages = images.length > 0
   const hasPoll = pollOptions.length > 0
 
-  useEffect(() => {
-    if (!isAttachmentMenuOpen) return
+  const resetAiMode = () => {
+    aiRequestRef.current?.abort()
+    aiRequestRef.current = null
+    setIsGeneratingAiDraft(false)
+    setAiErrorMessage('')
+    setAiPrompt('')
+    setIsAiMode(false)
+  }
 
-    const closeOnPointerDown = (event: PointerEvent) => {
-      if (attachmentShellRef.current?.contains(event.target as Node)) return
-      setIsAttachmentMenuOpen(false)
-    }
-
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsAttachmentMenuOpen(false)
-      }
-    }
-
-    window.addEventListener('pointerdown', closeOnPointerDown)
-    window.addEventListener('keydown', closeOnEscape)
-    return () => {
-      window.removeEventListener('pointerdown', closeOnPointerDown)
-      window.removeEventListener('keydown', closeOnEscape)
-    }
-  }, [isAttachmentMenuOpen])
+  const handleCloseComposer = () => {
+    resetAiMode()
+    onClose()
+  }
 
   useEffect(() => {
     return () => aiRequestRef.current?.abort()
   }, [])
+
+  useEffect(() => {
+    if (!isOpen) {
+      aiRequestRef.current?.abort()
+      aiRequestRef.current = null
+      setIsGeneratingAiDraft(false)
+      setAiErrorMessage('')
+      setAiPrompt('')
+      setIsAiMode(false)
+      return
+    }
+
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    const focusFrame = window.requestAnimationFrame(() => contentTextareaRef.current?.focus())
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return
+      if (isAiMode) {
+        resetAiMode()
+      } else {
+        handleCloseComposer()
+      }
+    }
+
+    window.addEventListener('keydown', closeOnEscape)
+    return () => {
+      window.cancelAnimationFrame(focusFrame)
+      window.removeEventListener('keydown', closeOnEscape)
+      document.body.style.overflow = previousOverflow
+    }
+  }, [isAiMode, isOpen])
 
   useEffect(() => {
     if (!isGeneratingAiDraft) {
@@ -131,25 +167,27 @@ export function BoardComposer({
   }, [isGeneratingAiDraft])
 
   useLayoutEffect(() => {
-    if (isAiMode || !contentTextareaRef.current) return
+    if (!isOpen || !contentTextareaRef.current) return
     resizeTextarea(contentTextareaRef.current)
-  }, [content, isAiMode])
+  }, [content, isOpen])
 
   useLayoutEffect(() => {
-    const composer = composerRef.current
-    const boardShell = composer?.closest<HTMLElement>('.board-shell')
-    if (!composer || !boardShell) return
+    if (isOpen) return
+
+    const launcher = launcherRef.current
+    const boardShell = launcher?.closest<HTMLElement>('.board-shell')
+    if (!launcher || !boardShell) return
 
     const syncReservedHeight = () => {
       boardShell.style.setProperty(
         '--composer-reserved-height',
-        `${Math.ceil(composer.getBoundingClientRect().height)}px`,
+        `${Math.ceil(launcher.getBoundingClientRect().height)}px`,
       )
     }
 
     syncReservedHeight()
     const observer = new ResizeObserver(syncReservedHeight)
-    observer.observe(composer)
+    observer.observe(launcher)
     window.addEventListener('resize', syncReservedHeight)
 
     return () => {
@@ -157,12 +195,11 @@ export function BoardComposer({
       window.removeEventListener('resize', syncReservedHeight)
       boardShell.style.removeProperty('--composer-reserved-height')
     }
-  }, [])
+  }, [isOpen])
 
   const uploadImages = (files: File[]) => {
     if (files.length === 0) return
     onUploadImages(files)
-    setIsAttachmentMenuOpen(false)
   }
 
   const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -170,24 +207,9 @@ export function BoardComposer({
     event.currentTarget.value = ''
   }
 
-  const handleStartPoll = () => {
-    onStartPoll()
-    setIsAttachmentMenuOpen(false)
-  }
-
   const handleStartAiMode = () => {
-    setIsAttachmentMenuOpen(false)
     setAiErrorMessage('')
     setIsAiMode(true)
-  }
-
-  const handleCancelAiMode = () => {
-    aiRequestRef.current?.abort()
-    aiRequestRef.current = null
-    setIsGeneratingAiDraft(false)
-    setAiErrorMessage('')
-    setAiPrompt('')
-    setIsAiMode(false)
   }
 
   const handleGenerateAiDraft = async () => {
@@ -271,12 +293,69 @@ export function BoardComposer({
     }
   }
 
+  if (!isOpen) {
+    return (
+      <section ref={launcherRef} className="composer-launcher composer-bottom" aria-label="게시글 작성 열기">
+        <button className="composer-launcher-button" type="button" onClick={onOpen}>
+          무슨 일이 있었나요?
+        </button>
+      </section>
+    )
+  }
+
   return (
-    <section ref={composerRef} className="composer composer-bottom" aria-label="게시글 작성">
-      <form onSubmit={onSubmit} onKeyDown={preventEnterSubmit}>
-        <div className="composer-draft-box">
+    <section className="composer-screen" aria-label="게시글 작성">
+      <form className="composer-screen-form" onSubmit={onSubmit} onKeyDown={preventEnterSubmit}>
+        <header className="composer-screen-header">
+          <button
+            className="composer-screen-back icon-only-button"
+            type="button"
+            aria-label="작성 화면 닫기"
+            title="작성 화면 닫기"
+            onClick={handleCloseComposer}
+          >
+            <ArrowLeftIcon />
+          </button>
+          <strong>글쓰기</strong>
+          <button
+            className="composer-screen-submit"
+            type="submit"
+            disabled={isSubmitting || isUploadingImage || !content.trim()}
+          >
+            <SendIcon />
+            {isSubmitting ? '게시 중' : '게시'}
+          </button>
+        </header>
+
+        <div className="composer-screen-scroll">
+          <div className="composer-author-row">
+            <span className="composer-author-mark" aria-hidden="true">익</span>
+            <input
+              className="composer-screen-nickname"
+              value={nickname}
+              onChange={(event) => onNicknameChange(event.target.value)}
+              maxLength={40}
+              placeholder="익명"
+              aria-label="게시글 닉네임"
+            />
+          </div>
+
+          <textarea
+            ref={contentTextareaRef}
+            className="composer-screen-textarea"
+            value={content}
+            onChange={onContentChange}
+            onKeyDown={handleTextareaKeyDown}
+            onPaste={handlePaste}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            rows={8}
+            placeholder="무슨 일이 있었나요?"
+            aria-label="게시글 내용"
+          />
+
           {hasImages && (
-            <div className="composer-preview-strip">
+            <section className="composer-screen-section" aria-label="첨부한 사진">
               <ImageAttachmentFields
                 images={images}
                 showImagesInContent={showImagesInContent}
@@ -287,14 +366,16 @@ export function BoardComposer({
                 onRemoveImage={onRemoveImage}
                 onShowImagesInContentChange={onShowImagesInContentChange}
               />
-            </div>
+            </section>
           )}
 
           {hasPoll && (
-            <div className="composer-poll-editor">
+            <section className="composer-poll-editor" aria-label="투표 만들기">
               <div className="composer-poll-header">
                 <strong><BarChart3Icon />투표</strong>
-                <button className="text-button icon-text-button" type="button" onClick={onClearPoll}><Trash2Icon />삭제</button>
+                <button className="text-button icon-text-button" type="button" onClick={onClearPoll}>
+                  <Trash2Icon />삭제
+                </button>
               </div>
               <div className="composer-poll-options">
                 {pollOptions.map((option, index) => (
@@ -307,19 +388,29 @@ export function BoardComposer({
                       onChange={(event) => onPollOptionChange(index, event.target.value)}
                     />
                     {pollOptions.length > 2 && (
-                      <button className="text-button icon-text-button" type="button" onClick={() => onRemovePollOption(index)}><Trash2Icon />삭제</button>
+                      <button
+                        className="text-button icon-only-button"
+                        type="button"
+                        aria-label={`선택지 ${index + 1} 삭제`}
+                        title="선택지 삭제"
+                        onClick={() => onRemovePollOption(index)}
+                      >
+                        <Trash2Icon />
+                      </button>
                     )}
                   </div>
                 ))}
               </div>
               {pollOptions.length < 5 && (
-                <button className="ghost-button composer-poll-add icon-text-button" type="button" onClick={onAddPollOption}><PlusIcon />선택지 추가</button>
+                <button className="ghost-button composer-poll-add icon-text-button" type="button" onClick={onAddPollOption}>
+                  <PlusIcon />선택지 추가
+                </button>
               )}
-            </div>
+            </section>
           )}
 
-          {isAiMode ? (
-            <div className="composer-ai-mode">
+          {isAiMode && (
+            <section className="composer-ai-mode" aria-label="AI 글쓰기">
               <div className="composer-ai-header">
                 <strong className="composer-ai-title"><SparklesIcon />AI 글쓰기</strong>
                 <button
@@ -327,7 +418,7 @@ export function BoardComposer({
                   type="button"
                   aria-label="AI 글쓰기 취소"
                   title="AI 글쓰기 취소"
-                  onClick={handleCancelAiMode}
+                  onClick={resetAiMode}
                 >
                   <XIcon />
                 </button>
@@ -337,8 +428,8 @@ export function BoardComposer({
                   className="composer-ai-prompt"
                   value={aiPrompt}
                   maxLength={2000}
-                  rows={3}
-                  placeholder="어떤 내용과 말투로 글을 쓸지 설명해주세요."
+                  rows={4}
+                  placeholder="원하는 내용, 형식, 말투를 자유롭게 설명해주세요."
                   aria-label="AI 글쓰기 요청"
                   aria-busy={isGeneratingAiDraft}
                   onChange={(event) => setAiPrompt(event.target.value)}
@@ -358,7 +449,7 @@ export function BoardComposer({
               </div>
               {aiErrorMessage && <p className="composer-ai-error" role="alert">{aiErrorMessage}</p>}
               <div className="composer-ai-actions">
-                <p className="composer-ai-hint">생성된 글은 게시 전에 자유롭게 고칠 수 있습니다.</p>
+                <p className="composer-ai-hint">생성된 글은 본문에서 이어 쓰거나 고칠 수 있습니다.</p>
                 <button
                   className="composer-ai-generate"
                   type="button"
@@ -366,75 +457,46 @@ export function BoardComposer({
                   disabled={isGeneratingAiDraft || !aiPrompt.trim()}
                 >
                   <SparklesIcon />
-                  {isGeneratingAiDraft ? '작성 중' : '글 생성'}
+                  {isGeneratingAiDraft ? '작성 중' : '초안 만들기'}
                 </button>
               </div>
-            </div>
-          ) : (
-            <div className="composer-input-shell" ref={attachmentShellRef}>
-            <button
-              className="composer-attach-button icon-only-button"
-              type="button"
-              aria-label="첨부 메뉴"
-              aria-expanded={isAttachmentMenuOpen}
-              onClick={() => setIsAttachmentMenuOpen((isOpen) => !isOpen)}
-              disabled={isUploadingImage}
-            >
-              <PlusIcon />
-            </button>
-            <input
-              className="composer-nickname-input"
-              value={nickname}
-              onChange={(event) => onNicknameChange(event.target.value)}
-              maxLength={40}
-              placeholder="익명"
-              aria-label="게시글 닉네임"
-            />
-            <textarea
-              ref={contentTextareaRef}
-              className="composer-textarea"
-              value={content}
-              onChange={onContentChange}
-              onKeyDown={handleTextareaKeyDown}
-              onPaste={handlePaste}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              rows={1}
-              placeholder="무슨 일이 있었나요?"
-              aria-label="게시글 내용"
-            />
-            <button className="composer-submit-button icon-only-button" type="submit" disabled={isSubmitting || isUploadingImage} aria-label={isSubmitting ? '게시글 등록 중' : '게시글 등록'}>
-              <SendIcon />
-            </button>
-
-            {isAttachmentMenuOpen && (
-              <div className="composer-attachment-menu" role="menu">
-                <label className={`composer-attachment-option ${isUploadingImage ? 'disabled' : ''}`} aria-label="사진 첨부">
-                  <CameraIcon />
-                  <span>사진</span>
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/gif,image/webp"
-                    multiple
-                    onChange={handleFileInputChange}
-                    disabled={isUploadingImage}
-                  />
-                </label>
-                <button className="composer-attachment-option" type="button" onClick={handleStartPoll} disabled={hasPoll} aria-label="투표 만들기">
-                  <BarChart3Icon />
-                  <span>투표</span>
-                </button>
-                <button className="composer-attachment-option" type="button" onClick={handleStartAiMode} aria-label="AI 글쓰기">
-                  <SparklesIcon />
-                  <span>AI 글쓰기</span>
-                </button>
-              </div>
-            )}
-            </div>
+            </section>
           )}
+
+          {errorMessage && <p className="form-error" role="alert">{errorMessage}</p>}
         </div>
 
-        {errorMessage && <p className="form-error">{errorMessage}</p>}
+        <footer className="composer-screen-toolbar" aria-label="게시글 도구">
+          <label className={`composer-tool-button ${isUploadingImage ? 'disabled' : ''}`}>
+            <CameraIcon />
+            <span>{isUploadingImage ? '올리는 중' : '사진'}</span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp"
+              multiple
+              onChange={handleFileInputChange}
+              disabled={isUploadingImage}
+            />
+          </label>
+          <button
+            className={`composer-tool-button ${hasPoll ? 'active' : ''}`}
+            type="button"
+            aria-pressed={hasPoll}
+            onClick={onStartPoll}
+          >
+            <BarChart3Icon />
+            <span>투표</span>
+          </button>
+          <button
+            className={`composer-tool-button ${isAiMode ? 'active' : ''}`}
+            type="button"
+            aria-pressed={isAiMode}
+            onClick={handleStartAiMode}
+          >
+            <SparklesIcon />
+            <span>AI 글쓰기</span>
+          </button>
+        </footer>
       </form>
     </section>
   )
