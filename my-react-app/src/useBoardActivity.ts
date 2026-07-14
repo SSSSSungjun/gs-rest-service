@@ -50,7 +50,7 @@ function isActivityMessage(value: unknown): value is BoardActivityMessage {
     && typeof message.occurredAt === 'number'
 }
 
-export function useBoardActivity(activePostId: number | null) {
+export function useBoardActivity(activePostId: number | null, enabled: boolean) {
   const pendingActivitiesRef = useRef<ReceivedActivity[]>([])
   const seenEventIdsRef = useRef(new Set<string>())
   const seenEventOrderRef = useRef<string[]>([])
@@ -60,7 +60,7 @@ export function useBoardActivity(activePostId: number | null) {
   const [summary, setSummary] = useState<BoardActivitySummary>(EMPTY_SUMMARY)
 
   useEffect(() => {
-    if (!('EventSource' in window)) return
+    if (!enabled || !('EventSource' in window)) return
 
     const baseUrl = resolveApiBaseUrl().replace(/\/$/, '')
     const eventSource = new EventSource(`${baseUrl}/activity/stream`, {
@@ -97,7 +97,7 @@ export function useBoardActivity(activePostId: number | null) {
       eventSource.removeEventListener('activity', receiveActivity)
       eventSource.close()
     }
-  }, [])
+  }, [enabled])
 
   useEffect(() => {
     const evaluateActivity = () => {
