@@ -693,3 +693,35 @@
     width: 64px;
   }
 }
+
+@media (max-width: 380px) {
+  .pagination {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .pagination-pages {
+    width: 100%;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+
+  .pagination-pages button {
+    flex: 0 0 auto;
+  }
+
+  .pagination-jump {
+    width: 100%;
+    min-width: 0;
+    flex-wrap: wrap;
+  }
+
+  .pagination-jump input {
+    width: 48px;
+  }
+}
