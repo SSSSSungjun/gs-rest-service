@@ -11,6 +11,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.springframework.http.HttpStatus.BAD_GATEWAY;
@@ -18,6 +19,8 @@ import static org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE;
 
 @Service
 public class AiDraftService {
+    private static final String GEMINI_PROVIDER = "gemini";
+    private static final String OPENAI_PROVIDER = "openai";
     private static final String INSTRUCTIONS = """
             한국어 익명 커뮤니티 게시글 작성 도우미입니다.
             사용자가 설명한 의도와 말투를 살려 자연스러운 게시글 본문을 작성하세요.
@@ -26,45 +29,43 @@ public class AiDraftService {
             게시글 본문은 1800자 이내로 작성하세요.
             """;
 
-    private final RestClient restClient;
-    private final String apiKey;
-    private final String model;
+    private final RestClient openAiRestClient;
+    private final RestClient geminiRestClient;
+    private final String provider;
+    private final String openAiApiKey;
+    private final String openAiModel;
+    private final String geminiApiKey;
+    private final String geminiModel;
 
     public AiDraftService(
             RestClient.Builder restClientBuilder,
-            @Value("${app.openai.api-key:}") String apiKey,
-            @Value("${app.openai.model:gpt-5.4-mini}") String model,
-            @Value("${app.openai.base-url:https://api.openai.com}") String baseUrl
+            @Value("${app.ai.provider:gemini}") String provider,
+            @Value("${app.openai.api-key:}") String openAiApiKey,
+            @Value("${app.openai.model:gpt-5.4-mini}") String openAiModel,
+            @Value("${app.openai.base-url:https://api.openai.com}") String openAiBaseUrl,
+            @Value("${app.gemini.api-key:}") String geminiApiKey,
+            @Value("${app.gemini.model:gemini-3.5-flash}") String geminiModel,
+            @Value("${app.gemini.base-url:https://generativelanguage.googleapis.com}") String geminiBaseUrl
     ) {
-        this.restClient = restClientBuilder.baseUrl(baseUrl).build();
-        this.apiKey = apiKey;
-        this.model = model;
+        this.openAiRestClient = restClientBuilder.baseUrl(openAiBaseUrl).build();
+        this.geminiRestClient = restClientBuilder.baseUrl(geminiBaseUrl).build();
+        this.provider = provider;
+        this.openAiApiKey = openAiApiKey;
+        this.openAiModel = openAiModel;
+        this.geminiApiKey = geminiApiKey;
+        this.geminiModel = geminiModel;
     }
 
     public String generateDraft(String prompt) {
-        if (apiKey.isBlank()) {
-            throw new ResponseStatusException(
-                    SERVICE_UNAVAILABLE,
-                    "OPENAI_API_KEY가 설정되지 않았습니다."
-            );
-        }
-
         try {
-            JsonNode response = restClient.post()
-                    .uri("/v1/responses")
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + apiKey)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .body(Map.of(
-                            "model", model,
-                            "instructions", INSTRUCTIONS,
-                            "input", prompt.trim(),
-                            "max_output_tokens", 700
-                    ))
-                    .retrieve()
-                    .body(JsonNode.class);
-
-            return extractOutputText(response);
+            return switch (provider.trim().toLowerCase(Locale.ROOT)) {
+                case GEMINI_PROVIDER -> generateWithGemini(prompt);
+                case OPENAI_PROVIDER -> generateWithOpenAi(prompt);
+                default -> throw new ResponseStatusException(
+                        SERVICE_UNAVAILABLE,
+                        "지원하지 않는 AI provider입니다: " + provider
+                );
+            };
         } catch (ResponseStatusException exception) {
             throw exception;
         } catch (RestClientException exception) {
@@ -76,9 +77,77 @@ public class AiDraftService {
         }
     }
 
-    static String extractOutputText(JsonNode response) {
+    private String generateWithGemini(String prompt) {
+        if (geminiApiKey.isBlank()) {
+            throw new ResponseStatusException(
+                    SERVICE_UNAVAILABLE,
+                    "GEMINI_API_KEY가 설정되지 않았습니다."
+            );
+        }
+
+        JsonNode response = geminiRestClient.post()
+                .uri("/v1beta/models/{model}:generateContent", geminiModel)
+                .header("x-goog-api-key", geminiApiKey)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(Map.of(
+                        "system_instruction", Map.of(
+                                "parts", List.of(Map.of("text", INSTRUCTIONS))
+                        ),
+                        "contents", List.of(Map.of(
+                                "role", "user",
+                                "parts", List.of(Map.of("text", prompt.trim()))
+                        )),
+                        "generationConfig", Map.of("maxOutputTokens", 700)
+                ))
+                .retrieve()
+                .body(JsonNode.class);
+
+        return extractGeminiOutputText(response);
+    }
+
+    private String generateWithOpenAi(String prompt) {
+        if (openAiApiKey.isBlank()) {
+            throw new ResponseStatusException(
+                    SERVICE_UNAVAILABLE,
+                    "OPENAI_API_KEY가 설정되지 않았습니다."
+            );
+        }
+
+        JsonNode response = openAiRestClient.post()
+                .uri("/v1/responses")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + openAiApiKey)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(Map.of(
+                        "model", openAiModel,
+                        "instructions", INSTRUCTIONS,
+                        "input", prompt.trim(),
+                        "max_output_tokens", 700
+                ))
+                .retrieve()
+                .body(JsonNode.class);
+
+        return extractOpenAiOutputText(response);
+    }
+
+    static String extractGeminiOutputText(JsonNode response) {
         if (response == null) {
-            throw new ResponseStatusException(BAD_GATEWAY, "AI 응답이 비어 있습니다.");
+            throw emptyResponse();
+        }
+
+        List<String> textParts = new ArrayList<>();
+        for (JsonNode candidate : response.path("candidates")) {
+            for (JsonNode part : candidate.path("content").path("parts")) {
+                addTextPart(textParts, part);
+            }
+        }
+        return requireOutputText(textParts);
+    }
+
+    static String extractOpenAiOutputText(JsonNode response) {
+        if (response == null) {
+            throw emptyResponse();
         }
 
         List<String> textParts = new ArrayList<>();
@@ -89,14 +158,21 @@ public class AiDraftService {
 
             for (JsonNode contentItem : outputItem.path("content")) {
                 if ("output_text".equals(contentItem.path("type").asText())) {
-                    String text = contentItem.path("text").asText("").trim();
-                    if (!text.isEmpty()) {
-                        textParts.add(text);
-                    }
+                    addTextPart(textParts, contentItem);
                 }
             }
         }
+        return requireOutputText(textParts);
+    }
 
+    private static void addTextPart(List<String> textParts, JsonNode item) {
+        String text = item.path("text").asText("").trim();
+        if (!text.isEmpty()) {
+            textParts.add(text);
+        }
+    }
+
+    private static String requireOutputText(List<String> textParts) {
         if (textParts.isEmpty()) {
             throw new ResponseStatusException(
                     BAD_GATEWAY,
@@ -104,5 +180,9 @@ public class AiDraftService {
             );
         }
         return String.join("\n", textParts);
+    }
+
+    private static ResponseStatusException emptyResponse() {
+        return new ResponseStatusException(BAD_GATEWAY, "AI 응답이 비어 있습니다.");
     }
 }
