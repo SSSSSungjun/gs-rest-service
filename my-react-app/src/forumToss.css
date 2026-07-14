@@ -6,7 +6,8 @@ body {
 
 .board-shell {
   width: min(100%, 840px);
-  padding: 10px 22px 190px;
+  max-width: 100%;
+  padding: 10px clamp(10px, 3vw, 22px) 190px;
 }
 
 .board-hero {
@@ -72,7 +73,7 @@ body {
   border-radius: 12px;
   background: #ffffff;
   box-shadow: none;
-  padding: 22px 24px;
+  padding: clamp(18px, 3vw, 22px) clamp(16px, 3.5vw, 24px);
   transition: background 140ms ease, border-color 140ms ease;
 }
 
@@ -88,7 +89,7 @@ body {
 }
 
 .detail-card {
-  padding: 24px;
+  padding: clamp(18px, 3.5vw, 24px);
 }
 
 .post-header {
@@ -486,7 +487,7 @@ textarea:focus {
 @media (max-width: 720px) {
   .board-shell {
     width: min(100%, 840px);
-    padding: 8px 14px 206px;
+    padding: 8px clamp(10px, 3vw, 14px) 206px;
   }
 
   .board-hero {
@@ -502,16 +503,21 @@ textarea:focus {
   }
 
   .feed-toolbar {
-    align-items: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    gap: 8px;
     padding: 6px 10px;
   }
 
-  .post-card:not(.detail-card) {
-    padding: 20px 16px;
+  .feed-toolbar > div,
+  .feed-toolbar-actions {
+    min-width: 0;
   }
 
+  .post-card:not(.detail-card),
   .detail-card {
-    padding: 20px 16px;
+    padding: clamp(15px, 4vw, 20px) clamp(12px, 4vw, 16px);
   }
 
   .composer-bottom {
@@ -528,5 +534,64 @@ textarea:focus {
   .composer-submit-button {
     min-width: 38px;
     padding: 0;
+  }
+}
+
+@media (max-width: 360px) {
+  .board-shell {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .board-hero {
+    padding-right: 4px;
+    padding-left: 4px;
+  }
+
+  .board-hero h1 {
+    font-size: 24px;
+  }
+
+  .feed-toolbar {
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .feed-toolbar-actions {
+    gap: 6px;
+  }
+
+  .post-card:not(.detail-card),
+  .detail-card {
+    padding: 14px 12px;
+  }
+
+  .post-header > :first-child,
+  .post-list-preview,
+  .post-list-preview .post-content,
+  .comment-body > :first-child {
+    min-width: 0;
+  }
+
+  .post-card-meta-row {
+    gap: 6px;
+  }
+
+  .notification-list-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .notification-list-header .inline-actions {
+    width: 100%;
+  }
+
+  .modal-backdrop {
+    padding: 10px;
+  }
+
+  .confirm-dialog {
+    padding: 16px;
   }
 }
