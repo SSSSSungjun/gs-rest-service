@@ -13,17 +13,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Locale;
-import java.util.Set;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class PostImageStorageService {
-    private static final Set<String> ALLOWED_CONTENT_TYPES = Set.of(
-            "image/jpeg",
-            "image/png",
-            "image/gif",
-            "image/webp"
+    private static final Map<String, String> CONTENT_TYPE_EXTENSIONS = Map.of(
+            "image/jpeg", ".jpg",
+            "image/png", ".png",
+            "image/gif", ".gif",
+            "image/webp", ".webp"
     );
 
     @Value("${app.upload.post-images-dir:uploads/post-images}")
@@ -36,10 +36,9 @@ public class PostImageStorageService {
     private String publicPath;
 
     public PostImageResponseDto store(MultipartFile file) {
-        validate(file);
+        String extension = validate(file);
 
         String originalFilename = StringUtils.cleanPath(file.getOriginalFilename() == null ? "image" : file.getOriginalFilename());
-        String extension = getExtension(originalFilename);
         String storedFilename = UUID.randomUUID() + extension;
 
         try {
@@ -62,7 +61,7 @@ public class PostImageStorageService {
                 .build();
     }
 
-    private void validate(MultipartFile file) {
+    private String validate(MultipartFile file) {
         if (file == null || file.isEmpty()) {
             throw new IllegalArgumentException("이미지 파일을 선택해주세요.");
         }
@@ -70,17 +69,13 @@ public class PostImageStorageService {
             throw new IllegalArgumentException("이미지는 5MB 이하로 업로드해주세요.");
         }
         String contentType = file.getContentType();
-        if (contentType == null || !ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase(Locale.ROOT))) {
+        String extension = contentType == null
+                ? null
+                : CONTENT_TYPE_EXTENSIONS.get(contentType.toLowerCase(Locale.ROOT));
+        if (extension == null) {
             throw new IllegalArgumentException("JPG, PNG, GIF, WEBP 이미지만 업로드할 수 있습니다.");
         }
-    }
-
-    private String getExtension(String filename) {
-        int dotIndex = filename.lastIndexOf('.');
-        if (dotIndex < 0) {
-            return "";
-        }
-        return filename.substring(dotIndex).toLowerCase(Locale.ROOT);
+        return extension;
     }
 
     private String normalizePublicPath() {
