@@ -35,6 +35,42 @@ jobs:
       - name: Run Spring tests
         run: ./gradlew test
 
+  postgres-schema:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: bamboo_test
+          POSTGRES_USER: bamboo
+          POSTGRES_PASSWORD: bamboo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U bamboo -d bamboo_test"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    defaults:
+      run:
+        working-directory: complete
+    env:
+      POSTGRES_TEST: 'true'
+      DB_URL: jdbc:postgresql://127.0.0.1:5432/bamboo_test
+      DB_USERNAME: bamboo
+      DB_PASSWORD: bamboo
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - name: Validate Flyway schema on PostgreSQL
+        run: ./gradlew test --tests 'com.example.restservice.repository.PostgreSqlSchemaIntegrationTest'
+
   frontend-build:
     runs-on: ubuntu-latest
     defaults:
