@@ -148,3 +148,7 @@ for (const viewport of [
       }))
       expect(composerWidth.scroll).toBeLessThanOrEqual(composerWidth.client + 1)
     } finally {
+      await context.close()
+    }
+  })
+}
