@@ -128,6 +128,7 @@
 - PR #60은 Spring 서비스 테스트 5개의 영어 메서드명은 유지하면서 CI·IDE 테스트 결과에서 의도가 바로 보이도록 한글 `@DisplayName`을 추가한 작업이다.
 - PR #61은 Playwright 가상 베타테스터 기반을 추가한 작업이다. 실제 Vite + Spring Boot + 전용 H2를 띄우고 독립 BrowserContext 두 개로 익명 소유권과 댓글 왕복을 검증하며, 검색 제출/강조와 320px 모바일·768px 태블릿 overflow를 검사한다. 실패 시 screenshot·video·trace·HTML report를 Actions artifact로 7일 보관한다.
 - PR #62는 게시글·댓글 검색, 최신순·오래된순·인기순, 페이지 분할을 Spring Data Page 쿼리로 옮긴 작업이다. 목록은 페이지 결과만 받고 상세와 소유 글 댓글 알림 소스는 별도 API로 분리했다. Repository 통합 테스트 3개와 Playwright 8개/1개 페이지 전환 시나리오를 추가했다.
+- PR #63은 Codespaces에서 개발 서버와 Playwright 서버 포트가 충돌해 Vite가 5174로 이동하고 테스트가 5173을 기다리던 타임아웃을 고친 작업이다. E2E 전용 포트를 Spring 18080/Vite 4173으로 분리하고 `--strictPort`, 서버 로그 출력, 동적 CORS, Codespaces UI 모드(9323) 매뉴얼을 추가했다.
 - PR #58의 SSE는 전체 게시판에서 활동이 급증했다는 선택적 갱신 신호다. 새 글·댓글을 자동 반영하지 않으며 연결이나 이벤트가 유실되어도 다음 전체 조회로 복구되어야 한다.
 - 내가 쓴 글의 기존 댓글 알림 목록은 별도 실시간 push가 아니다. 게시글 목록을 다시 가져온 시점에 댓글과 `localStorage` 읽음 ID를 비교해 계산하므로, 활동 SSE 버튼으로 갱신한 뒤 함께 최신화된다.
 - 비속어 필터링은 현재 최후순위다. Spring AI로 검열하기보다 신고/관리자 삭제 모델이 더 적절할 수 있으므로 실제 운영 요구가 생기면 별도 설계한다.

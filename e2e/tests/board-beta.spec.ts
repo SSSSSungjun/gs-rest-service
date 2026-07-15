@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
-const frontendUrl = process.env.E2E_FRONTEND_URL ?? 'http://127.0.0.1:5173'
-const backendUrl = process.env.E2E_BACKEND_URL ?? 'http://127.0.0.1:8080'
+const frontendUrl = process.env.E2E_FRONTEND_URL ?? 'http://127.0.0.1:4173'
+const backendUrl = process.env.E2E_BACKEND_URL ?? 'http://127.0.0.1:18080'
 
 function uniqueValue(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`

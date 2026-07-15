@@ -6,7 +6,9 @@
   "scripts": {
     "test": "playwright test",
     "test:headed": "playwright test --headed",
-    "show-report": "playwright show-report"
+    "test:ui": "playwright test --ui --ui-host=0.0.0.0 --ui-port=9323",
+    "show-report": "playwright show-report",
+    "show-report:codespaces": "playwright show-report --host 0.0.0.0 --port 9324"
   },
   "devDependencies": {
     "@playwright/test": "1.61.1"
