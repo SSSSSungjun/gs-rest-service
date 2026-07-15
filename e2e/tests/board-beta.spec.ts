@@ -91,11 +91,11 @@ test('검색은 제출 시 적용되고 일치 키워드를 강조한다', async
 })
 
 
-test('검색 결과를 서버에서 10개씩 페이지로 나눠 조회한다', async ({ page }) => {
+test('검색 결과를 서버 설정 크기로 나눠 조회한다', async ({ page }) => {
   const keyword = uniqueValue('서버페이지')
 
   await openBoard(page)
-  for (let index = 1; index <= 11; index += 1) {
+  for (let index = 1; index <= 9; index += 1) {
     const response = await page.context().request.post(`${backendUrl}/api/posts`, {
       data: {
         nickname: '페이지작성자',
@@ -109,7 +109,7 @@ test('검색 결과를 서버에서 10개씩 페이지로 나눠 조회한다', 
   await page.reload()
   await page.getByLabel('게시글 검색어').fill(keyword)
   await page.getByRole('button', { name: '게시글 검색 실행' }).click()
-  await expect(page.locator('article.post-card')).toHaveCount(10)
+  await expect(page.locator('article.post-card')).toHaveCount(8)
   await expect(page.locator('.pagination-total')).toHaveText('/ 2')
 
   await page.getByRole('button', { name: '2', exact: true }).click()
@@ -148,7 +148,3 @@ for (const viewport of [
       }))
       expect(composerWidth.scroll).toBeLessThanOrEqual(composerWidth.client + 1)
     } finally {
-      await context.close()
-    }
-  })
-}
