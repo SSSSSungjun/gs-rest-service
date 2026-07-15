@@ -61,9 +61,9 @@ jobs:
       DB_URL: jdbc:postgresql://127.0.0.1:5432/bamboo_load
       DB_USERNAME: bamboo
       DB_PASSWORD: bamboo
-      K6_VUS: ${{ inputs.vus || '10' }}
-      K6_DURATION: ${{ inputs.duration || '15s' }}
-      K6_MAX_P95_MS: ${{ inputs.max_p95_ms || '1500' }}
+      K6_VUS: ${{ inputs.vus || '50' }}
+      K6_DURATION: ${{ inputs.duration || '30s' }}
+      K6_MAX_P95_MS: ${{ inputs.max_p95_ms || '1000' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
