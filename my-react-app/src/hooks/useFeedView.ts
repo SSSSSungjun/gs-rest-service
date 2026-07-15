@@ -11,7 +11,6 @@ interface ServerPageState {
 
 export function useFeedView(
   posts: Post[],
-  currentPage: number,
   onPageChange: (page: number) => void,
 ) {
   const [feedSort, setFeedSort] = useState<FeedSort>('latest')
