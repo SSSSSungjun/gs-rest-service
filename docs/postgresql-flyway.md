@@ -7,7 +7,7 @@
 - PostgreSQL 16의 빈 DB에는 `V1__initial_schema.sql`이 7개 엔티티 테이블과 인덱스를 생성한다.
 - GitHub Actions의 `postgres-schema` job이 실제 PostgreSQL 서비스에서 마이그레이션과 JPA 매핑을 함께 검증한다.
 
-이 단계는 PostgreSQL을 선택 가능한 후보로 검증하는 작업이다. 기존 MySQL/H2 데이터를 자동 변환하거나 운영 DB를 즉시 전환하지 않는다.
+`compose.yaml` 기반 배포는 PostgreSQL을 기준 DB로 확정한다. bare `bootRun`의 MySQL 기본값은 기존 개발 데이터 호환을 위해 남아 있으며, 기존 MySQL/H2 데이터를 자동 변환하지 않는다. Compose 실행과 운영 검증 절차는 `docs/docker-deployment.md`를 따른다.
 
 ## 실행 설정
 

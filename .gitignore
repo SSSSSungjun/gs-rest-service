@@ -16,3 +16,7 @@ dependency-reduced-pom.xml
 README.html
 *.iml
 .idea
+
+.env
+!.env.example
+backups/

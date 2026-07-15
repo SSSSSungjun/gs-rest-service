@@ -48,7 +48,6 @@
 - 로컬 빌드나 실행이 불가능하면 가능한 정적 검증 범위를 명확히 말한다.
 - 사용자 변경이나 기존 작업을 되돌리지 않는다.
 - 기존 코드 스타일과 책임 분리를 우선한다.
-
 ### 브랜치 이름 규칙
 
 - 브랜치 이름에는 작업 주체를 나타내는 `agent/`, `codex/` 같은 접두사를 사용하지 않는다.
@@ -97,8 +96,7 @@
 우선 확인 후보:
 
 - UI 배치/간격: `my-react-app/src/App.css`, `my-react-app/src/forumToss.css`, 관련 React component
-- 검색/조회수: `my-react-app/src/hooks/useFeedView.ts`, `my-react-app/src/feedSelectors.ts`, `my-react-app/src/components/BoardFeed.tsx`, `my-react-app/src/components/HighlightedText.tsx`, `my-react-app/src/search.css`, `complete/src/main/java/com/example/restservice/service/PostService.java`, post entity/DTO/controller
-- 게시글 목록/상세: post list/detail component, post API client
+- 검색/조회수: `my-react-app/src/hooks/useFeedView.ts`, `my-react-app/src/feedSelectors.ts`, `my-react-app/src/components/BoardFeed.tsx`, `my-react-app/src/components/HighlightedText.tsx`, `my-react-app/src/search.css`, `complete/src/main/java/com/example/restservice/service/PostService.java`, post entity/DTO/controller- 게시글 목록/상세: post list/detail component, post API client
 - 글쓰기 입력창/이미지 첨부/투표/AI 초안: `my-react-app/src/components/BoardComposer.tsx`, `my-react-app/src/components/BoardComposer.css`, `my-react-app/src/boardApi.ts`, `complete/src/main/java/com/example/restservice/service/AiDraftService.java`
 - 투표 표시/집계: `my-react-app/src/components/PollBlock.tsx`, `complete/src/main/java/com/example/restservice/service/PollService.java`, poll entity/repository
 - 댓글/알림/활동 신호: `my-react-app/src/components/CommentNotificationBar.tsx`, `my-react-app/src/components/ActivityRefreshButton.tsx`, `my-react-app/src/useBoardActivity.ts`, `my-react-app/src/commentNotifications.ts`, `my-react-app/src/App.tsx`, `complete/src/main/java/com/example/restservice/service/BoardActivityStreamService.java`
@@ -147,8 +145,7 @@
 - 사용자는 목록까지 전부 무거운 카드로 감싸는 디자인은 싫어하지만, OKKY/커뮤니티 카드 리스트처럼 얇은 보더와 넉넉한 패딩으로 구분되는 흰 게시글 카드는 선호 쪽에 가깝다. 그림자는 약하게, 구분은 보더와 여백으로 한다.
 - 게시글 본문 카드/상세 카드/작성 카드에는 충분한 내부 패딩이 필요하다. 특히 게시글만 봐도 본문을 읽을 공간이 넉넉해야 한다.
 - 사용자는 전체 배경이 완전 흰색이면 쨍하다고 느낀다. 기본 바탕은 아주 옅은 연두/회색, 게시글 행/컴포넌트는 흰색, 선택/hover/active 상태는 연한 초록 또는 연회색 쪽이 현재 선호에 가깝다.
-- 사용자는 버튼을 텍스트만으로 처리하는 것을 싫어하며, 가능한 경우 아이콘/에셋 기반 버튼을 선호한다. 단, 첨부 메뉴처럼 아이콘만으로 의미가 애매한 경우에는 `사진`, `투표`처럼 짧은 텍스트를 같이 둔다. 수정/삭제 메뉴는 아이콘보다 텍스트만 있는 쪽을 선호한다. 현재는 lockfile 변동을 피하려고 `lucide-react` 대신 로컬 SVG 아이콘 컴포넌트를 사용했다.
-- 페이지네이션은 숫자 1~5 정도를 보여주고, 사용자가 원하는 페이지로 직접 이동하는 현재 구조를 반드시 유지한다.
+- 사용자는 버튼을 텍스트만으로 처리하는 것을 싫어하며, 가능한 경우 아이콘/에셋 기반 버튼을 선호한다. 단, 첨부 메뉴처럼 아이콘만으로 의미가 애매한 경우에는 `사진`, `투표`처럼 짧은 텍스트를 같이 둔다. 수정/삭제 메뉴는 아이콘보다 텍스트만 있는 쪽을 선호한다. 현재는 lockfile 변동을 피하려고 `lucide-react` 대신 로컬 SVG 아이콘 컴포넌트를 사용했다.- 페이지네이션은 숫자 1~5 정도를 보여주고, 사용자가 원하는 페이지로 직접 이동하는 현재 구조를 반드시 유지한다.
 - 공기업 행사용 커뮤니티 배포 이야기는 실제 클라우드 배포로 추진하지 않고, 백엔드 보안·트랜잭션·동시성·운영 리스크를 설명하기 위한 가상 시나리오로만 다룬다.
 - 사용자는 실시간 신호가 모바일·웹에서 읽기를 방해하면 안 된다고 본다. 활동 알림은 여러 건이 짧게 몰릴 때만 기존 툴바 자리에서 작게 표시하고, 자동 목록 삽입·스크롤 이동·본문 오버레이·반복 토스트를 피한다.
 - 알림 버튼은 새 알림이 있을 때 `+N` 배지와 초록 강조색을 사용한다.
@@ -157,7 +154,10 @@
 - PR #69는 200 VU 기준점 이후 운영 보호선을 추가한 작업이다. AI·콘텐츠 변경·업로드·상호작용 API에 세션/IP 이중 token bucket을 적용하고, AI에는 KST 일일 한도와 서버 전체 동시 실행 상한을 둔다. 초과 응답은 429 + `Retry-After`이며 일반 GET/SSE는 제한하지 않는다.
 - rate limit 상태와 AI 일일 카운터는 단일 프로세스 메모리에 있으므로 재시작 시 초기화되고 수평 확장 인스턴스끼리 공유되지 않는다. 실제 다중 인스턴스 배포 전에는 gateway/Redis 같은 공유 제한기로 이전하고 provider 결제 hard quota를 별도로 둔다.
 - 200 VU/steady 3분 기준은 75,336요청, 357.16 req/s, 오류 0%, HTTP p95 52.89ms, 최대 1.7s, 정합성 위반 0건이다. 같은 GitHub runner 내부 단기 측정이므로 실제 운영 200명 보장으로 해석하지 않는다.
-- 다음 기능 우선순위는 Docker·nginx·배포 패키지와 운영 환경변수 체크리스트이며, UI 패딩·색상 고도화는 사용자가 집에서 레퍼런스를 가져온 뒤 한 번에 진행한다.
+- PR #70은 PostgreSQL 16 + Spring Boot + nginx/React를 `compose.yaml` 하나로 구동하는 배포 패키지를 추가한 작업이다. 외부에는 nginx 포트만 공개하고 DB/백엔드는 내부 네트워크에 두며, DB·업로드 named volume, non-root 백엔드, Actuator health check, graceful shutdown, 자원·로그 제한을 적용한다.
+- `.github/workflows/container-smoke-test.yml`은 실제 이미지를 빌드해 목록 조회·글 생성·보안/SSE 프록시 헤더까지 검증한다. 프론트 의존성은 `npm ci`로 lockfile 일치를 강제하고, 실행 절차·TLS 경계·백업은 `docs/docker-deployment.md`를 먼저 본다.
+- Spring Boot plugin/starter 3.2.4와 devtools 3.2.5가 섞이면 `bootJar`에서 core `spring-boot` JAR가 빠져 컨테이너가 `NoClassDefFoundError: SpringApplication`으로 종료될 수 있다. 현재는 전부 3.2.4로 통일하고 Docker 빌드에서 정확한 core JAR 포함을 검사한다.
+- 다음 우선순위는 Codespaces에서 Compose 수동 인수 테스트와 집에서 할 실제 서버/TLS·도메인 체크리스트다. UI 패딩·색상 고도화는 사용자가 집에서 레퍼런스를 가져온 뒤 한 번에 진행한다.
 - GitHub PR에 Vercel 상태 체크가 자동으로 붙어 있으며, Codex가 Vercel을 별도 실행하는 것은 아니다.
 - `AGENTS.md`는 Codex 작업 규칙과 컨텍스트 캐시의 첫 진입점으로 충분하다.
 - 기술적인 의사결정과 트러블슈팅은 `docs/technical-notes.md`에 남기고, `AGENTS.md`에는 다음 작업자가 어디부터 보면 되는지만 짧게 남긴다.
