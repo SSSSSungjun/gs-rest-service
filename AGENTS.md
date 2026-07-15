@@ -48,6 +48,15 @@
 - 로컬 빌드나 실행이 불가능하면 가능한 정적 검증 범위를 명확히 말한다.
 - 사용자 변경이나 기존 작업을 되돌리지 않는다.
 - 기존 코드 스타일과 책임 분리를 우선한다.
+
+### 브랜치 이름 규칙
+
+- 브랜치 이름에는 작업 주체를 나타내는 `agent/`, `codex/` 같은 접두사를 사용하지 않는다.
+- 형식은 `<type>/<short-kebab-case>`로 통일하고 영문 소문자와 하이픈을 사용한다.
+- 허용 type은 `feat`, `fix`, `refactor`, `test`, `docs`, `chore`, `ci`, `perf`다.
+- `add`, `update`, 사용자명처럼 변경 성격이 불명확한 접두사는 사용하지 않는다.
+- 예: `feat/comment-replies`, `fix/null-view-count`, `test/multi-user-load`, `docs/deployment-guide`.
+- 한 브랜치에는 하나의 변경 목적만 담고 squash merge 후 원격 브랜치를 삭제한다.
 ## 프로젝트 요약
 
 - 프로젝트명: 대나무숲
