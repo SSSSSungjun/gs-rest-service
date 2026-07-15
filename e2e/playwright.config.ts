@@ -1,7 +1,10 @@
 import { defineConfig, devices } from '@playwright/test'
 
-const frontendUrl = process.env.E2E_FRONTEND_URL ?? 'http://127.0.0.1:5173'
-const backendUrl = process.env.E2E_BACKEND_URL ?? 'http://127.0.0.1:8080'
+const frontendUrl = process.env.E2E_FRONTEND_URL ?? 'http://127.0.0.1:4173'
+const backendUrl = process.env.E2E_BACKEND_URL ?? 'http://127.0.0.1:18080'
+const frontendPort = new URL(frontendUrl).port || '4173'
+const backendPort = new URL(backendUrl).port || '18080'
+const reuseExistingServers = process.env.E2E_REUSE_SERVERS === 'true'
 
 export default defineConfig({
   testDir: './tests',
@@ -29,16 +32,23 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "../complete/gradlew -p ../complete bootRun --args='--spring.profiles.active=e2e'",
+      command: `../complete/gradlew -p ../complete bootRun --args='--spring.profiles.active=e2e --server.port=${backendPort}'`,
       url: `${backendUrl}/api/posts`,
       timeout: 180_000,
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: reuseExistingServers,
+      stdout: 'pipe',
+      stderr: 'pipe',
+      env: {
+        E2E_ALLOWED_ORIGINS: frontendUrl,
+      },
     },
     {
-      command: 'npm --prefix ../my-react-app run dev -- --host 127.0.0.1 --port 5173',
+      command: `npm --prefix ../my-react-app run dev -- --host 127.0.0.1 --port ${frontendPort} --strictPort`,
       url: frontendUrl,
       timeout: 60_000,
-      reuseExistingServer: !process.env.CI,
+      reuseExistingServer: reuseExistingServers,
+      stdout: 'pipe',
+      stderr: 'pipe',
       env: {
         VITE_API_BASE_URL: `${backendUrl}/api`,
       },
