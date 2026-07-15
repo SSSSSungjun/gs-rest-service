@@ -154,7 +154,10 @@
 - 알림 버튼은 새 알림이 있을 때 `+N` 배지와 초록 강조색을 사용한다.
 - 알림 목록 화면에서는 개별 알림 읽음 처리, 모두 읽음, 원문 게시글 열기를 제공한다.
 - 프론트 unit/component test runner는 아직 없지만 `e2e`의 Playwright가 실제 브라우저 회귀를 담당한다. Spring 서비스 테스트는 `complete/src/test/java/com/example/restservice/service`에 있고, `.github/workflows/backend-tests.yml`과 `.github/workflows/playwright-e2e.yml`이 빌드·단위 테스트·브라우저 테스트를 분리 실행한다.
-- 다음 기능 우선순위는 k6 100→200 VU 단계 실행과 병목 확인 후 보안·rate limit을 적용하는 것이며, UI 패딩·색상 고도화는 사용자가 집에서 레퍼런스를 가져온 뒤 한 번에 진행한다.
+- PR #69는 200 VU 기준점 이후 운영 보호선을 추가한 작업이다. AI·콘텐츠 변경·업로드·상호작용 API에 세션/IP 이중 token bucket을 적용하고, AI에는 KST 일일 한도와 서버 전체 동시 실행 상한을 둔다. 초과 응답은 429 + `Retry-After`이며 일반 GET/SSE는 제한하지 않는다.
+- rate limit 상태와 AI 일일 카운터는 단일 프로세스 메모리에 있으므로 재시작 시 초기화되고 수평 확장 인스턴스끼리 공유되지 않는다. 실제 다중 인스턴스 배포 전에는 gateway/Redis 같은 공유 제한기로 이전하고 provider 결제 hard quota를 별도로 둔다.
+- 200 VU/steady 3분 기준은 75,336요청, 357.16 req/s, 오류 0%, HTTP p95 52.89ms, 최대 1.7s, 정합성 위반 0건이다. 같은 GitHub runner 내부 단기 측정이므로 실제 운영 200명 보장으로 해석하지 않는다.
+- 다음 기능 우선순위는 Docker·nginx·배포 패키지와 운영 환경변수 체크리스트이며, UI 패딩·색상 고도화는 사용자가 집에서 레퍼런스를 가져온 뒤 한 번에 진행한다.
 - GitHub PR에 Vercel 상태 체크가 자동으로 붙어 있으며, Codex가 Vercel을 별도 실행하는 것은 아니다.
 - `AGENTS.md`는 Codex 작업 규칙과 컨텍스트 캐시의 첫 진입점으로 충분하다.
 - 기술적인 의사결정과 트러블슈팅은 `docs/technical-notes.md`에 남기고, `AGENTS.md`에는 다음 작업자가 어디부터 보면 되는지만 짧게 남긴다.
