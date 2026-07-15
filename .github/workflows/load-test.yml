@@ -1,0 +1,146 @@
+name: Multi-user load test
+
+on:
+  pull_request:
+    paths:
+      - 'load-tests/**'
+      - '.github/workflows/load-test.yml'
+      - 'complete/src/main/**'
+  workflow_dispatch:
+    inputs:
+      vus:
+        description: Peak virtual users
+        required: true
+        default: '50'
+        type: choice
+        options:
+          - '50'
+          - '100'
+          - '200'
+      duration:
+        description: Steady load duration
+        required: true
+        default: '1m'
+        type: choice
+        options:
+          - '30s'
+          - '1m'
+          - '3m'
+      max_p95_ms:
+        description: Maximum p95 response time
+        required: true
+        default: '1000'
+        type: choice
+        options:
+          - '500'
+          - '1000'
+          - '1500'
+
+permissions:
+  contents: read
+
+jobs:
+  load-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: bamboo_load
+          POSTGRES_USER: bamboo
+          POSTGRES_PASSWORD: bamboo
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U bamboo -d bamboo_load"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      DB_URL: jdbc:postgresql://127.0.0.1:5432/bamboo_load
+      DB_USERNAME: bamboo
+      DB_PASSWORD: bamboo
+      K6_VUS: ${{ inputs.vus || '10' }}
+      K6_DURATION: ${{ inputs.duration || '15s' }}
+      K6_MAX_P95_MS: ${{ inputs.max_p95_ms || '1500' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Start Spring API
+        run: |
+          cd complete
+          ./gradlew bootRun --args='--spring.profiles.active=postgres --server.port=18080' > ../load-test-backend.log 2>&1 &
+          echo $! > ../load-test-backend.pid
+
+      - name: Wait for Spring API
+        run: |
+          for attempt in {1..90}; do
+            if curl -fsS 'http://127.0.0.1:18080/api/posts?page=1&size=1' > /dev/null; then
+              exit 0
+            fi
+            sleep 2
+          done
+          cat load-test-backend.log
+          exit 1
+
+      - name: Run mixed k6 load
+        run: |
+          mkdir -p load-test-results
+          docker run --rm --network host \
+            --user "$(id -u):$(id -g)" \
+            -v "${{ github.workspace }}/load-tests/k6:/scripts:ro" \
+            -v "${{ github.workspace }}/load-test-results:/results" \
+            -e BASE_URL=http://127.0.0.1:18080 \
+            -e VUS="${K6_VUS}" \
+            -e DURATION="${K6_DURATION}" \
+            -e MAX_P95_MS="${K6_MAX_P95_MS}" \
+            grafana/k6:1.7.1 run \
+            --summary-export=/results/summary.json \
+            /scripts/community-load.js
+
+      - name: Verify database integrity
+        if: always()
+        run: |
+          violations=$(docker run --rm --network host \
+            -e PGPASSWORD=bamboo postgres:16-alpine \
+            psql -h 127.0.0.1 -U bamboo -d bamboo_load -tA -c "
+              select
+                (select count(*) from (
+                  select post_id, owner_session_id from post_likes
+                  group by post_id, owner_session_id having count(*) > 1
+                ) duplicated_post_likes)
+                + (select count(*) from (
+                  select post_id, owner_session_id from poll_votes
+                  group by post_id, owner_session_id having count(*) > 1
+                ) duplicated_poll_votes)
+                + (select count(*) from comments c
+                  left join posts p on p.id = c.post_id where p.id is null);
+            " | xargs)
+          test "${violations}" = '0'
+
+      - name: Upload load-test artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-load-test-${{ github.run_id }}
+          path: |
+            load-test-results
+            load-test-backend.log
+          if-no-files-found: warn
+          retention-days: 7
+
+      - name: Stop Spring API
+        if: always()
+        run: |
+          if [ -f load-test-backend.pid ]; then
+            kill "$(cat load-test-backend.pid)" || true
+          fi
