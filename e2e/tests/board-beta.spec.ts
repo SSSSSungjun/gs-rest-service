@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 const frontendUrl = process.env.E2E_FRONTEND_URL ?? 'http://127.0.0.1:5173'
+const backendUrl = process.env.E2E_BACKEND_URL ?? 'http://127.0.0.1:8080'
 
 function uniqueValue(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
@@ -87,6 +88,33 @@ test('검색은 제출 시 적용되고 일치 키워드를 강조한다', async
   const result = page.locator('article.post-card').filter({ hasText: postContent }).first()
   await expect(result).toBeVisible()
   await expect(result.locator('mark.search-highlight')).toHaveText(keyword)
+})
+
+
+test('검색 결과를 서버에서 10개씩 페이지로 나눠 조회한다', async ({ page }) => {
+  const keyword = uniqueValue('서버페이지')
+
+  await openBoard(page)
+  for (let index = 1; index <= 11; index += 1) {
+    const response = await page.context().request.post(`${backendUrl}/api/posts`, {
+      data: {
+        nickname: '페이지작성자',
+        content: `${keyword} 게시글 ${index}`,
+        showImagesInContent: true,
+      },
+    })
+    expect(response.ok()).toBeTruthy()
+  }
+
+  await page.reload()
+  await page.getByLabel('게시글 검색어').fill(keyword)
+  await page.getByRole('button', { name: '게시글 검색 실행' }).click()
+  await expect(page.locator('article.post-card')).toHaveCount(10)
+  await expect(page.locator('.pagination-total')).toHaveText('/ 2')
+
+  await page.getByRole('button', { name: '2', exact: true }).click()
+  await expect(page.locator('article.post-card')).toHaveCount(1)
+  await expect(page.locator('[aria-current="page"]')).toHaveText('2')
 })
 
 for (const viewport of [
