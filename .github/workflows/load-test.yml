@@ -96,6 +96,7 @@ jobs:
         run: |
           mkdir -p load-test-results
           docker run --rm --network host \
+            --user "$(id -u):$(id -g)" \
             -v "${{ github.workspace }}/load-tests/k6:/scripts:ro" \
             -v "${{ github.workspace }}/load-test-results:/results" \
             -e BASE_URL=http://127.0.0.1:18080 \
