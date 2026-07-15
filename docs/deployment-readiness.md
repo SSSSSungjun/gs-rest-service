@@ -37,7 +37,7 @@
 1. rate limit 기본값은 `prod` 프로필에서 활성화된다. 실제 AI provider의 결제 한도도 별도로 설정하고 아래 단일 인스턴스 한계를 확인한다.
 2. 게시글 API의 서버 검색·정렬·페이지네이션은 적용되어 있다. 운영 데이터 규모에서 느린 검색어를 수집한 뒤 PostgreSQL trigram/전문 검색 도입 여부를 결정한다.
 3. 업로드 파일의 실제 signature를 검사하고, 로컬 디스크에서 object storage로 옮기며, 게시글에 연결되지 않은 임시 업로드를 만료 삭제한다.
-4. HTTPS와 trusted proxy 설정을 확인하고 `prod` profile을 활성화한다. `app.cookie.secure=true`와 HSTS가 실제 HTTPS 요청에서 동작해야 한다.
+4. Compose는 nginx만 공개하고 백엔드는 내부 network에 둔다. 실제 서버의 TLS termination 뒤에서 `prod,postgres` profiles, secure cookie와 HSTS를 활성화한다.
 5. PostgreSQL 전환 시 Flyway migration을 사용하고 기존 DB baseline, 백업·복구 절차를 검증한다.
 6. 허용 origin을 실제 프런트 주소로 제한하고, 별도 도메인 구성이라면 Origin/CSRF 정책을 다시 검토한다.
 7. 4xx/5xx, DB lock wait, AI latency·실패율, 업로드 용량을 관측하고 session id와 API key는 로그에 남기지 않는다.

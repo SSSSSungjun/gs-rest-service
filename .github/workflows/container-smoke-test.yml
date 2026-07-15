@@ -1,0 +1,56 @@
+name: Container smoke test
+
+on:
+  pull_request:
+    paths:
+      - 'complete/**'
+      - 'my-react-app/**'
+      - 'compose.yaml'
+      - '.env.example'
+      - 'scripts/compose-smoke.sh'
+      - '.github/workflows/container-smoke-test.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'complete/**'
+      - 'my-react-app/**'
+      - 'compose.yaml'
+      - '.env.example'
+      - 'scripts/compose-smoke.sh'
+      - '.github/workflows/container-smoke-test.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compose-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      APP_PORT: '8080'
+      PUBLIC_ORIGIN: http://localhost:8080
+      POSTGRES_PASSWORD: actions-smoke-password
+      COOKIE_SECURE: 'false'
+      SECURITY_HSTS_ENABLED: 'false'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate Compose configuration
+        run: docker compose config --quiet
+
+      - name: Build and start the stack
+        run: docker compose up --detach --build
+
+      - name: Run HTTP, write, security header, and SSE smoke checks
+        run: ./scripts/compose-smoke.sh
+
+      - name: Show container logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+
+      - name: Stop and remove the smoke stack
+        if: always()
+        run: docker compose down --volumes --remove-orphans

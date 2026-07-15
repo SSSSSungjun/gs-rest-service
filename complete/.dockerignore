@@ -1,0 +1,8 @@
+.gradle
+build
+target
+uploads
+*.iml
+.idea
+.git
+.gitignore
