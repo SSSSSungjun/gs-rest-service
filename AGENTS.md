@@ -47,7 +47,8 @@
 - 동일한 빌드 에러나 린트 에러가 3회 이상 반복되면 자율 수정을 중단하고, 에러 로그와 함께 사용자에게 즉시 질문한다.
 - 로컬 빌드나 실행이 불가능하면 가능한 정적 검증 범위를 명확히 말한다.
 - 사용자 변경이나 기존 작업을 되돌리지 않는다.
-- 기존 코드 스타일과 책임 분리를 우선한다.### 브랜치 이름 규칙
+- 기존 코드 스타일과 책임 분리를 우선한다.
+### 브랜치 이름 규칙
 
 - 브랜치 이름에는 작업 주체를 나타내는 `agent/`, `codex/` 같은 접두사를 사용하지 않는다.
 - 형식은 `<type>/<short-kebab-case>`로 통일하고 영문 소문자와 하이픈을 사용한다.
@@ -96,7 +97,8 @@
 
 - UI 배치/간격: `my-react-app/src/App.css`, `my-react-app/src/forumToss.css`, 관련 React component
 - 검색/조회수: `my-react-app/src/hooks/useFeedView.ts`, `my-react-app/src/feedSelectors.ts`, `my-react-app/src/components/BoardFeed.tsx`, `my-react-app/src/components/HighlightedText.tsx`, `my-react-app/src/search.css`, `complete/src/main/java/com/example/restservice/service/PostService.java`, post entity/DTO/controller- 게시글 목록/상세: post list/detail component, post API client
-- 글쓰기 입력창/이미지 첨부/투표/AI 초안: `my-react-app/src/components/BoardComposer.tsx`, `my-react-app/src/components/BoardComposer.css`, `my-react-app/src/boardApi.ts`, `complete/src/main/java/com/example/restservice/service/AiDraftService.java`- 투표 표시/집계: `my-react-app/src/components/PollBlock.tsx`, `complete/src/main/java/com/example/restservice/service/PollService.java`, poll entity/repository
+- 글쓰기 입력창/이미지 첨부/투표/AI 초안: `my-react-app/src/components/BoardComposer.tsx`, `my-react-app/src/components/BoardComposer.css`, `my-react-app/src/boardApi.ts`, `complete/src/main/java/com/example/restservice/service/AiDraftService.java`
+- 투표 표시/집계: `my-react-app/src/components/PollBlock.tsx`, `complete/src/main/java/com/example/restservice/service/PollService.java`, poll entity/repository
 - 댓글/알림/활동 신호: `my-react-app/src/components/CommentNotificationBar.tsx`, `my-react-app/src/components/ActivityRefreshButton.tsx`, `my-react-app/src/useBoardActivity.ts`, `my-react-app/src/commentNotifications.ts`, `my-react-app/src/App.tsx`, `complete/src/main/java/com/example/restservice/service/BoardActivityStreamService.java`
 - 버튼/액션 아이콘: `my-react-app/src/components/Icons.tsx`, 액션이 있는 각 컴포넌트
 - 백엔드 API 변경: controller/service/dto/entity 순서로 최소 확인
@@ -145,7 +147,8 @@
 - 사용자는 전체 배경이 완전 흰색이면 쨍하다고 느낀다. 기본 바탕은 아주 옅은 연두/회색, 게시글 행/컴포넌트는 흰색, 선택/hover/active 상태는 연한 초록 또는 연회색 쪽이 현재 선호에 가깝다.
 - 사용자는 버튼을 텍스트만으로 처리하는 것을 싫어하며, 가능한 경우 아이콘/에셋 기반 버튼을 선호한다. 단, 첨부 메뉴처럼 아이콘만으로 의미가 애매한 경우에는 `사진`, `투표`처럼 짧은 텍스트를 같이 둔다. 수정/삭제 메뉴는 아이콘보다 텍스트만 있는 쪽을 선호한다. 현재는 lockfile 변동을 피하려고 `lucide-react` 대신 로컬 SVG 아이콘 컴포넌트를 사용했다.- 페이지네이션은 숫자 1~5 정도를 보여주고, 사용자가 원하는 페이지로 직접 이동하는 현재 구조를 반드시 유지한다.
 - 공기업 행사용 커뮤니티 배포 이야기는 실제 클라우드 배포로 추진하지 않고, 백엔드 보안·트랜잭션·동시성·운영 리스크를 설명하기 위한 가상 시나리오로만 다룬다.
-- 사용자는 실시간 신호가 모바일·웹에서 읽기를 방해하면 안 된다고 본다. 활동 알림은 여러 건이 짧게 몰릴 때만 기존 툴바 자리에서 작게 표시하고, 자동 목록 삽입·스크롤 이동·본문 오버레이·반복 토스트를 피한다.- 알림 버튼은 새 알림이 있을 때 `+N` 배지와 초록 강조색을 사용한다.
+- 사용자는 실시간 신호가 모바일·웹에서 읽기를 방해하면 안 된다고 본다. 활동 알림은 여러 건이 짧게 몰릴 때만 기존 툴바 자리에서 작게 표시하고, 자동 목록 삽입·스크롤 이동·본문 오버레이·반복 토스트를 피한다.
+- 알림 버튼은 새 알림이 있을 때 `+N` 배지와 초록 강조색을 사용한다.
 - 알림 목록 화면에서는 개별 알림 읽음 처리, 모두 읽음, 원문 게시글 열기를 제공한다.
 - 프론트 unit/component test runner는 아직 없지만 `e2e`의 Playwright가 실제 브라우저 회귀를 담당한다. Spring 서비스 테스트는 `complete/src/test/java/com/example/restservice/service`에 있고, `.github/workflows/backend-tests.yml`과 `.github/workflows/playwright-e2e.yml`이 빌드·단위 테스트·브라우저 테스트를 분리 실행한다.
 - PR #69는 200 VU 기준점 이후 운영 보호선을 추가한 작업이다. AI·콘텐츠 변경·업로드·상호작용 API에 세션/IP 이중 token bucket을 적용하고, AI에는 KST 일일 한도와 서버 전체 동시 실행 상한을 둔다. 초과 응답은 429 + `Retry-After`이며 일반 GET/SSE는 제한하지 않는다.
