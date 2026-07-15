@@ -26,7 +26,7 @@ export function useBoardController() {
     dispatch({ type: 'pagination/pageChanged', payload: page })
   }, [])
 
-  const feed = useFeedView(state.posts, state.currentPage, changePage)
+  const feed = useFeedView(state.posts, changePage)
   const screen = useBoardScreen(state.posts, detailPost, state.expandedPostId, dispatch)
   const {
     summary: boardActivity,
