@@ -1,0 +1,66 @@
+name: Browser beta tests
+
+on:
+  pull_request:
+    paths:
+      - 'complete/**'
+      - 'my-react-app/**'
+      - 'e2e/**'
+      - '.github/workflows/playwright-e2e.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'complete/**'
+      - 'my-react-app/**'
+      - 'e2e/**'
+      - '.github/workflows/playwright-e2e.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: browser-beta-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  playwright:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: e2e
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install frontend dependencies
+        run: npm install --prefix ../my-react-app --no-audit --no-fund
+      - name: Install beta test dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Run browser beta tests
+        run: npm test
+        env:
+          CI: 'true'
+      - name: Upload failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-failure-evidence
+          path: |
+            e2e/playwright-report
+            e2e/test-results
+          if-no-files-found: ignore
+          retention-days: 7
