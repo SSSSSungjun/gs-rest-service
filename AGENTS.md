@@ -130,6 +130,7 @@
 - PR #62는 게시글·댓글 검색, 최신순·오래된순·인기순, 페이지 분할을 Spring Data Page 쿼리로 옮긴 작업이다. 목록은 페이지 결과만 받고 상세와 소유 글 댓글 알림 소스는 별도 API로 분리했다. Repository 통합 테스트 3개와 Playwright 8개/1개 페이지 전환 시나리오를 추가했다.
 - PR #63은 Codespaces에서 개발 서버와 Playwright 서버 포트가 충돌해 Vite가 5174로 이동하고 테스트가 5173을 기다리던 타임아웃을 고친 작업이다. E2E 전용 포트를 Spring 18080/Vite 4173으로 분리하고 `--strictPort`, 서버 로그 출력, 동적 CORS, Codespaces UI 모드(9323) 매뉴얼을 추가했다.
 - PR #64는 PostgreSQL을 선택 가능한 운영 DB 후보로 추가한 1단계 작업이다. `postgres` 프로필에서만 Flyway V1 + Hibernate `validate`를 사용하고, Actions의 PostgreSQL 16 서비스에서 실제 migration/JPA 통합 검증을 수행한다. 기존 MySQL/H2는 아직 Hibernate `update`를 유지하며 전환 경계와 baseline 주의사항은 `docs/postgresql-flyway.md`를 본다.
+- PR #65는 Playwright의 다중 브라우저 기능 검증과 k6 다중접속 부하 검증을 분리한 작업이다. PostgreSQL 16에서 목록·상세·댓글·좋아요·투표 혼합 트래픽을 50/100/200 VU로 수동 실행할 수 있고, PR은 10 VU smoke와 좋아요·투표 중복/고아 댓글 SQL 검사를 수행한다. 첫 smoke는 661요청, 오류 0%, p95 11.81ms, 정합성 위반 0건이며 아직 200 VU 통과 결과로 해석하지 않는다.
 - PR #58의 SSE는 전체 게시판에서 활동이 급증했다는 선택적 갱신 신호다. 새 글·댓글을 자동 반영하지 않으며 연결이나 이벤트가 유실되어도 다음 전체 조회로 복구되어야 한다.
 - 내가 쓴 글의 기존 댓글 알림 목록은 별도 실시간 push가 아니다. 게시글 목록을 다시 가져온 시점에 댓글과 `localStorage` 읽음 ID를 비교해 계산하므로, 활동 SSE 버튼으로 갱신한 뒤 함께 최신화된다.
 - 비속어 필터링은 현재 최후순위다. Spring AI로 검열하기보다 신고/관리자 삭제 모델이 더 적절할 수 있으므로 실제 운영 요구가 생기면 별도 설계한다.
@@ -144,7 +145,7 @@
 - 알림 버튼은 새 알림이 있을 때 `+N` 배지와 초록 강조색을 사용한다.
 - 알림 목록 화면에서는 개별 알림 읽음 처리, 모두 읽음, 원문 게시글 열기를 제공한다.
 - 프론트 unit/component test runner는 아직 없지만 `e2e`의 Playwright가 실제 브라우저 회귀를 담당한다. Spring 서비스 테스트는 `complete/src/test/java/com/example/restservice/service`에 있고, `.github/workflows/backend-tests.yml`과 `.github/workflows/playwright-e2e.yml`이 빌드·단위 테스트·브라우저 테스트를 분리 실행한다.
-- 다음 기능 우선순위는 동시성·보안·rate limit 점검이며, UI 패딩·색상 고도화는 사용자가 집에서 레퍼런스를 가져온 뒤 한 번에 진행한다.
+- 다음 기능 우선순위는 k6 50→100→200 VU 단계 실행과 병목 확인 후 보안·rate limit을 적용하는 것이며, UI 패딩·색상 고도화는 사용자가 집에서 레퍼런스를 가져온 뒤 한 번에 진행한다.
 - GitHub PR에 Vercel 상태 체크가 자동으로 붙어 있으며, Codex가 Vercel을 별도 실행하는 것은 아니다.
 - `AGENTS.md`는 Codex 작업 규칙과 컨텍스트 캐시의 첫 진입점으로 충분하다.
 - 기술적인 의사결정과 트러블슈팅은 `docs/technical-notes.md`에 남기고, `AGENTS.md`에는 다음 작업자가 어디부터 보면 되는지만 짧게 남긴다.
