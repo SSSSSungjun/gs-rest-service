@@ -2,6 +2,7 @@ package com.example.restservice.controller;
 
 import com.example.restservice.dto.request.PostRequestDto;
 import com.example.restservice.dto.response.PostImageResponseDto;
+import com.example.restservice.dto.response.PostPageResponseDto;
 import com.example.restservice.dto.response.PostResponseDto;
 import com.example.restservice.service.AnonymousSessionService;
 import com.example.restservice.service.LikeService;
@@ -39,12 +40,36 @@ public class PostController {
     private final AnonymousSessionService anonymousSessionService;
 
     @GetMapping
-    public ResponseEntity<List<PostResponseDto>> getAllPosts(
+    public ResponseEntity<PostPageResponseDto> getPosts(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "latest") String sort,
+            @RequestParam(defaultValue = "posts") String searchMode,
+            @RequestParam(defaultValue = "") String query,
             HttpServletRequest request,
             HttpServletResponse response
     ) {
         String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
-        return ResponseEntity.ok(postService.getAllPosts(sessionId));
+        return ResponseEntity.ok(postService.getPosts(page, size, sort, searchMode, query, sessionId));
+    }
+
+    @GetMapping("/notifications")
+    public ResponseEntity<List<PostResponseDto>> getNotificationPosts(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
+        return ResponseEntity.ok(postService.getNotificationPosts(sessionId));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PostResponseDto> getPost(
+            @PathVariable Long id,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
+        String sessionId = anonymousSessionService.getOrCreateSessionId(request, response);
+        return ResponseEntity.ok(postService.getPost(id, sessionId));
     }
 
     @PostMapping

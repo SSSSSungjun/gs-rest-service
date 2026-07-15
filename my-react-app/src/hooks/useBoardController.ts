@@ -2,8 +2,9 @@ import { useCallback, useEffect, useReducer, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
 import { getApiErrorMessage, isApiErrorStatus } from '../apiClient'
 import { boardApi } from '../boardApi'
+import type { Post } from '../boardApi'
 import { boardReducer, initialBoardState } from '../boardReducer'
-import { POST_HASH_PREFIX, resizeTextarea } from '../boardUi'
+import { POSTS_PER_PAGE, POST_HASH_PREFIX, resizeTextarea } from '../boardUi'
 import type { FeedSort } from '../feedSelectors'
 import { useBoardActivity } from '../useBoardActivity'
 import { useBoardImages } from './useBoardImages'
@@ -15,6 +16,8 @@ export function useBoardController() {
   const [state, dispatch] = useReducer(boardReducer, initialBoardState)
   const [isActivityRefreshing, setIsActivityRefreshing] = useState(false)
   const [isActivityStreamEnabled, setIsActivityStreamEnabled] = useState(false)
+  const [notificationPosts, setNotificationPosts] = useState<Post[]>([])
+  const [detailPost, setDetailPost] = useState<Post | null>(null)
 
   const showSystemMessage = useCallback((message: string) => {
     window.alert(message)
@@ -23,14 +26,14 @@ export function useBoardController() {
     dispatch({ type: 'pagination/pageChanged', payload: page })
   }, [])
 
-  const feed = useFeedView(state.posts, state.currentPage, changePage)
-  const screen = useBoardScreen(state.posts, state.expandedPostId, dispatch)
+  const feed = useFeedView(state.posts, changePage)
+  const screen = useBoardScreen(state.posts, detailPost, state.expandedPostId, dispatch)
   const {
     summary: boardActivity,
     captureRefreshMarker,
     acknowledgeRefresh,
   } = useBoardActivity(screen.selectedPost?.id ?? null, isActivityStreamEnabled)
-  const commentNotifications = useCommentNotifications(state.posts)
+  const commentNotifications = useCommentNotifications(notificationPosts)
   const boardImages = useBoardImages(
     state.images,
     state.editingPosts,
@@ -43,8 +46,42 @@ export function useBoardController() {
     if (showLoading) dispatch({ type: 'posts/loadStarted' })
 
     try {
-      const data = await boardApi.getPosts()
-      dispatch({ type: 'posts/loadSucceeded', payload: data })
+      const data = await boardApi.getPosts({
+        page: state.currentPage,
+        size: POSTS_PER_PAGE,
+        sort: feed.feedSort,
+        searchMode: feed.appliedSearchMode,
+        query: feed.normalizedSearchQuery,
+      })
+      dispatch({ type: 'posts/loadSucceeded', payload: data.posts })
+      feed.applyPage(data)
+
+      const nextNotificationPosts = await boardApi.getNotificationPosts()
+      setNotificationPosts(nextNotificationPosts)
+
+      if (state.expandedPostId !== null) {
+        const postOnCurrentPage = data.posts.find((post) => post.id === state.expandedPostId)
+        if (postOnCurrentPage) {
+          setDetailPost(postOnCurrentPage)
+        } else {
+          try {
+            setDetailPost(await boardApi.getPost(state.expandedPostId))
+          } catch (error) {
+            if (!isApiErrorStatus(error, 404)) throw error
+            setDetailPost(null)
+            dispatch({ type: 'posts/detailClosed' })
+            window.history.replaceState(
+              null,
+              '',
+              window.location.pathname + window.location.search,
+            )
+            showSystemMessage('게시글이 삭제되었습니다. 목록으로 돌아갑니다.')
+          }
+        }
+      } else {
+        setDetailPost(null)
+      }
+
       setIsActivityStreamEnabled(true)
       acknowledgeRefresh(refreshMarker)
     } catch (error) {
@@ -57,7 +94,17 @@ export function useBoardController() {
       showSystemMessage(message)
       console.error(error)
     }
-  }, [acknowledgeRefresh, captureRefreshMarker, showSystemMessage])
+  }, [
+    acknowledgeRefresh,
+    captureRefreshMarker,
+    feed.appliedSearchMode,
+    feed.applyPage,
+    feed.feedSort,
+    feed.normalizedSearchQuery,
+    showSystemMessage,
+    state.currentPage,
+    state.expandedPostId,
+  ])
 
   const refreshBoardActivity = useCallback(async () => {
     setIsActivityRefreshing(true)

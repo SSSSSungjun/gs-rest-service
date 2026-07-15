@@ -127,6 +127,7 @@
 - PR #59는 약 940줄의 `App.tsx`를 `useBoardController` + `BoardPage` 조립으로 축소하고, 피드 selector·화면 전환·알림·이미지를 역할별 훅으로 분리한 리팩터링이다. Spring 서비스 테스트 5개와 backend/frontend 독립 Application checks를 추가했으며, Spring Boot 3.2.4와 호환되지 않던 Gradle 9.3.1 wrapper를 8.7로 맞춰 전체 `bootJar` 빌드도 복구했다.
 - PR #60은 Spring 서비스 테스트 5개의 영어 메서드명은 유지하면서 CI·IDE 테스트 결과에서 의도가 바로 보이도록 한글 `@DisplayName`을 추가한 작업이다.
 - PR #61은 Playwright 가상 베타테스터 기반을 추가한 작업이다. 실제 Vite + Spring Boot + 전용 H2를 띄우고 독립 BrowserContext 두 개로 익명 소유권과 댓글 왕복을 검증하며, 검색 제출/강조와 320px 모바일·768px 태블릿 overflow를 검사한다. 실패 시 screenshot·video·trace·HTML report를 Actions artifact로 7일 보관한다.
+- PR #62는 게시글·댓글 검색, 최신순·오래된순·인기순, 페이지 분할을 Spring Data Page 쿼리로 옮긴 작업이다. 목록은 페이지 결과만 받고 상세와 소유 글 댓글 알림 소스는 별도 API로 분리했다. Repository 통합 테스트 3개와 Playwright 8개/1개 페이지 전환 시나리오를 추가했다.
 - PR #58의 SSE는 전체 게시판에서 활동이 급증했다는 선택적 갱신 신호다. 새 글·댓글을 자동 반영하지 않으며 연결이나 이벤트가 유실되어도 다음 전체 조회로 복구되어야 한다.
 - 내가 쓴 글의 기존 댓글 알림 목록은 별도 실시간 push가 아니다. 게시글 목록을 다시 가져온 시점에 댓글과 `localStorage` 읽음 ID를 비교해 계산하므로, 활동 SSE 버튼으로 갱신한 뒤 함께 최신화된다.
 - 비속어 필터링은 현재 최후순위다. Spring AI로 검열하기보다 신고/관리자 삭제 모델이 더 적절할 수 있으므로 실제 운영 요구가 생기면 별도 설계한다.
@@ -141,7 +142,7 @@
 - 알림 버튼은 새 알림이 있을 때 `+N` 배지와 초록 강조색을 사용한다.
 - 알림 목록 화면에서는 개별 알림 읽음 처리, 모두 읽음, 원문 게시글 열기를 제공한다.
 - 프론트 unit/component test runner는 아직 없지만 `e2e`의 Playwright가 실제 브라우저 회귀를 담당한다. Spring 서비스 테스트는 `complete/src/test/java/com/example/restservice/service`에 있고, `.github/workflows/backend-tests.yml`과 `.github/workflows/playwright-e2e.yml`이 빌드·단위 테스트·브라우저 테스트를 분리 실행한다.
-- 다음 기능 우선순위는 서버 검색·페이지네이션이며, UI 패딩·색상 고도화는 사용자가 집에서 레퍼런스를 가져온 뒤 한 번에 진행한다.
+- 다음 기능 우선순위는 DB migration과 PostgreSQL 선택 검증이며, UI 패딩·색상 고도화는 사용자가 집에서 레퍼런스를 가져온 뒤 한 번에 진행한다.
 - GitHub PR에 Vercel 상태 체크가 자동으로 붙어 있으며, Codex가 Vercel을 별도 실행하는 것은 아니다.
 - `AGENTS.md`는 Codex 작업 규칙과 컨텍스트 캐시의 첫 진입점으로 충분하다.
 - 기술적인 의사결정과 트러블슈팅은 `docs/technical-notes.md`에 남기고, `AGENTS.md`에는 다음 작업자가 어디부터 보면 되는지만 짧게 남긴다.

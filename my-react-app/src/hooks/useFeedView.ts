@@ -1,19 +1,16 @@
-import { useCallback, useMemo, useState } from 'react'
-import type { Post } from '../boardApi'
-import { POSTS_PER_PAGE } from '../boardUi'
-import {
-  filterPosts,
-  findCommentSearchResults,
-  getPageCount,
-  normalizeSearchQuery,
-  paginate,
-  sortPosts,
-} from '../feedSelectors'
+import { useCallback, useState } from 'react'
+import type { CommentSearchResult, Post, PostPageResponse } from '../boardApi'
+import { normalizeSearchQuery } from '../feedSelectors'
 import type { FeedSort, SearchMode } from '../feedSelectors'
+
+interface ServerPageState {
+  commentResults: CommentSearchResult[]
+  totalElements: number
+  totalPages: number
+}
 
 export function useFeedView(
   posts: Post[],
-  currentPage: number,
   onPageChange: (page: number) => void,
 ) {
   const [feedSort, setFeedSort] = useState<FeedSort>('latest')
@@ -21,28 +18,22 @@ export function useFeedView(
   const [appliedSearchMode, setAppliedSearchMode] = useState<SearchMode>('posts')
   const [searchInput, setSearchInput] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
+  const [serverPage, setServerPage] = useState<ServerPageState>({
+    commentResults: [],
+    totalElements: 0,
+    totalPages: 1,
+  })
 
   const normalizedSearchQuery = normalizeSearchQuery(searchQuery)
-  const sortedPosts = useMemo(() => sortPosts(posts, feedSort), [feedSort, posts])
   const isCommentSearch = appliedSearchMode === 'comments' && Boolean(normalizedSearchQuery)
-  const filteredPosts = useMemo(
-    () => filterPosts(sortedPosts, normalizedSearchQuery, appliedSearchMode),
-    [appliedSearchMode, normalizedSearchQuery, sortedPosts],
-  )
-  const commentSearchResults = useMemo(
-    () => isCommentSearch ? findCommentSearchResults(sortedPosts, normalizedSearchQuery) : [],
-    [isCommentSearch, normalizedSearchQuery, sortedPosts],
-  )
-  const searchResultCount = isCommentSearch ? commentSearchResults.length : filteredPosts.length
-  const pageCount = getPageCount(searchResultCount, POSTS_PER_PAGE)
-  const visiblePosts = useMemo(
-    () => paginate(filteredPosts, currentPage, POSTS_PER_PAGE),
-    [currentPage, filteredPosts],
-  )
-  const visibleCommentResults = useMemo(
-    () => paginate(commentSearchResults, currentPage, POSTS_PER_PAGE),
-    [commentSearchResults, currentPage],
-  )
+
+  const applyPage = useCallback((response: PostPageResponse) => {
+    setServerPage({
+      commentResults: response.commentResults,
+      totalElements: response.totalElements,
+      totalPages: response.totalPages,
+    })
+  }, [])
 
   const changeFeedSort = useCallback((nextSort: FeedSort) => {
     setFeedSort(nextSort)
@@ -74,12 +65,13 @@ export function useFeedView(
     searchQuery,
     normalizedSearchQuery,
     isCommentSearch,
-    searchResultCount,
-    pageCount,
-    visiblePosts,
-    visibleCommentResults,
+    searchResultCount: serverPage.totalElements,
+    pageCount: serverPage.totalPages,
+    visiblePosts: isCommentSearch ? [] : posts,
+    visibleCommentResults: isCommentSearch ? serverPage.commentResults : [],
     setSearchMode,
     setSearchInput,
+    applyPage,
     changeFeedSort,
     submitSearch,
     resetFeed,

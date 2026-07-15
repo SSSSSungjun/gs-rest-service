@@ -47,6 +47,29 @@ export interface Post {
   comments: Comment[]
 }
 
+export interface CommentSearchResult {
+  postId: number
+  postContent: string
+  comment: Comment
+}
+
+export interface PostPageResponse {
+  posts: Post[]
+  commentResults: CommentSearchResult[]
+  totalElements: number
+  totalPages: number
+  page: number
+  size: number
+}
+
+export interface PostPageQuery {
+  page: number
+  size: number
+  sort: 'latest' | 'oldest' | 'popular'
+  searchMode: 'posts' | 'comments'
+  query: string
+}
+
 export interface BoardWritePayload {
   nickname: string
   content: string
@@ -66,8 +89,18 @@ export const boardApi = {
     return response.data.content
   },
 
-  async getPosts() {
-    const response = await apiClient.get<Post[]>('/posts')
+  async getPosts(query: PostPageQuery) {
+    const response = await apiClient.get<PostPageResponse>('/posts', { params: query })
+    return response.data
+  },
+
+  async getPost(postId: number) {
+    const response = await apiClient.get<Post>(`/posts/${postId}`)
+    return response.data
+  },
+
+  async getNotificationPosts() {
+    const response = await apiClient.get<Post[]>('/posts/notifications')
     return response.data
   },
 

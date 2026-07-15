@@ -2,7 +2,10 @@ package com.example.restservice.service;
 
 import com.example.restservice.dto.request.PostImageRequestDto;
 import com.example.restservice.dto.request.PostRequestDto;
+import com.example.restservice.dto.response.CommentSearchResultResponseDto;
+import com.example.restservice.dto.response.PostPageResponseDto;
 import com.example.restservice.dto.response.PostResponseDto;
+import com.example.restservice.entity.Comment;
 import com.example.restservice.entity.PollOption;
 import com.example.restservice.entity.Post;
 import com.example.restservice.entity.PostImage;
@@ -10,17 +13,23 @@ import com.example.restservice.event.BoardActivityCreatedEvent;
 import com.example.restservice.exception.ForbiddenOperationException;
 import com.example.restservice.exception.ResourceNotFoundException;
 import com.example.restservice.repository.CommentLikeRepository;
+import com.example.restservice.repository.CommentRepository;
 import com.example.restservice.repository.LikeCountProjection;
 import com.example.restservice.repository.PollVoteRepository;
 import com.example.restservice.repository.PostLikeRepository;
 import com.example.restservice.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,13 +45,136 @@ public class PostService {
     private static final int MAX_POLL_OPTION_COUNT = 5;
 
     private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
     private final PostLikeRepository postLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final PollVoteRepository pollVoteRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    public List<PostResponseDto> getAllPosts(String sessionId) {
-        List<Post> posts = postRepository.findAllByOrderByCreatedAtDesc();
+    private enum FeedSort {
+        LATEST,
+        OLDEST,
+        POPULAR;
+
+        static FeedSort from(String value) {
+            try {
+                return valueOf((value == null ? "latest" : value).trim().toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException exception) {
+                throw new IllegalArgumentException("지원하지 않는 정렬 방식입니다.");
+            }
+        }
+    }
+
+    private enum SearchMode {
+        POSTS,
+        COMMENTS;
+
+        static SearchMode from(String value) {
+            try {
+                return valueOf((value == null ? "posts" : value).trim().toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException exception) {
+                throw new IllegalArgumentException("지원하지 않는 검색 대상입니다.");
+            }
+        }
+    }
+
+    public PostPageResponseDto getPosts(
+            int page,
+            int size,
+            String sort,
+            String searchMode,
+            String query,
+            String sessionId
+    ) {
+        int pageNumber = Math.max(1, page);
+        int pageSize = Math.min(50, Math.max(1, size));
+        FeedSort feedSort = FeedSort.from(sort);
+        SearchMode mode = SearchMode.from(searchMode);
+        String normalizedQuery = query == null ? "" : query.trim().toLowerCase(Locale.ROOT);
+
+        if (mode == SearchMode.COMMENTS && !normalizedQuery.isBlank()) {
+            return getCommentPage(pageNumber, pageSize, feedSort, normalizedQuery, sessionId);
+        }
+
+        Pageable pageable = feedSort == FeedSort.POPULAR
+                ? PageRequest.of(pageNumber - 1, pageSize)
+                : PageRequest.of(
+                        pageNumber - 1,
+                        pageSize,
+                        Sort.by(feedSort == FeedSort.OLDEST ? Sort.Direction.ASC : Sort.Direction.DESC, "createdAt")
+                );
+        Page<Post> result = feedSort == FeedSort.POPULAR
+                ? postRepository.searchPopular(normalizedQuery, pageable)
+                : postRepository.search(normalizedQuery, pageable);
+
+        return PostPageResponseDto.of(
+                toPostResponses(result.getContent(), sessionId),
+                List.of(),
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.getNumber() + 1,
+                result.getSize()
+        );
+    }
+
+    public PostResponseDto getPost(Long id, String sessionId) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("삭제되었거나 존재하지 않는 글입니다."));
+        return toPostResponses(List.of(post), sessionId).get(0);
+    }
+
+    public List<PostResponseDto> getNotificationPosts(String sessionId) {
+        return toPostResponses(
+                postRepository.findByOwnerSessionIdOrderByCreatedAtDesc(sessionId),
+                sessionId
+        );
+    }
+
+    private PostPageResponseDto getCommentPage(
+            int pageNumber,
+            int pageSize,
+            FeedSort feedSort,
+            String query,
+            String sessionId
+    ) {
+        Pageable pageable = feedSort == FeedSort.POPULAR
+                ? PageRequest.of(pageNumber - 1, pageSize)
+                : PageRequest.of(
+                        pageNumber - 1,
+                        pageSize,
+                        Sort.by(feedSort == FeedSort.OLDEST ? Sort.Direction.ASC : Sort.Direction.DESC, "createdAt")
+                );
+        Page<Comment> result = feedSort == FeedSort.POPULAR
+                ? commentRepository.searchPopular(query, pageable)
+                : commentRepository.search(query, pageable);
+        List<Long> commentIds = result.getContent().stream()
+                .map(Comment::getId)
+                .toList();
+        Map<Long, Long> likeCounts = getCommentLikeCounts(commentIds);
+        Set<Long> likedCommentIds = commentIds.isEmpty()
+                ? Set.of()
+                : Set.copyOf(commentLikeRepository.findLikedCommentIds(sessionId, commentIds));
+
+        List<CommentSearchResultResponseDto> commentResults = result.getContent().stream()
+                .map(comment -> CommentSearchResultResponseDto.from(
+                        comment,
+                        sessionId,
+                        likeCounts.getOrDefault(comment.getId(), 0L),
+                        likedCommentIds.contains(comment.getId())
+                ))
+                .toList();
+
+        return PostPageResponseDto.of(
+                List.of(),
+                commentResults,
+                result.getTotalElements(),
+                result.getTotalPages(),
+                result.getNumber() + 1,
+                result.getSize()
+        );
+    }
+
+    private List<PostResponseDto> toPostResponses(List<Post> posts, String sessionId) {
         List<Long> postIds = posts.stream()
                 .map(Post::getId)
                 .toList();
@@ -247,7 +379,6 @@ public class PostService {
                 })
                 .toList();
     }
-
     private List<PollOption> toPollOptions(Post post, List<String> pollOptions) {
         if (pollOptions.isEmpty()) {
             return List.of();
