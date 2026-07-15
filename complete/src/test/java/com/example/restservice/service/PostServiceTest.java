@@ -6,6 +6,7 @@ import com.example.restservice.entity.PollOption;
 import com.example.restservice.entity.Post;
 import com.example.restservice.event.BoardActivityCreatedEvent;
 import com.example.restservice.repository.CommentLikeRepository;
+import com.example.restservice.repository.CommentRepository;
 import com.example.restservice.repository.PollVoteRepository;
 import com.example.restservice.repository.PostLikeRepository;
 import com.example.restservice.repository.PostRepository;
@@ -32,6 +33,8 @@ class PostServiceTest {
 
     @Mock
     private PostRepository postRepository;
+    @Mock
+    private CommentRepository commentRepository;
     @Mock
     private PostLikeRepository postLikeRepository;
     @Mock
