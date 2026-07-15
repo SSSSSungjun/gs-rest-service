@@ -163,6 +163,20 @@
 - 기술적인 의사결정과 트러블슈팅은 `docs/technical-notes.md`에 남기고, `AGENTS.md`에는 다음 작업자가 어디부터 보면 되는지만 짧게 남긴다.
 - Redis 같은 인프라 캐싱은 실제 성능 병목이나 배포 요구가 생긴 뒤 별도 설계한다.
 
+## 새 세션 인계 기준
+
+- 최신 완료 지점은 PR #70, squash merge commit `854fdd1aa0a0cb0dc7e4ef24646a17db067d64c5`다.
+- PostgreSQL 16 + Spring Boot + nginx/React Docker Compose 패키지, 컨테이너 smoke workflow, 배포 문서까지 완료됐고 main의 backend/frontend/Playwright/PostgreSQL/container checks가 모두 통과했다.
+- 현재 상태는 실제 상시 운영 서버 배포가 아니라, 어느 Linux 서버에서도 재현 가능한 배포 패키지를 만들고 GitHub Actions에서 검증한 단계다.
+- 다음 세션의 기본 작업은 Codespaces에서 Compose를 직접 띄워 수동 인수 테스트하는 것이다. 저장소 루트에서 `cp .env.example .env`, 비밀번호와 Codespaces forwarded origin을 설정한 뒤 `docker compose config --quiet`, `docker compose up -d --build`, `docker compose ps`, `./scripts/compose-smoke.sh` 순서로 확인한다.
+- Compose 경로는 PostgreSQL 컨테이너를 사용하므로 `sudo service mysql start`가 필요 없다. 기존 MySQL 직접 실행 경로는 제거되지 않았지만 Compose 검증과 섞지 않는다.
+- 종료는 데이터가 유지되는 `docker compose down`을 사용한다. `docker compose down -v`는 PostgreSQL 데이터를 삭제하므로 사용자가 명시적으로 초기화를 요청한 경우에만 실행한다.
+- 수동 인수 테스트 다음 순서는 컨테이너 재시작 후 DB/업로드 영속성, 이미지 업로드, 백업·복구 모의훈련, 환경변수 누락과 DB 장애 동작, 동시 삭제·댓글·투표 사이드 이펙트 E2E 보강이다.
+- 실제 서버·도메인·HTTPS·운영 Secret·CD 연결과 외부망 부하/보안 검증은 대상 인프라가 있는 집 환경에서 진행한다.
+- Figma 레퍼런스 기반 UI 전면 개편과 최종 패딩·색상 고도화도 사용자가 집에서 레퍼런스를 제공한 뒤 한 번에 진행한다.
+- 회사 환경에서는 로컬 저장소를 보지 않고 GitHub connector로만 원격 저장소를 읽고 수정한다. 매 작업 시작 시 `_get_repo`로 연결을 확인하고, main 최신 기준의 규칙 브랜치 생성 → 최소 변경 → PR → checks 확인 → squash merge → AGENTS 컨텍스트 캐시 갱신 순서를 지킨다.
+- 원격 브랜치 삭제 기능이 connector에 없으면 squash merge 후 사용자에게 GitHub에서 브랜치를 삭제할 대상만 짧게 알린다.
+
 ## 사용자가 짧게 말해도 되는 형식
 
 ```text
