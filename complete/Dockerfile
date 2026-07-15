@@ -8,7 +8,11 @@ COPY gradle ./gradle
 RUN chmod +x gradlew && ./gradlew dependencies --no-daemon
 
 COPY src ./src
-RUN ./gradlew bootJar --no-daemon
+RUN ./gradlew clean bootJar --no-daemon \
+    && jar_file="$(find build/libs -maxdepth 1 -type f -name '*.jar' ! -name '*-plain.jar' -print -quit)" \
+    && test -n "$jar_file" \
+    && jar tf "$jar_file" | grep --quiet 'BOOT-INF/lib/spring-boot-' \
+    && cp "$jar_file" /workspace/app.jar
 
 FROM eclipse-temurin:17-jre-jammy AS runtime
 
@@ -19,7 +23,7 @@ RUN apt-get update \
     && useradd --system --gid spring --home-dir /app spring
 
 WORKDIR /app
-COPY --from=build --chown=spring:spring /workspace/build/libs/*.jar /app/app.jar
+COPY --from=build --chown=spring:spring /workspace/app.jar /app/app.jar
 RUN mkdir -p /data/uploads/post-images \
     && chown -R spring:spring /data
 
