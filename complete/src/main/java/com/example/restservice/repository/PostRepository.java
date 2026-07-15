@@ -2,6 +2,8 @@ package com.example.restservice.repository;
 
 import com.example.restservice.entity.Post;
 import jakarta.persistence.LockModeType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,8 +14,37 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PostRepository extends JpaRepository<Post, Long> {
-    //최신 글이 맨 위로 올라오도록
-    List<Post> findAllByOrderByCreatedAtDesc();
+    @Query("""
+            select post
+            from Post post
+            where :query = ''
+               or lower(post.nickname) like concat('%', :query, '%')
+               or lower(post.content) like concat('%', :query, '%')
+            """)
+    Page<Post> search(@Param("query") String query, Pageable pageable);
+
+    @Query(
+            value = """
+                    select post
+                    from Post post
+                    left join PostLike postLike on postLike.post = post
+                    where :query = ''
+                       or lower(post.nickname) like concat('%', :query, '%')
+                       or lower(post.content) like concat('%', :query, '%')
+                    group by post
+                    order by count(postLike.id) desc, post.createdAt desc
+                    """,
+            countQuery = """
+                    select count(post)
+                    from Post post
+                    where :query = ''
+                       or lower(post.nickname) like concat('%', :query, '%')
+                       or lower(post.content) like concat('%', :query, '%')
+                    """
+    )
+    Page<Post> searchPopular(@Param("query") String query, Pageable pageable);
+
+    List<Post> findByOwnerSessionIdOrderByCreatedAtDesc(String ownerSessionId);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     Optional<Post> findWithLockById(Long id);
