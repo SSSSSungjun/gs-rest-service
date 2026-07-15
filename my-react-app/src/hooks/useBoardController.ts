@@ -61,7 +61,23 @@ export function useBoardController() {
 
       if (state.expandedPostId !== null) {
         const postOnCurrentPage = data.posts.find((post) => post.id === state.expandedPostId)
-        setDetailPost(postOnCurrentPage ?? await boardApi.getPost(state.expandedPostId))
+        if (postOnCurrentPage) {
+          setDetailPost(postOnCurrentPage)
+        } else {
+          try {
+            setDetailPost(await boardApi.getPost(state.expandedPostId))
+          } catch (error) {
+            if (!isApiErrorStatus(error, 404)) throw error
+            setDetailPost(null)
+            dispatch({ type: 'posts/detailClosed' })
+            window.history.replaceState(
+              null,
+              '',
+              window.location.pathname + window.location.search,
+            )
+            showSystemMessage('게시글이 삭제되었습니다. 목록으로 돌아갑니다.')
+          }
+        }
       } else {
         setDetailPost(null)
       }
