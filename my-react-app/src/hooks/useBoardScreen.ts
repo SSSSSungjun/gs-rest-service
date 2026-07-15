@@ -12,6 +12,7 @@ function replaceHashWithRoot() {
 
 export function useBoardScreen(
   posts: Post[],
+  detailPost: Post | null,
   expandedPostId: number | null,
   dispatch: Dispatch<BoardAction>,
 ) {
@@ -19,8 +20,9 @@ export function useBoardScreen(
   const [isComposerViewOpen, setIsComposerViewOpen] = useState(false)
 
   const selectedPost = useMemo(
-    () => posts.find((post) => post.id === expandedPostId) ?? null,
-    [expandedPostId, posts],
+    () => posts.find((post) => post.id === expandedPostId)
+      ?? (detailPost?.id === expandedPostId ? detailPost : null),
+    [detailPost, expandedPostId, posts],
   )
   const isDetailView = selectedPost !== null
   const isNotificationView = isNotificationViewOpen && !isDetailView
