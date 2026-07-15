@@ -111,21 +111,25 @@ export function FeedResults({ controller }: BoardFeedProps) {
     state,
   } = controller
   const selectedPost = screen.selectedPost
+  const hasVisibleResults = feed.isCommentSearch
+    ? feed.visibleCommentResults.length > 0
+    : feed.visiblePosts.length > 0
 
   return (
     <div className="feed-scroll-region">
-      {state.isLoading && state.posts.length === 0 && (
-        <p className="empty-state">게시글을 불러오는 중입니다.</p>
-      )}
-      {!state.isLoading && state.posts.length === 0 && (
-        <p className="empty-state">아직 게시글이 없습니다.</p>
-      )}
+      {state.isLoading
+        && !hasVisibleResults
+        && !screen.isDetailView
+        && !screen.isNotificationView && (
+          <p className="empty-state">게시글을 불러오는 중입니다.</p>
+        )}
       {!state.isLoading
-        && state.posts.length > 0
         && feed.searchResultCount === 0
         && !screen.isDetailView
         && !screen.isNotificationView && (
-          <p className="empty-state">검색 결과가 없습니다.</p>
+          <p className="empty-state">
+            {feed.normalizedSearchQuery ? '검색 결과가 없습니다.' : '아직 게시글이 없습니다.'}
+          </p>
         )}
 
       {screen.isNotificationView ? (
