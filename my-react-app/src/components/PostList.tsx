@@ -9,6 +9,21 @@ import { PollBlock } from './PollBlock'
 import { PostEditForm } from './PostEditForm'
 import { PostImageGallery } from './PostImageGallery'
 
+const AVATAR_TOKENS = ['🌱', '🍀', '🌿', '🍃', '🌼', '🎋']
+
+function getAvatarToken(postId: number, nickname: string) {
+  const nicknameHash = Array.from(nickname || '익명').reduce(
+    (hash, character) => ((hash * 31) + (character.codePointAt(0) ?? 0)) | 0,
+    0,
+  )
+  const tokenIndex = Math.abs(nicknameHash + (postId * 17)) % AVATAR_TOKENS.length
+
+  return {
+    symbol: AVATAR_TOKENS[tokenIndex],
+    tone: tokenIndex + 1,
+  }
+}
+
 interface PostListProps {
   posts: Post[]
   searchQuery: string
@@ -62,6 +77,7 @@ export function PostList({
         const postImages = post.images ?? []
         const pollOptions = post.pollOptions ?? []
         const isPopular = isPopularPost(post.likeCount)
+        const avatarToken = getAvatarToken(post.id, post.nickname)
 
         return (
           <article
@@ -70,15 +86,23 @@ export function PostList({
             onClick={(event) => handleCardClick(event, post.id)}
           >
             <header className="post-header post-list-header">
-              <div className="post-list-heading">
-                <div className="post-title-row">
-                  {isPopular && <span className="popular-badge">인기</span>}
-                  <strong><HighlightedText text={post.nickname || '익명'} query={searchQuery} /></strong>
+              <div className="post-author-row">
+                <span
+                  className={`post-avatar post-avatar-tone-${avatarToken.tone}`}
+                  aria-hidden="true"
+                >
+                  {avatarToken.symbol}
+                </span>
+                <div className="post-list-heading">
+                  <div className="post-title-row">
+                    {isPopular && <span className="popular-badge">인기</span>}
+                    <strong><HighlightedText text={post.nickname || '익명'} query={searchQuery} /></strong>
+                  </div>
+                  <time dateTime={post.createdAt}>
+                    {formatDate(post.createdAt)}
+                    {wasEdited(post.createdAt, post.updatedAt) && <span className="edited-label">(수정됨)</span>}
+                  </time>
                 </div>
-                <time dateTime={post.createdAt}>
-                  {formatDate(post.createdAt)}
-                  {wasEdited(post.createdAt, post.updatedAt) && <span className="edited-label">(수정됨)</span>}
-                </time>
               </div>
               {post.ownedByMe && !postEditDraft && (
                 <ActionMenu

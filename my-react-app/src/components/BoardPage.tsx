@@ -3,7 +3,6 @@ import { BoardComposer } from './BoardComposer'
 import { BoardFeed } from './BoardFeed'
 import { CommentNotificationBar } from './CommentNotificationBar'
 import { ConfirmDialog } from './ConfirmDialog'
-import { PlusIcon } from './Icons'
 
 interface BoardPageProps {
   controller: BoardController
@@ -36,16 +35,6 @@ export function BoardPage({ controller }: BoardPageProps) {
             </button>
           </h1>
           <div className="board-header-actions">
-            {canCompose && (
-              <button
-                className="desktop-compose-button"
-                type="button"
-                onClick={screen.openComposer}
-              >
-                <PlusIcon />
-                글쓰기
-              </button>
-            )}
             <CommentNotificationBar
               notifications={notifications.items}
               onOpenList={notifications.openList}
