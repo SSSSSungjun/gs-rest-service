@@ -193,6 +193,14 @@
 - 회사 환경에서는 로컬 저장소를 보지 않고 GitHub connector로만 원격 저장소를 읽고 수정한다. 매 작업 시작 시 `_get_repo`로 연결을 확인한다.
 - 원격 브랜치 삭제 기능이 connector에 없으면 squash merge 후 사용자에게 GitHub에서 브랜치를 삭제할 대상만 짧게 알린다.
 
+## 프로젝트/세션 격리 기준
+
+- 이 문서의 규칙과 컨텍스트는 `SSSSSungjun/gs-rest-service` 저장소에만 적용하며, 다른 프로젝트로 자동 전이하지 않는다.
+- 새 PC·새 Codex 세션에서는 보관 대화나 특정 로컬 폴더명에 의존하지 않고, 먼저 GitHub connector의 `_get_repo`로 이 저장소 연결을 확인한 뒤 원격 `main`의 `AGENTS.md`를 읽는다.
+- 이 프로젝트를 다시 시작할 때 사용자가 제공해야 할 최소 정보는 저장소명과 “AGENTS.md 기준으로 진행”이라는 지시뿐이다.
+- 같은 Codespace를 다른 PC에서 열면 workspace 파일, 무시된 `.env`, Docker volume의 PostgreSQL 데이터가 유지된다. 새 Codespace에서는 Git 추적 파일은 자동 복원되지만 Secret/`.env`는 별도로 복원한다.
+- 작업 종료는 volume을 보존하는 `docker compose down`을 사용한다. `docker compose down -v`와 Codespace 삭제는 사용자가 데이터 초기화를 명시한 경우에만 수행한다.
+
 ## 사용자가 짧게 말해도 되는 형식
 
 ```text
