@@ -1,0 +1,19 @@
+:root {
+  --color-brand-500: #49a96f;
+  --color-brand-600: #3c915d;
+  --color-brand-soft: #eaf5ee;
+  --color-canvas: #f3f4f5;
+  --color-surface: #ffffff;
+  --color-line: #e1e6e3;
+  --color-text: #1b2820;
+  --color-text-muted: #7d8981;
+  --color-icon-muted: #87948c;
+  --color-like: #e45461;
+  --color-like-soft: #fff0f2;
+  --color-avatar-1: #dff4e6;
+  --color-avatar-2: #e8f2d8;
+  --color-avatar-3: #dceff1;
+  --color-avatar-4: #f4ead5;
+  --color-avatar-5: #f4e1e8;
+  --color-avatar-6: #e7e2f4;
+}
