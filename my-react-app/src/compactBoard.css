@@ -1072,3 +1072,115 @@ body {
     height: 92px;
   }
 }
+
+/* Precise feed layout corrections */
+.board-hero .board-title-button {
+  color: #ffffff !important;
+  font-family: "Jua", ui-rounded, "Arial Rounded MT Bold", "Malgun Gothic", sans-serif;
+  font-size: 25px;
+  font-weight: 400;
+  letter-spacing: -0.025em;
+}
+
+.feed-toolbar-list .feed-toolbar-controls {
+  justify-content: flex-start;
+  gap: 20px;
+}
+
+.feed-toolbar-list .feed-toolbar-actions {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.feed-toolbar-list .toolbar-compose-button {
+  margin-left: auto;
+}
+
+.post-list .post-list-preview.has-images {
+  grid-template-columns: 132px minmax(0, 1fr) !important;
+  gap: 16px !important;
+}
+
+.post-list .list-image-gallery {
+  width: 132px !important;
+  min-width: 132px !important;
+  max-width: 132px !important;
+  grid-auto-columns: 132px !important;
+  grid-template-columns: 132px !important;
+}
+
+.post-list .list-image-gallery .post-image-frame {
+  width: 132px !important;
+  min-width: 132px !important;
+  max-width: 132px !important;
+  height: 132px !important;
+  min-height: 132px !important;
+  max-height: 132px !important;
+  aspect-ratio: 1 / 1 !important;
+}
+
+.post-list .list-image-gallery .post-image-frame img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+.feed-scroll-region > .pagination {
+  padding: 30px 0 220px !important;
+}
+
+@media (max-width: 820px) {
+  .feed-toolbar-list .feed-toolbar-controls {
+    gap: 10px;
+  }
+
+  .post-list .post-list-preview.has-images {
+    grid-template-columns: 104px minmax(0, 1fr) !important;
+    gap: 13px !important;
+  }
+
+  .post-list .list-image-gallery {
+    width: 104px !important;
+    min-width: 104px !important;
+    max-width: 104px !important;
+    grid-auto-columns: 104px !important;
+    grid-template-columns: 104px !important;
+  }
+
+  .post-list .list-image-gallery .post-image-frame {
+    width: 104px !important;
+    min-width: 104px !important;
+    max-width: 104px !important;
+    height: 104px !important;
+    min-height: 104px !important;
+    max-height: 104px !important;
+  }
+
+  .feed-scroll-region > .pagination {
+    padding-bottom: 190px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .post-list .post-list-preview.has-images {
+    grid-template-columns: 92px minmax(0, 1fr) !important;
+    gap: 11px !important;
+  }
+
+  .post-list .list-image-gallery {
+    width: 92px !important;
+    min-width: 92px !important;
+    max-width: 92px !important;
+    grid-auto-columns: 92px !important;
+    grid-template-columns: 92px !important;
+  }
+
+  .post-list .list-image-gallery .post-image-frame {
+    width: 92px !important;
+    min-width: 92px !important;
+    max-width: 92px !important;
+    height: 92px !important;
+    min-height: 92px !important;
+    max-height: 92px !important;
+  }
+}
