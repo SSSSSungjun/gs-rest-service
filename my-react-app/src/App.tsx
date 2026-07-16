@@ -5,6 +5,7 @@ import './forumToss.css'
 import './search.css'
 import './activityRefresh.css'
 import './compactBoard.css'
+import './finalFeedFix.css'
 import { BoardPage } from './components/BoardPage'
 import { useBoardController } from './hooks/useBoardController'
 
