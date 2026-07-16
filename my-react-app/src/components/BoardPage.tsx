@@ -3,6 +3,7 @@ import { BoardComposer } from './BoardComposer'
 import { BoardFeed } from './BoardFeed'
 import { CommentNotificationBar } from './CommentNotificationBar'
 import { ConfirmDialog } from './ConfirmDialog'
+import { PlusIcon } from './Icons'
 
 interface BoardPageProps {
   controller: BoardController
@@ -18,25 +19,38 @@ export function BoardPage({ controller }: BoardPageProps) {
     state,
   } = controller
   const hasActivePostEdit = Object.keys(state.editingPosts).length > 0
+  const canCompose = !screen.isDetailView && !screen.isNotificationView && !hasActivePostEdit
 
   return (
     <main className="board-shell">
       <section className="board-hero" aria-labelledby="board-title">
-        <div>
-          <p className="eyebrow">Bamboo forest</p>
-          <h1 id="board-title">
+        <div className="board-hero-inner">
+          <div>
+            <p className="eyebrow">Bamboo forest</p>
+            <h1 id="board-title">
+              <button
+                className="board-title-button"
+                type="button"
+                onClick={actions.handleBoardTitleClick}
+                disabled={state.isLoading}
+              >
+                대나무숲
+              </button>
+            </h1>
+            <p className="hero-copy">
+              가입 없이 남기고, 내가 쓴 글과 댓글은 이 브라우저에서 바로 삭제할 수 있습니다.
+            </p>
+          </div>
+          {canCompose && (
             <button
-              className="board-title-button"
+              className="desktop-compose-button"
               type="button"
-              onClick={actions.handleBoardTitleClick}
-              disabled={state.isLoading}
+              onClick={screen.openComposer}
             >
-              대나무숲
+              <PlusIcon />
+              글쓰기
             </button>
-          </h1>
-          <p className="hero-copy">
-            가입 없이 남기고, 내가 쓴 글과 댓글은 이 브라우저에서 바로 삭제할 수 있습니다.
-          </p>
+          )}
         </div>
       </section>
 
@@ -47,7 +61,7 @@ export function BoardPage({ controller }: BoardPageProps) {
 
       <BoardFeed controller={controller} />
 
-      {!screen.isDetailView && !screen.isNotificationView && !hasActivePostEdit && (
+      {canCompose && (
         <BoardComposer
           isOpen={screen.isComposerViewOpen}
           nickname={state.nickname}

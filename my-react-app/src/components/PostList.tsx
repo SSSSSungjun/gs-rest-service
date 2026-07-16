@@ -56,7 +56,7 @@ export function PostList({
   }
 
   return (
-    <>
+    <div className="post-list">
       {posts.map((post) => {
         const postEditDraft = editingPosts[post.id]
         const postImages = post.images ?? []
@@ -144,6 +144,6 @@ export function PostList({
           </article>
         )
       })}
-    </>
+    </div>
   )
 }

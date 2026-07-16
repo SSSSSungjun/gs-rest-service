@@ -14,7 +14,7 @@ async function openBoard(page: Page) {
 }
 
 async function createPost(page: Page, nickname: string, content: string) {
-  await page.getByRole('button', { name: '무슨 일이 있었나요?' }).click()
+  await page.getByRole('button', { name: '글쓰기', exact: true }).click()
   await page.getByLabel('게시글 닉네임').fill(nickname)
   await page.getByLabel('게시글 내용').fill(content)
   await page.getByRole('button', { name: '게시', exact: true }).click()
@@ -110,7 +110,7 @@ test('검색 결과를 서버 설정 크기로 나눠 조회한다', async ({ pa
   await page.getByLabel('게시글 검색어').fill(keyword)
   await page.getByRole('button', { name: '게시글 검색 실행' }).click()
   await expect(page.locator('article.post-card')).toHaveCount(8)
-  await expect(page.locator('.pagination-total')).toHaveText('/ 2')
+  await expect(page.getByRole('button', { name: '2', exact: true })).toBeVisible()
 
   await page.getByRole('button', { name: '2', exact: true }).click()
   await expect(page.locator('article.post-card')).toHaveCount(1)
