@@ -24,78 +24,91 @@ function getFeedLabel(controller: BoardController) {
 
 export function FeedToolbar({ controller }: BoardFeedProps) {
   const { actions, activity, feed, screen, state } = controller
+  const showsFeedControls = !screen.isDetailView && !screen.isNotificationView
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     actions.submitSearch()
   }
 
+  const refreshControl = activity.summary.visible && !screen.isNotificationView ? (
+    <ActivityRefreshButton
+      summary={activity.summary}
+      isRefreshing={activity.isRefreshing}
+      onRefresh={() => void activity.refresh()}
+    />
+  ) : (
+    <button
+      className="refresh-button icon-only-button"
+      type="button"
+      onClick={() => void actions.fetchPosts(false)}
+      disabled={state.isLoading}
+      aria-label="게시글 새로고침"
+    >
+      <RefreshCwIcon />
+    </button>
+  )
+
   return (
     <div className="feed-toolbar">
-      <div>
+      <div className="feed-toolbar-heading">
         <strong>{getFeedLabel(controller)}</strong>
+        {showsFeedControls && <span>총 {feed.searchResultCount.toLocaleString()}개</span>}
       </div>
-      <div className="feed-toolbar-actions">
-        {!screen.isDetailView && !screen.isNotificationView && (
-          <form className="feed-search-field" role="search" onSubmit={handleSearchSubmit}>
-            <span>검색</span>
-            <div className="feed-search-control">
-              <select
-                className="feed-search-target"
-                value={feed.searchMode}
-                onChange={(event) => feed.setSearchMode(event.target.value as SearchMode)}
-                aria-label="검색 대상"
-              >
-                <option value="posts">게시글</option>
-                <option value="comments">댓글</option>
-              </select>
-              <input
-                value={feed.searchInput}
-                onChange={(event) => feed.setSearchInput(event.target.value)}
-                placeholder="검색어"
-                aria-label={feed.searchMode === 'comments' ? '댓글 검색어' : '게시글 검색어'}
-              />
+
+      {showsFeedControls ? (
+        <div className="feed-toolbar-controls">
+          <div className="feed-sort-tabs" role="group" aria-label="게시글 정렬">
+            {([
+              ['latest', '최신순'],
+              ['oldest', '오래된순'],
+              ['popular', '인기순'],
+            ] as const).map(([value, label]) => (
               <button
-                className="feed-search-button"
-                type="submit"
-                aria-label={feed.searchMode === 'comments' ? '댓글 검색 실행' : '게시글 검색 실행'}
+                key={value}
+                type="button"
+                className={feed.feedSort === value ? 'active' : undefined}
+                aria-pressed={feed.feedSort === value}
+                onClick={() => actions.changeFeedSort(value as FeedSort)}
               >
-                <SearchIcon />
+                {label}
               </button>
-            </div>
-          </form>
-        )}
-        {!screen.isDetailView && !screen.isNotificationView && (
-          <label className="feed-sort-select">
-            <span>정렬</span>
-            <select
-              value={feed.feedSort}
-              onChange={(event) => actions.changeFeedSort(event.target.value as FeedSort)}
-            >
-              <option value="latest">최신순</option>
-              <option value="oldest">오래된순</option>
-              <option value="popular">인기순</option>
-            </select>
-          </label>
-        )}
-        {activity.summary.visible && !screen.isNotificationView ? (
-          <ActivityRefreshButton
-            summary={activity.summary}
-            isRefreshing={activity.isRefreshing}
-            onRefresh={() => void activity.refresh()}
-          />
-        ) : (
-          <button
-            className="refresh-button icon-only-button"
-            type="button"
-            onClick={() => void actions.fetchPosts(false)}
-            disabled={state.isLoading}
-            aria-label="게시글 새로고침"
-          >
-            <RefreshCwIcon />
-          </button>
-        )}
-      </div>
+            ))}
+          </div>
+
+          <div className="feed-toolbar-actions">
+            <form className="feed-search-field" role="search" onSubmit={handleSearchSubmit}>
+              <div className="feed-search-control">
+                <select
+                  className="feed-search-target"
+                  value={feed.searchMode}
+                  onChange={(event) => feed.setSearchMode(event.target.value as SearchMode)}
+                  aria-label="검색 대상"
+                >
+                  <option value="posts">게시글</option>
+                  <option value="comments">댓글</option>
+                </select>
+                <input
+                  value={feed.searchInput}
+                  onChange={(event) => feed.setSearchInput(event.target.value)}
+                  placeholder="검색어를 입력해 주세요"
+                  aria-label={feed.searchMode === 'comments' ? '댓글 검색어' : '게시글 검색어'}
+                />
+                <button
+                  className="feed-search-button"
+                  type="submit"
+                  aria-label={feed.searchMode === 'comments' ? '댓글 검색 실행' : '게시글 검색 실행'}
+                >
+                  <SearchIcon />
+                </button>
+              </div>
+            </form>
+            {refreshControl}
+          </div>
+        </div>
+      ) : (
+        <div className="feed-toolbar-actions">{refreshControl}</div>
+      )}
     </div>
   )
 }
