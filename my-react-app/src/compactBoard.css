@@ -417,6 +417,16 @@ body {
   display: none;
 }
 
+@media (max-width: 820px) {
+  .desktop-compose-button {
+    display: none;
+  }
+
+  .composer-launcher {
+    display: block;
+  }
+}
+
 @media (max-width: 720px) {
   .board-shell {
     width: 100%;
