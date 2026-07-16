@@ -68,8 +68,11 @@ jobs:
           distribution: temurin
           java-version: '17'
           cache: gradle
-      - name: Validate Flyway schema on PostgreSQL
-        run: ./gradlew test --tests 'com.example.restservice.repository.PostgreSqlSchemaIntegrationTest'
+      - name: Validate PostgreSQL schema and concurrency
+        run: >
+          ./gradlew test
+          --tests 'com.example.restservice.repository.PostgreSqlSchemaIntegrationTest'
+          --tests 'com.example.restservice.service.PostgreSqlConcurrencyIntegrationTest'
 
   frontend-build:
     runs-on: ubuntu-latest
