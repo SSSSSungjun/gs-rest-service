@@ -100,17 +100,17 @@ export function FeedToolbar({ controller }: BoardFeedProps) {
             >
               <RefreshCwIcon />
             </button>
-            {canCompose && (
-              <button
-                className="desktop-compose-button toolbar-compose-button"
-                type="button"
-                onClick={screen.openComposer}
-              >
-                <PlusIcon />
-                글쓰기
-              </button>
-            )}
           </div>
+          {canCompose && (
+            <button
+              className="desktop-compose-button toolbar-compose-button"
+              type="button"
+              onClick={screen.openComposer}
+            >
+              <PlusIcon />
+              글쓰기
+            </button>
+          )}
         </div>
       )}
     </div>
