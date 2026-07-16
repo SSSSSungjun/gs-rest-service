@@ -102,10 +102,8 @@ export function PostList({
                     <time dateTime={post.createdAt}>
                       {formatDate(post.createdAt)}
                       {wasEdited(post.createdAt, post.updatedAt) && <span className="edited-label">(수정됨)</span>}
+                      {postImages.length > 0 && ` · 사진 ${postImages.length}개`}
                     </time>
-                    {postImages.length > 0 && (
-                      <span className="post-image-count">· 사진 {postImages.length}개</span>
-                    )}
                   </div>
                 </div>
               </div>
