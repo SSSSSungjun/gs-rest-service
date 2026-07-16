@@ -20,3 +20,4 @@ README.html
 .env
 !.env.example
 backups/
+/complete/uploads/post-images/
