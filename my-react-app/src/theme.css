@@ -1,6 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+
 :root {
-  --color-brand-500: #49a96f;
-  --color-brand-600: #3c915d;
+  --color-brand-500: #58b47d;
+  --color-brand-600: #459d68;
   --color-brand-soft: #eaf5ee;
   --color-canvas: #f3f4f5;
   --color-surface: #ffffff;
