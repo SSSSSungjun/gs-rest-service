@@ -22,21 +22,23 @@ export function formatDate(value: string) {
   const elapsedHours = Math.floor(elapsedMinutes / 60)
   if (elapsedHours < 24) return `${elapsedHours}시간 전`
 
-  const yearFormatter = new Intl.DateTimeFormat('ko-KR', {
+  const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone: 'Asia/Seoul',
     year: 'numeric',
-  })
-  const isCurrentYear = yearFormatter.format(date) === yearFormatter.format(now)
-
-  return new Intl.DateTimeFormat('ko-KR', {
-    timeZone: 'Asia/Seoul',
-    ...(isCurrentYear ? {} : { year: 'numeric' }),
     month: 'numeric',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
     hourCycle: 'h23',
-  }).format(date)
+  })
+  const getPart = (target: Date, type: Intl.DateTimeFormatPartTypes) => (
+    formatter.formatToParts(target).find((part) => part.type === type)?.value ?? ''
+  )
+  const dateYear = getPart(date, 'year')
+  const nowYear = getPart(now, 'year')
+  const dateLabel = `${getPart(date, 'month')}월 ${getPart(date, 'day')}일 ${getPart(date, 'hour')}:${getPart(date, 'minute')}`
+
+  return dateYear === nowYear ? dateLabel : `${dateYear}년 ${dateLabel}`
 }
 
 export function wasEdited(createdAt: string, updatedAt: string | null) {
