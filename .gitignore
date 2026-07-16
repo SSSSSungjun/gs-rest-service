@@ -21,3 +21,4 @@ README.html
 !.env.example
 backups/
 /complete/uploads/post-images/
+/e2e/package-lock.json
