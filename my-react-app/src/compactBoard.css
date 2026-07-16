@@ -780,6 +780,12 @@ body {
     margin-left: -10px;
   }
 
+  .post-list {
+    width: calc(100% + 20px);
+    margin-right: -10px;
+    margin-left: -10px;
+  }
+
   .post-list .post-list-preview.has-images {
     gap: 14px;
   }
