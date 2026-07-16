@@ -3,7 +3,7 @@ import type { Post } from '../boardApi'
 import type { BoardDraft } from '../boardReducer'
 import { formatDate, isInteractiveClick, isPopularPost, wasEdited } from '../boardUi'
 import { ActionMenu } from './ActionMenu'
-import { HeartIcon, ImageIcon, MessageCircleIcon } from './Icons'
+import { HeartIcon, MessageBubbleIcon } from './Icons'
 import { HighlightedText } from './HighlightedText'
 import { PollBlock } from './PollBlock'
 import { PostEditForm } from './PostEditForm'
@@ -104,10 +104,7 @@ export function PostList({
                       {wasEdited(post.createdAt, post.updatedAt) && <span className="edited-label">(수정됨)</span>}
                     </time>
                     {postImages.length > 0 && (
-                      <span className="post-image-count" aria-label={`사진 ${postImages.length}장`}>
-                        <ImageIcon />
-                        {postImages.length}
-                      </span>
+                      <span className="post-image-count">· 사진 {postImages.length}개</span>
                     )}
                   </div>
                 </div>
@@ -163,7 +160,7 @@ export function PostList({
                     <HeartIcon /> {post.likeCount}
                   </button>
                   <span className="meta-pill comment-count" aria-label={`댓글 ${post.comments.length}개`}>
-                    <MessageCircleIcon />
+                    <MessageBubbleIcon />
                     {post.comments.length}
                   </span>
                 </div>

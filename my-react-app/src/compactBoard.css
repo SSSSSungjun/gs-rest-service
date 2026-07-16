@@ -1324,3 +1324,135 @@ body {
     height: 21px;
   }
 }
+
+/* Softer list reactions and progress poll */
+.post-image-count {
+  display: inline;
+}
+
+.post-image-count svg {
+  display: none;
+}
+
+.post-list .post-content {
+  font-weight: 400;
+}
+
+.post-list .post-card-meta-row {
+  color: #a3aca6;
+}
+
+.post-list .post-card-meta-row > * {
+  gap: 5px;
+  color: inherit;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.post-list .post-card-meta-row .like-button {
+  color: #a3aca6;
+}
+
+.post-list .post-card-meta-row .like-button svg {
+  width: 20px;
+  height: 20px;
+  fill: transparent;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+.post-list .post-card-meta-row .like-button:hover,
+.post-list .post-card-meta-row .like-button:active {
+  color: #8f9992;
+}
+
+.post-list .post-card-meta-row .like-button.active,
+.post-list .post-card-meta-row .like-button.active:hover,
+.post-list .post-card-meta-row .like-button.active:active {
+  color: var(--color-like);
+}
+
+.post-list .post-card-meta-row .like-button.active svg {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.post-list .post-card-meta-row .comment-count {
+  color: #aeb6b1;
+}
+
+.post-list .post-card-meta-row .comment-count svg {
+  width: 20px;
+  height: 20px;
+  color: #c3c9c5;
+}
+
+.board-shell .poll-block {
+  gap: 9px;
+  margin-top: 4px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.board-shell .poll-options {
+  gap: 8px;
+}
+
+.board-shell .poll-option {
+  min-height: 46px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 8px;
+  background: #f0f2f1;
+  color: var(--color-text);
+  padding: 0 15px;
+  box-shadow: none;
+}
+
+.board-shell .poll-option:hover,
+.board-shell .poll-option.selected {
+  border: 0;
+  background: #edf2ef;
+  color: var(--color-text);
+  box-shadow: none;
+}
+
+.board-shell .poll-option-fill {
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-brand-500) 30%, #ffffff);
+}
+
+.board-shell .poll-option-content {
+  padding-right: 14px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.board-shell .poll-option-count {
+  color: var(--color-brand-600);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.poll-participation {
+  margin: 1px 0 0;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+}
+
+@media (max-width: 720px) {
+  .board-shell .poll-option {
+    min-height: 44px;
+    padding-right: 13px;
+    padding-left: 13px;
+  }
+
+  .board-shell .poll-option-content {
+    font-size: 13px;
+  }
+}

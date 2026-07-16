@@ -214,3 +214,15 @@ export function ChevronRightIcon(props: IconProps) {
     </IconBase>
   )
 }
+
+export function MessageBubbleIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path
+        d="M5.5 4.5h13a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3H11l-4.8 3.1.8-3.1H5.5a3 3 0 0 1-3-3v-7a3 3 0 0 1 3-3Z"
+        fill="currentColor"
+        stroke="none"
+      />
+    </IconBase>
+  )
+}
