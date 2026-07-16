@@ -10,8 +10,10 @@ interface PollBlockProps {
 }
 
 function getVotePercent(voteCount: number, totalVoteCount: number) {
-  if (totalVoteCount === 0) return 0
-  return Math.round((voteCount / totalVoteCount) * 100)
+  if (totalVoteCount === 0) return '0'
+
+  const percent = Math.round(((voteCount / totalVoteCount) * 100) * 10) / 10
+  return Number.isInteger(percent) ? String(percent) : percent.toFixed(1)
 }
 
 export function PollBlock({ postId, options, totalVoteCount, variant, onVote }: PollBlockProps) {
@@ -21,10 +23,6 @@ export function PollBlock({ postId, options, totalVoteCount, variant, onVote }: 
 
   return (
     <div className={`poll-block ${variant === 'list' ? 'poll-block-list' : 'poll-block-detail'}`}>
-      <div className="poll-block-header">
-        <strong>투표</strong>
-        <span>{totalVoteCount}명 참여</span>
-      </div>
       <div className="poll-options">
         {options.map((option) => {
           const percent = getVotePercent(option.voteCount, totalVoteCount)
@@ -38,11 +36,12 @@ export function PollBlock({ postId, options, totalVoteCount, variant, onVote }: 
             >
               <span className="poll-option-fill" style={{ width: hasVoted ? `${percent}%` : '0%' }} />
               <span className="poll-option-content">{option.content}</span>
-              <span className="poll-option-count">{hasVoted ? `${percent}% · ${option.voteCount}` : '투표'}</span>
+              <span className="poll-option-count">{hasVoted ? `${percent}%` : '투표'}</span>
             </button>
           )
         })}
       </div>
+      <p className="poll-participation">{totalVoteCount.toLocaleString()}명이 참여했어요</p>
     </div>
   )
 }
