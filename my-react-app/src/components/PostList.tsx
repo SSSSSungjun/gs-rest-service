@@ -3,7 +3,7 @@ import type { Post } from '../boardApi'
 import type { BoardDraft } from '../boardReducer'
 import { formatDate, isInteractiveClick, isPopularPost, wasEdited } from '../boardUi'
 import { ActionMenu } from './ActionMenu'
-import { BarChart3Icon, EyeIcon, HeartIcon, ImageIcon, MessageCircleIcon } from './Icons'
+import { HeartIcon, ImageIcon, MessageCircleIcon } from './Icons'
 import { HighlightedText } from './HighlightedText'
 import { PollBlock } from './PollBlock'
 import { PostEditForm } from './PostEditForm'
@@ -98,10 +98,18 @@ export function PostList({
                     {isPopular && <span className="popular-badge">인기</span>}
                     <strong><HighlightedText text={post.nickname || '익명'} query={searchQuery} /></strong>
                   </div>
-                  <time dateTime={post.createdAt}>
-                    {formatDate(post.createdAt)}
-                    {wasEdited(post.createdAt, post.updatedAt) && <span className="edited-label">(수정됨)</span>}
-                  </time>
+                  <div className="post-author-meta-row">
+                    <time dateTime={post.createdAt}>
+                      {formatDate(post.createdAt)}
+                      {wasEdited(post.createdAt, post.updatedAt) && <span className="edited-label">(수정됨)</span>}
+                    </time>
+                    {postImages.length > 0 && (
+                      <span className="post-image-count" aria-label={`사진 ${postImages.length}장`}>
+                        <ImageIcon />
+                        {postImages.length}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
               {post.ownedByMe && !postEditDraft && (
@@ -154,14 +162,10 @@ export function PostList({
                   >
                     <HeartIcon /> {post.likeCount}
                   </button>
-                  <span className="meta-pill" aria-label={`조회수 ${post.viewCount ?? 0}회`}><EyeIcon /> {post.viewCount ?? 0}</span>
-                  <span className="meta-pill" aria-label={`댓글 ${post.comments.length}개`}><MessageCircleIcon /> {post.comments.length}</span>
-                  {postImages.length > 0 && (
-                    <span className="meta-pill" aria-label={`사진 ${postImages.length}장`}><ImageIcon /> {postImages.length}</span>
-                  )}
-                  {pollOptions.length > 0 && (
-                    <span className="meta-pill" aria-label={`투표 ${post.pollTotalVoteCount ?? 0}표`}><BarChart3Icon /> {post.pollTotalVoteCount ?? 0}</span>
-                  )}
+                  <span className="meta-pill comment-count" aria-label={`댓글 ${post.comments.length}개`}>
+                    <MessageCircleIcon />
+                    {post.comments.length}
+                  </span>
                 </div>
               </>
             )}
