@@ -1,3 +1,4 @@
+import './theme.css'
 import './App.css'
 import './feedSort.css'
 import './forumToss.css'
