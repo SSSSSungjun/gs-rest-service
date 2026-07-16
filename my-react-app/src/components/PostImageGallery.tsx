@@ -14,15 +14,8 @@ export function PostImageGallery({ images, variant }: PostImageGalleryProps) {
     'post-image-gallery',
     variant === 'list' ? 'list-image-gallery single-image-gallery' : 'detail-image-gallery',
   ].join(' ')
-  const galleryStyle = variant === 'list'
-    ? {
-      width: '52px',
-      gridTemplateColumns: '52px',
-    }
-    : undefined
-
   return (
-    <div className={galleryClassName} style={galleryStyle}>
+    <div className={galleryClassName}>
       {visibleImages.map((image, index) => (
         <figure className="post-image-frame" key={`${image.url}-${index}`}>
           <img src={resolveImageUrl(image.url)} alt={image.originalFilename || `첨부 이미지 ${index + 1}`} loading="lazy" />
