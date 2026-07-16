@@ -165,16 +165,19 @@
 
 ## 새 세션 인계 기준
 
-- 최신 완료 지점은 PR #70, squash merge commit `854fdd1aa0a0cb0dc7e4ef24646a17db067d64c5`다.
-- PostgreSQL 16 + Spring Boot + nginx/React Docker Compose 패키지, 컨테이너 smoke workflow, 배포 문서까지 완료됐고 main의 backend/frontend/Playwright/PostgreSQL/container checks가 모두 통과했다.
-- 현재 상태는 실제 상시 운영 서버 배포가 아니라, 어느 Linux 서버에서도 재현 가능한 배포 패키지를 만들고 GitHub Actions에서 검증한 단계다.
-- 다음 세션의 기본 작업은 Codespaces에서 Compose를 직접 띄워 수동 인수 테스트하는 것이다. 저장소 루트에서 `cp .env.example .env`, 비밀번호와 Codespaces forwarded origin을 설정한 뒤 `docker compose config --quiet`, `docker compose up -d --build`, `docker compose ps`, `./scripts/compose-smoke.sh` 순서로 확인한다.
-- Compose 경로는 PostgreSQL 컨테이너를 사용하므로 `sudo service mysql start`가 필요 없다. 기존 MySQL 직접 실행 경로는 제거되지 않았지만 Compose 검증과 섞지 않는다.
-- 종료는 데이터가 유지되는 `docker compose down`을 사용한다. `docker compose down -v`는 PostgreSQL 데이터를 삭제하므로 사용자가 명시적으로 초기화를 요청한 경우에만 실행한다.
-- 수동 인수 테스트 다음 순서는 컨테이너 재시작 후 DB/업로드 영속성, 이미지 업로드, 백업·복구 모의훈련, 환경변수 누락과 DB 장애 동작, 동시 삭제·댓글·투표 사이드 이펙트 E2E 보강이다.
-- 실제 서버·도메인·HTTPS·운영 Secret·CD 연결과 외부망 부하/보안 검증은 대상 인프라가 있는 집 환경에서 진행한다.
-- Figma 레퍼런스 기반 UI 전면 개편과 최종 패딩·색상 고도화도 사용자가 집에서 레퍼런스를 제공한 뒤 한 번에 진행한다.
-- 회사 환경에서는 로컬 저장소를 보지 않고 GitHub connector로만 원격 저장소를 읽고 수정한다. 매 작업 시작 시 `_get_repo`로 연결을 확인하고, main 최신 기준의 규칙 브랜치 생성 → 최소 변경 → PR → checks 확인 → squash merge → AGENTS 컨텍스트 캐시 갱신 순서를 지킨다.
+- 최신 완료 지점은 PR #75, squash merge commit `f00d8855a2c9b6cbf7ad0c9cef5ef87a5a9f0d67`이다.
+- PR #72와 #73은 로컬 직접 실행의 게시글 업로드와 현재 lockfile 없이 실행되는 E2E의 생성 `package-lock.json`을 Git 추적 대상에서 제외해 Codespaces에서 `git add .`을 안전하게 사용할 수 있게 한 작업이다.
+- PR #74는 PostgreSQL을 외부 인터페이스가 아닌 host loopback `127.0.0.1:15432`에만 바인딩해 VS Code PostgreSQL 관리 도구가 연결할 수 있게 한 작업이다.
+- Codespaces Docker Compose 수동 인수 테스트, 글/이미지 등록, `docker compose restart`와 `down` → `up` 후 PostgreSQL/업로드 named volume 영속성 검증을 완료했다. 브라우저 쓰기 403은 코드 결함이 아니라 실제 접속 Origin과 `PUBLIC_ORIGIN` 불일치였고, 같은 값으로 맞춰 해결했다.
+- PostgreSQL volume 생성 뒤 `.env`의 비밀번호만 바꿔도 DB 사용자 비밀번호는 자동 변경되지 않는다. 데이터를 유지하려면 container의 `psql`에서 `\\password bamboo`로 맞추고 backend를 재생성한다.
+- PR #75는 PostgreSQL 16에서 두 요청을 latch로 동시에 출발시켜 게시글 삭제/댓글 생성, 게시글 삭제/투표 참여, 동일 세션 좋아요 toggle 2회, 동일 세션 동일 투표 2회를 검증한다. 기존 게시글 `PESSIMISTIC_WRITE` 잠금과 트랜잭션만으로 네 테스트가 모두 통과했으며 운영 코드에 별도 비동기 처리는 추가하지 않았다.
+- 같은 세션의 좋아요 2회는 toggle 계약대로 직렬 처리 후 최종 0건이고, 같은 세션의 동일 투표 2회는 최종 1건이다. 삭제 충돌은 반대 요청이 먼저 성공하거나 404로 안전하게 끝나며 고아 댓글·투표가 남지 않는다.
+- CI는 backend/frontend/Playwright/PostgreSQL/container checks까지 구축됐다. 실제 서버·도메인·TLS·운영 Secret으로 자동 배포하는 full-stack CD는 아직 없고 Vercel 상태 체크는 별도다.
+- 백업·복구 모의훈련, 환경변수 누락/DB 장애, 외부망 부하·보안 검증은 자동 다음 작업이 아니라 사용자가 명시적으로 선택할 때 진행한다.
+- 실제 서버·도메인·HTTPS·운영 Secret·CD 연결과 외부망 검증은 대상 인프라가 있는 집 환경에서 진행한다.
+- 사용자는 `main`만 유지하고, Codex는 main 최신 기준의 규칙 브랜치 생성 → 최소 변경 → PR → checks 확인 → squash merge를 맡는다. 사용자는 merge 후 `git switch main`, `git pull --ff-only`만 실행하면 된다.
+- Compose의 평상시 시작은 `docker compose up -d`, 종료는 volume을 보존하는 `docker compose down`이다. `docker compose down -v`는 사용자가 명시적으로 초기화를 요청한 경우에만 실행한다.
+- 회사 환경에서는 로컬 저장소를 보지 않고 GitHub connector로만 원격 저장소를 읽고 수정한다. 매 작업 시작 시 `_get_repo`로 연결을 확인한다.
 - 원격 브랜치 삭제 기능이 connector에 없으면 squash merge 후 사용자에게 GitHub에서 브랜치를 삭제할 대상만 짧게 알린다.
 
 ## 사용자가 짧게 말해도 되는 형식
