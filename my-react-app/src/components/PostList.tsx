@@ -3,7 +3,7 @@ import type { Post } from '../boardApi'
 import type { BoardDraft } from '../boardReducer'
 import { formatDate, isInteractiveClick, isPopularPost, wasEdited } from '../boardUi'
 import { ActionMenu } from './ActionMenu'
-import { HeartIcon, MessageBubbleIcon } from './Icons'
+import { HeartIcon, MessageCircleIcon } from './Icons'
 import { HighlightedText } from './HighlightedText'
 import { PollBlock } from './PollBlock'
 import { PostEditForm } from './PostEditForm'
@@ -160,7 +160,7 @@ export function PostList({
                     <HeartIcon /> {post.likeCount}
                   </button>
                   <span className="meta-pill comment-count" aria-label={`댓글 ${post.comments.length}개`}>
-                    <MessageBubbleIcon />
+                    <MessageCircleIcon />
                     {post.comments.length}
                   </span>
                 </div>
