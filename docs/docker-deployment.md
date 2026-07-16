@@ -1,6 +1,6 @@
 # Docker Compose deployment package
 
-이 패키지는 단일 Linux 서버 또는 Codespaces에서 PostgreSQL 16, Spring Boot, React/nginx를 같은 Compose 프로젝트로 실행하는 기준 구성이다. PostgreSQL과 백엔드 포트는 호스트에 공개하지 않고 nginx의 `APP_PORT`만 공개한다.
+이 패키지는 단일 Linux 서버 또는 Codespaces에서 PostgreSQL 16, Spring Boot, React/nginx를 같은 Compose 프로젝트로 실행하는 기준 구성이다. 백엔드 포트는 호스트에 공개하지 않고 nginx의 `APP_PORT`만 공개한다. PostgreSQL은 관리 도구 연결을 위해 호스트 loopback의 `POSTGRES_HOST_PORT`에만 바인딩하며 외부 인터페이스에는 공개하지 않는다.
 
 ## 구성
 
@@ -48,6 +48,12 @@ SECURITY_HSTS_ENABLED=true
 ```
 
 Ports 탭에서 `APP_PORT`를 private 또는 public으로 연다. Codespace를 중지하면 stack도 중지되므로 상시 운영 서버로 사용하지 않는다.
+
+### PostgreSQL 관리 도구 연결
+
+PostgreSQL은 기본적으로 Codespace 내부의 `127.0.0.1:15432`에만 바인딩된다. VS Code PostgreSQL 확장에서는 host `127.0.0.1`, port `15432`, database `bamboo_forest`, user `bamboo`, password는 `.env`의 `POSTGRES_PASSWORD`를 사용한다. SSL은 로컬 연결에서 비활성화할 수 있다.
+
+다른 host port가 필요하면 `.env`의 `POSTGRES_HOST_PORT`를 바꾼다. 이 포트는 Codespaces Ports 탭에서 Public으로 전환하지 않는다.
 
 ## 실제 서버
 
