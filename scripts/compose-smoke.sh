@@ -4,8 +4,9 @@ set -euo pipefail
 base_url="${BASE_URL:-http://127.0.0.1:${APP_PORT:-8080}}"
 cookie_file="$(mktemp)"
 api_headers="$(mktemp)"
+index_headers="$(mktemp)"
 sse_headers="$(mktemp)"
-trap 'rm -f "$cookie_file" "$api_headers" "$sse_headers"' EXIT
+trap 'rm -f "$cookie_file" "$api_headers" "$index_headers" "$sse_headers"' EXIT
 
 for attempt in $(seq 1 90); do
   if curl --fail --silent --show-error "${base_url}/healthz" > /dev/null; then
@@ -24,6 +25,12 @@ curl --fail --silent --show-error \
   "${base_url}/api/posts?page=1&size=1" > /dev/null
 
 grep --ignore-case --quiet '^Content-Security-Policy:' "$api_headers"
+
+curl --fail --silent --show-error \
+  --dump-header "$index_headers" \
+  "${base_url}/" > /dev/null
+
+grep --ignore-case --quiet '^Cache-Control: no-cache' "$index_headers"
 
 post_response="$(curl --fail --silent --show-error \
   --cookie "$cookie_file" \

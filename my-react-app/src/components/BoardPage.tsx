@@ -23,41 +23,36 @@ export function BoardPage({ controller }: BoardPageProps) {
 
   return (
     <main className="board-shell">
-      <section className="board-hero" aria-labelledby="board-title">
+      <header className="board-hero" aria-labelledby="board-title">
         <div className="board-hero-inner">
-          <div>
-            <p className="eyebrow">Bamboo forest</p>
-            <h1 id="board-title">
-              <button
-                className="board-title-button"
-                type="button"
-                onClick={actions.handleBoardTitleClick}
-                disabled={state.isLoading}
-              >
-                대나무숲
-              </button>
-            </h1>
-            <p className="hero-copy">
-              가입 없이 남기고, 내가 쓴 글과 댓글은 이 브라우저에서 바로 삭제할 수 있습니다.
-            </p>
-          </div>
-          {canCompose && (
+          <h1 id="board-title">
             <button
-              className="desktop-compose-button"
+              className="board-title-button"
               type="button"
-              onClick={screen.openComposer}
+              onClick={actions.handleBoardTitleClick}
+              disabled={state.isLoading}
             >
-              <PlusIcon />
-              글쓰기
+              대나무숲
             </button>
-          )}
+          </h1>
+          <div className="board-header-actions">
+            {canCompose && (
+              <button
+                className="desktop-compose-button"
+                type="button"
+                onClick={screen.openComposer}
+              >
+                <PlusIcon />
+                글쓰기
+              </button>
+            )}
+            <CommentNotificationBar
+              notifications={notifications.items}
+              onOpenList={notifications.openList}
+            />
+          </div>
         </div>
-      </section>
-
-      <CommentNotificationBar
-        notifications={notifications.items}
-        onOpenList={notifications.openList}
-      />
+      </header>
 
       <BoardFeed controller={controller} />
 

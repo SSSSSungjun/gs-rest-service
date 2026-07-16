@@ -1,7 +1,6 @@
 import type { FormEvent } from 'react'
 import type { BoardController } from '../hooks/useBoardController'
 import type { FeedSort, SearchMode } from '../feedSelectors'
-import { ActivityRefreshButton } from './ActivityRefreshButton'
 import { CommentNotificationList } from './CommentNotificationBar'
 import { CommentSearchResults } from './CommentSearchResults'
 import { RefreshCwIcon, SearchIcon } from './Icons'
@@ -23,40 +22,27 @@ function getFeedLabel(controller: BoardController) {
 }
 
 export function FeedToolbar({ controller }: BoardFeedProps) {
-  const { actions, activity, feed, screen, state } = controller
+  const { actions, feed, screen, state } = controller
   const showsFeedControls = !screen.isDetailView && !screen.isNotificationView
+  const showsContextHeading = screen.isDetailView
+    || screen.isNotificationView
+    || feed.isCommentSearch
+    || Boolean(feed.normalizedSearchQuery)
 
   const handleSearchSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     actions.submitSearch()
   }
 
-  const refreshControl = activity.summary.visible && !screen.isNotificationView ? (
-    <ActivityRefreshButton
-      summary={activity.summary}
-      isRefreshing={activity.isRefreshing}
-      onRefresh={() => void activity.refresh()}
-    />
-  ) : (
-    <button
-      className="refresh-button icon-only-button"
-      type="button"
-      onClick={() => void actions.fetchPosts(false)}
-      disabled={state.isLoading}
-      aria-label="게시글 새로고침"
-    >
-      <RefreshCwIcon />
-    </button>
-  )
-
   return (
-    <div className="feed-toolbar">
-      <div className="feed-toolbar-heading">
-        <strong>{getFeedLabel(controller)}</strong>
-        {showsFeedControls && <span>총 {feed.searchResultCount.toLocaleString()}개</span>}
-      </div>
+    <div className={`feed-toolbar ${showsFeedControls ? 'feed-toolbar-list' : ''}`}>
+      {showsContextHeading && (
+        <div className="feed-toolbar-heading">
+          <strong>{getFeedLabel(controller)}</strong>
+        </div>
+      )}
 
-      {showsFeedControls ? (
+      {showsFeedControls && (
         <div className="feed-toolbar-controls">
           <div className="feed-sort-tabs" role="group" aria-label="게시글 정렬">
             {([
@@ -103,11 +89,17 @@ export function FeedToolbar({ controller }: BoardFeedProps) {
                 </button>
               </div>
             </form>
-            {refreshControl}
+            <button
+              className="refresh-button icon-only-button mobile-refresh-button"
+              type="button"
+              onClick={() => void actions.fetchPosts(false)}
+              disabled={state.isLoading}
+              aria-label="게시글 새로고침"
+            >
+              <RefreshCwIcon />
+            </button>
           </div>
         </div>
-      ) : (
-        <div className="feed-toolbar-actions">{refreshControl}</div>
       )}
     </div>
   )

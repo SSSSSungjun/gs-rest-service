@@ -8,13 +8,37 @@ export const POST_HASH_PREFIX = '#post-'
 export function formatDate(value: string) {
   if (!value) return ''
 
-  return new Intl.DateTimeFormat('ko-KR', {
+  const date = new Date(value)
+  const timestamp = date.getTime()
+  if (Number.isNaN(timestamp)) return ''
+
+  const now = new Date()
+  const elapsedMs = Math.max(0, now.getTime() - timestamp)
+  const elapsedMinutes = Math.floor(elapsedMs / 60_000)
+
+  if (elapsedMinutes < 1) return '방금 전'
+  if (elapsedMinutes < 60) return `${elapsedMinutes}분 전`
+
+  const elapsedHours = Math.floor(elapsedMinutes / 60)
+  if (elapsedHours < 24) return `${elapsedHours}시간 전`
+
+  const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone: 'Asia/Seoul',
-    month: 'short',
+    year: 'numeric',
+    month: 'numeric',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  }).format(new Date(value))
+    hourCycle: 'h23',
+  })
+  const getPart = (target: Date, type: Intl.DateTimeFormatPartTypes) => (
+    formatter.formatToParts(target).find((part) => part.type === type)?.value ?? ''
+  )
+  const dateYear = getPart(date, 'year')
+  const nowYear = getPart(now, 'year')
+  const dateLabel = `${getPart(date, 'month')}월 ${getPart(date, 'day')}일 ${getPart(date, 'hour')}:${getPart(date, 'minute')}`
+
+  return dateYear === nowYear ? dateLabel : `${dateYear}년 ${dateLabel}`
 }
 
 export function wasEdited(createdAt: string, updatedAt: string | null) {
