@@ -166,7 +166,7 @@
 
 ## 새 세션 인계 기준
 
-- 최신 완료 지점은 PR #79, squash merge commit `47eb0b2e0f2d10e409e8d8142435a393705b6f97`이다.
+- 최신 완료 지점은 PR #81, squash merge commit `486fec81ed199ce62f916c9f247b26c3c4e11109`이다.
 - PR #72와 #73은 로컬 직접 실행의 게시글 업로드와 현재 lockfile 없이 실행되는 E2E의 생성 `package-lock.json`을 Git 추적 대상에서 제외해 Codespaces에서 `git add .`을 안전하게 사용할 수 있게 한 작업이다.
 - PR #74는 PostgreSQL을 외부 인터페이스가 아닌 host loopback `127.0.0.1:15432`에만 바인딩해 VS Code PostgreSQL 관리 도구가 연결할 수 있게 한 작업이다.
 - Codespaces Docker Compose 수동 인수 테스트, 글/이미지 등록, `docker compose restart`와 `down` → `up` 후 PostgreSQL/업로드 named volume 영속성 검증을 완료했다. 브라우저 쓰기 403은 코드 결함이 아니라 실제 접속 Origin과 `PUBLIC_ORIGIN` 불일치였고, 같은 값으로 맞춰 해결했다.
@@ -175,6 +175,7 @@
 - PR #76은 동시성 검증 결과와 운영 판단을 기술 노트 및 인계 문서에 반영한 작업이다.
 - PR #77은 연회색 배경과 흰색 연속 목록 패널, 좌측 텍스트 정렬 탭, 우측 통합 검색, 컴팩트한 썸네일/메타 행, 화살표+숫자 페이지네이션으로 게시판을 재구성한 작업이다. 데스크톱은 상단 `글쓰기` 버튼, 820px 이하 모바일·태블릿은 기존 하단 입력형 진입을 사용한다.
 - PR #79는 상단을 여백 없는 초록색 헤더로 바꾸고 `대나무숲`·데스크톱 글쓰기·알림만 한 줄에 남겼다. 일반 목록의 전체 글/개수와 데스크톱 새로고침은 제거하고, 모바일은 3분할 정렬 버튼과 검색 옆 새로고침을 사용한다. 목록 본문·메타 대비를 낮추고 날짜를 24시간 이내 상대시간, 같은 해 월일·24시간제, 이전 해 연도 포함으로 표시한다.
+- PR #81은 720px 이하에서 게시글 목록 패널만 화면 좌우 끝까지 확장하고, 게시글 내부 패딩과 정렬·검색 영역의 여백 및 데스크톱 폭은 유지한 작업이다.
 - nginx는 `/`와 `index.html`을 매번 재검증하고 해시가 붙은 `/assets/`만 장기 캐시한다. 새 Compose 빌드 뒤 일반 `http://127.0.0.1:8081`에서도 쿼리 문자열 없이 최신 UI가 반영되어야 하며 container smoke test가 `Cache-Control: no-cache`를 검증한다.
 - 같은 세션의 좋아요 2회는 toggle 계약대로 직렬 처리 후 최종 0건이고, 같은 세션의 동일 투표 2회는 최종 1건이다. 삭제 충돌은 반대 요청이 먼저 성공하거나 404로 안전하게 끝나며 고아 댓글·투표가 남지 않는다.
 - CI는 backend/frontend/Playwright/PostgreSQL/container checks까지 구축됐다. 실제 서버·도메인·TLS·운영 Secret으로 자동 배포하는 full-stack CD는 아직 없고 Vercel 상태 체크는 별도다.
