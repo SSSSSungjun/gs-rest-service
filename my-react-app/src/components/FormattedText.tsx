@@ -7,15 +7,13 @@ interface FormattedTextProps {
   query: string
 }
 
-const inlinePattern = /\[size=(small|large)\]([^\n]*?)\[\/size\]|\[u\]([^\n]*?)\[\/u\]|\*\*([^*]+)\*\*|~~([^~]+)~~|_([^_]+)_/g
 
 function renderInline(text: string, query: string, keyPrefix: string): ReactNode[] {
+  const inlinePattern = /\[size=(small|large)\]([^\n]*?)\[\/size\]|\[u\]([^\n]*?)\[\/u\]|\*\*([^*]+)\*\*|~~([^~]+)~~|_([^_]+)_/g
   const nodes: ReactNode[] = []
   let cursor = 0
   let match: RegExpExecArray | null
   let index = 0
-  inlinePattern.lastIndex = 0
-
   while ((match = inlinePattern.exec(text)) !== null) {
     if (match.index > cursor) {
       nodes.push(
