@@ -25,3 +25,12 @@
 .formatted-text del {
   color: #78837c;
 }
+
+.formatted-size-small {
+  font-size: 0.82em;
+}
+
+.formatted-size-large {
+  font-size: 1.28em;
+  line-height: 1.45;
+}

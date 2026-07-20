@@ -1,0 +1,98 @@
+.rich-text-editor-shell {
+  display: grid;
+  min-height: 300px;
+  grid-template-rows: auto minmax(220px, 1fr);
+  gap: 0;
+}
+
+.rich-text-editor-shell .composer-format-toolbar {
+  margin: 0 0 22px;
+}
+
+.rich-text-size-control {
+  display: inline-flex;
+  align-items: center;
+}
+
+.rich-text-size-control select {
+  min-width: 76px;
+  min-height: 36px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #526158;
+  padding: 0 24px 0 8px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.rich-text-size-control select:hover,
+.rich-text-size-control select:focus-visible {
+  background: #e9efea;
+  color: #17231c;
+  outline: 0;
+}
+
+.rich-text-editor {
+  min-height: 220px;
+  color: #17231c;
+  font-size: 17px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.rich-text-editor:focus {
+  outline: 0;
+}
+
+.rich-text-editor:empty::before {
+  color: #9aa39d;
+  content: attr(data-placeholder);
+  pointer-events: none;
+}
+
+.rich-text-editor div,
+.rich-text-editor p,
+.rich-text-editor h2 {
+  margin: 0;
+  min-height: 1.75em;
+}
+
+.rich-text-editor h2 {
+  font-size: 1.25em;
+  font-weight: 850;
+  line-height: 1.55;
+}
+
+.rich-text-editor font[size='1'],
+.rich-text-editor font[size='2'],
+.rich-text-editor .rich-text-size-small {
+  font-size: 13px;
+}
+
+.rich-text-editor font[size='4'],
+.rich-text-editor font[size='5'],
+.rich-text-editor font[size='6'],
+.rich-text-editor font[size='7'],
+.rich-text-editor .rich-text-size-large {
+  font-size: 22px;
+}
+
+@media (max-width: 720px) {
+  .rich-text-editor-shell {
+    min-height: 280px;
+    grid-template-rows: auto minmax(200px, 1fr);
+  }
+
+  .rich-text-editor {
+    min-height: 200px;
+    font-size: 16px;
+  }
+
+  .rich-text-size-control select {
+    min-width: 70px;
+    font-size: 12px;
+  }
+}

@@ -1,0 +1,267 @@
+/* Clean Band-style writer layout and compact page ending. */
+.composer-screen-form {
+  grid-template-rows: auto minmax(0, 1fr) auto auto;
+}
+
+.composer-screen-header {
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  grid-template-areas: "close title spacer";
+  padding-right: 24px;
+  padding-left: 24px;
+}
+
+.composer-screen-header > strong {
+  grid-area: title;
+  justify-self: center;
+  text-align: center;
+}
+
+.composer-screen-back {
+  grid-area: close;
+}
+
+.composer-screen-scroll {
+  display: block;
+  padding-top: 20px;
+  padding-bottom: 28px;
+}
+
+.composer-screen-section {
+  margin-top: 22px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.composer-screen-toolbar {
+  min-height: 66px;
+  border-top: 0;
+  background: #ffffff;
+  padding: 8px 24px;
+}
+
+.composer-screen-actions {
+  display: grid;
+  min-height: 70px;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: center;
+  border-top: 1px solid #e3e8e4;
+  background: #ffffff;
+  padding: 10px 20px max(10px, env(safe-area-inset-bottom));
+}
+
+.composer-footer-author {
+  display: grid;
+  min-width: 150px;
+  grid-template-columns: 34px minmax(90px, 150px);
+  gap: 8px;
+  align-items: center;
+}
+
+.composer-footer-author .composer-author-mark {
+  width: 34px;
+  height: 34px;
+  font-size: 12px;
+}
+
+.composer-footer-author .composer-screen-nickname {
+  width: 100%;
+  min-height: 36px;
+}
+
+.composer-footer-preview-toggle {
+  display: inline-flex;
+  justify-self: start;
+  align-items: center;
+  gap: 8px;
+  color: #4e5d54;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.composer-footer-preview-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: #198747;
+}
+
+.composer-screen-actions .composer-screen-submit {
+  min-width: 90px;
+  border-radius: 8px;
+}
+
+.composer-screen-section .image-attachment-preview-list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+
+.composer-screen-section .image-attachment-preview {
+  position: relative;
+  min-height: 240px;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  background: #eef1ee;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.composer-screen-section .image-attachment-preview:hover,
+.composer-screen-section .image-attachment-preview:focus-within {
+  border-color: #5da978;
+  box-shadow: 0 0 0 3px rgba(63, 151, 94, 0.1);
+}
+
+.composer-screen-section .image-attachment-open {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.composer-screen-section .image-attachment-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.image-attachment-actions {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  z-index: 2;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: 8px;
+  background: rgba(24, 32, 27, 0.78);
+  opacity: 0;
+  transform: translateY(-3px);
+  transition: opacity 150ms ease, transform 150ms ease;
+  backdrop-filter: blur(8px);
+}
+
+.image-attachment-preview:hover .image-attachment-actions,
+.image-attachment-preview:focus-within .image-attachment-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.image-replace-button,
+.image-delete-button {
+  display: inline-flex;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #ffffff;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.image-replace-button {
+  position: relative;
+  border-right: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+.image-replace-button:hover,
+.image-delete-button:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.image-delete-button:hover {
+  color: #ffd5d5;
+}
+
+.image-replace-button.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.image-replace-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (min-width: 721px) {
+  .composer-screen-header {
+    grid-template-areas: "spacer title close";
+  }
+
+  .board-shell {
+    padding-bottom: 38px;
+  }
+
+  .pagination {
+    padding-bottom: 22px;
+  }
+}
+
+@media (max-width: 720px) {
+  .composer-screen-header {
+    grid-template-columns: 40px minmax(0, 1fr) 40px;
+    padding-right: 14px;
+    padding-left: 14px;
+  }
+
+  .composer-screen-scroll {
+    padding: 16px 18px 22px;
+  }
+
+  .composer-screen-toolbar {
+    min-height: 62px;
+  }
+
+  .composer-screen-actions {
+    min-height: 66px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px 12px;
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .composer-footer-author {
+    min-width: 0;
+    grid-template-columns: 32px minmax(0, 1fr);
+  }
+
+  .composer-footer-preview-toggle {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    font-size: 12px;
+  }
+
+  .composer-screen-actions .composer-screen-submit {
+    min-width: 72px;
+  }
+
+  .composer-screen-section .image-attachment-preview {
+    min-height: 180px;
+  }
+
+  .board-shell {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+
+  .pagination {
+    padding-bottom: 20px;
+  }
+}
+
+@media (hover: none) {
+  .image-attachment-actions {
+    opacity: 1;
+    transform: none;
+  }
+}
