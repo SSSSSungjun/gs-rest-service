@@ -47,6 +47,7 @@ interface BoardComposerProps {
   onContentApply: (content: string) => void
   onSubmit: (event: FormEvent) => void
 }
+
 function getImageFiles(files: FileList | File[]) {
   return Array.from(files).filter((file) => file.type.startsWith('image/'))
 }
@@ -96,7 +97,8 @@ export function BoardComposer({
   onContentApply,
   onSubmit,
 }: BoardComposerProps) {
-  const [isAiMode, setIsAiMode] = useState(false)  const [aiPrompt, setAiPrompt] = useState('')
+  const [isAiMode, setIsAiMode] = useState(false)
+  const [aiPrompt, setAiPrompt] = useState('')
   const [isGeneratingAiDraft, setIsGeneratingAiDraft] = useState(false)
   const [aiGenerationSeconds, setAiGenerationSeconds] = useState(0)
   const [aiErrorMessage, setAiErrorMessage] = useState('')
@@ -145,7 +147,8 @@ export function BoardComposer({
         handleCloseComposer()
       }
     }
-    window.addEventListener('keydown', closeOnEscape)    return () => {
+    window.addEventListener('keydown', closeOnEscape)
+    return () => {
       window.removeEventListener('keydown', closeOnEscape)
       document.body.style.overflow = previousOverflow
     }
@@ -194,6 +197,7 @@ export function BoardComposer({
     if (files.length === 0) return
     onUploadImages(files)
   }
+
   const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     uploadImages(Array.from(event.target.files ?? []))
     event.currentTarget.value = ''
@@ -243,7 +247,8 @@ export function BoardComposer({
         console.error(error)
       }
     } finally {
-      if (aiRequestRef.current === controller) {        aiRequestRef.current = null
+      if (aiRequestRef.current === controller) {
+        aiRequestRef.current = null
         setIsGeneratingAiDraft(false)
       }
     }
@@ -292,7 +297,8 @@ export function BoardComposer({
     }
   }
 
-  if (!isOpen) {    return (
+  if (!isOpen) {
+    return (
       <section ref={launcherRef} className="composer-launcher composer-bottom" aria-label="게시글 작성 열기">
         <span
           className={`composer-launcher-avatar post-avatar post-avatar-tone-${composerAvatar.tone}`}
@@ -341,7 +347,8 @@ export function BoardComposer({
               <SparklesIcon />
             </button>
           </div>
-        </div>      </section>
+        </div>
+      </section>
     )
   }
 
@@ -390,7 +397,8 @@ export function BoardComposer({
                 showImagesInContent={showImagesInContent}
                 isUploading={isUploadingImage}
                 showSummary={false}
-                showFilePicker={false}                showPreviewToggle={false}
+                showFilePicker={false}
+                showPreviewToggle={false}
                 onUploadFiles={onUploadImages}
                 onRemoveImage={onRemoveImage}
                 onShowImagesInContentChange={onShowImagesInContentChange}
@@ -439,7 +447,8 @@ export function BoardComposer({
               {pollOptions.length < 5 && (
                 <button className="ghost-button composer-poll-add icon-text-button" type="button" onClick={onAddPollOption}>
                   <PlusIcon />선택지 추가
-                </button>              )}
+                </button>
+              )}
             </section>
           )}
 
@@ -488,7 +497,8 @@ export function BoardComposer({
                   </div>
                 )}
               </div>
-              {aiErrorMessage && <p className="composer-ai-error" role="alert">{aiErrorMessage}</p>}              <div className="composer-ai-actions">
+              {aiErrorMessage && <p className="composer-ai-error" role="alert">{aiErrorMessage}</p>}
+              <div className="composer-ai-actions">
                 <button
                   className="composer-ai-generate"
                   type="button"
@@ -542,7 +552,8 @@ export function BoardComposer({
             onClick={handleStartAiMode}
           >
             <SparklesIcon />
-          </button>        </footer>
+          </button>
+        </footer>
 
         <footer className="composer-screen-actions">
           {hasImages && (
