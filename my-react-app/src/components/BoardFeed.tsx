@@ -44,23 +44,17 @@ export function FeedToolbar({ controller }: BoardFeedProps) {
 
       {showsFeedControls && (
         <div className="feed-toolbar-controls">
-          <div className="feed-sort-tabs" role="group" aria-label="게시글 정렬">
-            {([
-              ['latest', '최신순'],
-              ['oldest', '오래된순'],
-              ['popular', '인기순'],
-            ] as const).map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                className={feed.feedSort === value ? 'active' : undefined}
-                aria-pressed={feed.feedSort === value}
-                onClick={() => actions.changeFeedSort(value as FeedSort)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          <label className="feed-sort-menu">
+            <select
+              value={feed.feedSort}
+              onChange={(event) => actions.changeFeedSort(event.target.value as FeedSort)}
+              aria-label="게시글 정렬"
+            >
+              <option value="latest">최신순</option>
+              <option value="oldest">오래된순</option>
+              <option value="popular">인기순</option>
+            </select>
+          </label>
 
           <div className="feed-toolbar-actions">
             <form className="feed-search-field" role="search" onSubmit={handleSearchSubmit}>
