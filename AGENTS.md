@@ -166,7 +166,7 @@
 
 ## 새 세션 인계 기준
 
-- 최신 완료 지점은 PR #103이다. 작성기 서식 툴바는 레퍼런스처럼 전체 너비의 얇은 보더 안에 굵게·밑줄·글자색·형광펜 상태를 보여주는 `가` 네 개만 노출한다. 글자색·형광펜 보조 문구와 브라우저 툴팁은 없고 접근성 라벨만 유지한다. 모바일 선택 범위는 `selectionchange`와 pointer 이벤트로 보존해 Android 색상 적용을 복구했으며, 작성기 버튼의 기본·hover·pressed·selected·disabled·focus 색상은 `theme.css` 공통 토큰을 사용한다. 모바일 우선·웹 공용 `BoardComposer` 재사용 기조는 유지한다.
+- 최신 완료 지점은 PR #104다. 작성기 글자색 기본값은 검정(`#000000`), 형광펜은 흰색(`#ffffff`)이며 네이티브 색상 선택 확인 후 선택 영역 또는 이후 입력에 적용한다. 닉네임 입력은 본문 위에서 제거하고 하단 게시 버튼 바로 왼쪽의 짧은 필드(데스크톱 104px, 모바일 88px)로 옮겼다. 서식 툴바 `가` 네 개, 공통 상태색, 모바일 우선·웹 공용 `BoardComposer` 기조는 유지한다.
 - PR #72와 #73은 로컬 직접 실행의 게시글 업로드와 현재 lockfile 없이 실행되는 E2E의 생성 `package-lock.json`을 Git 추적 대상에서 제외해 Codespaces에서 `git add .`을 안전하게 사용할 수 있게 한 작업이다.
 - PR #74는 PostgreSQL을 외부 인터페이스가 아닌 host loopback `127.0.0.1:15432`에만 바인딩해 VS Code PostgreSQL 관리 도구가 연결할 수 있게 한 작업이다.
 - Codespaces Docker Compose 수동 인수 테스트, 글/이미지 등록, `docker compose restart`와 `down` → `up` 후 PostgreSQL/업로드 named volume 영속성 검증을 완료했다. 브라우저 쓰기 403은 코드 결함이 아니라 실제 접속 Origin과 `PUBLIC_ORIGIN` 불일치였고, 같은 값으로 맞춰 해결했다.
