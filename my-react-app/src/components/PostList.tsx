@@ -5,6 +5,7 @@ import { formatDate, isInteractiveClick, isPopularPost, wasEdited } from '../boa
 import { ActionMenu } from './ActionMenu'
 import { HeartIcon, MessageCircleIcon } from './Icons'
 import { HighlightedText } from './HighlightedText'
+import { FormattedText } from './FormattedText'
 import { PollBlock } from './PollBlock'
 import { PostEditForm } from './PostEditForm'
 import { PostImageGallery } from './PostImageGallery'
@@ -136,7 +137,7 @@ export function PostList({
               <>
                 <div className={`post-list-preview ${postImages.length > 0 ? 'has-images' : ''}`} aria-label="게시글 상세 보기">
                   {postImages.length > 0 && <PostImageGallery images={postImages} variant="list" />}
-                  <span className="post-content"><HighlightedText text={post.content} query={searchQuery} /></span>
+                  <span className="post-content"><FormattedText text={post.content} query={searchQuery} /></span>
                 </div>
                 {pollOptions.length > 0 && (
                   <PollBlock

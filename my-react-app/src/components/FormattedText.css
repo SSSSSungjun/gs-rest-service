@@ -1,0 +1,27 @@
+.formatted-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.formatted-line {
+  display: inline;
+}
+
+.formatted-heading {
+  color: #17231c;
+  font-size: 1.16em;
+  font-weight: 850;
+  line-height: 1.5;
+}
+
+.formatted-text strong {
+  font-weight: 850;
+}
+
+.formatted-text em {
+  font-style: italic;
+}
+
+.formatted-text del {
+  color: #78837c;
+}

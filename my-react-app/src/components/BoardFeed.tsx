@@ -3,7 +3,7 @@ import type { BoardController } from '../hooks/useBoardController'
 import type { FeedSort, SearchMode } from '../feedSelectors'
 import { CommentNotificationList } from './CommentNotificationBar'
 import { CommentSearchResults } from './CommentSearchResults'
-import { PlusIcon, RefreshCwIcon, SearchIcon } from './Icons'
+import { RefreshCwIcon, SearchIcon } from './Icons'
 import { Pagination } from './Pagination'
 import { PostDetail } from './PostDetail'
 import { PostList } from './PostList'
@@ -24,8 +24,6 @@ function getFeedLabel(controller: BoardController) {
 export function FeedToolbar({ controller }: BoardFeedProps) {
   const { actions, feed, screen, state } = controller
   const showsFeedControls = !screen.isDetailView && !screen.isNotificationView
-  const hasActivePostEdit = Object.keys(state.editingPosts).length > 0
-  const canCompose = showsFeedControls && !hasActivePostEdit
   const showsContextHeading = screen.isDetailView
     || screen.isNotificationView
     || feed.isCommentSearch
@@ -101,16 +99,6 @@ export function FeedToolbar({ controller }: BoardFeedProps) {
               <RefreshCwIcon />
             </button>
           </div>
-          {canCompose && (
-            <button
-              className="desktop-compose-button toolbar-compose-button"
-              type="button"
-              onClick={screen.openComposer}
-            >
-              <PlusIcon />
-              글쓰기
-            </button>
-          )}
         </div>
       )}
     </div>

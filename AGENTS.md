@@ -166,7 +166,7 @@
 
 ## 새 세션 인계 기준
 
-- 최신 완료 지점은 PR #92, squash merge commit `d8d50a1fb7a22526d48cf4eed2cd83a89391b8fc`이다.
+- 최신 완료 지점은 PR #95다. 데스크톱은 피드 상단 작성 인풋에서 다이얼로그를 열고, 모바일은 기존 하단 인풋에서 전체 화면 작성으로 진입한다. 기존 사진·투표·AI·수정 기능을 유지하며, 첨부 이미지 전체 화면 lightbox와 제목·굵게·기울임·취소선 텍스트 서식을 추가했다.
 - PR #72와 #73은 로컬 직접 실행의 게시글 업로드와 현재 lockfile 없이 실행되는 E2E의 생성 `package-lock.json`을 Git 추적 대상에서 제외해 Codespaces에서 `git add .`을 안전하게 사용할 수 있게 한 작업이다.
 - PR #74는 PostgreSQL을 외부 인터페이스가 아닌 host loopback `127.0.0.1:15432`에만 바인딩해 VS Code PostgreSQL 관리 도구가 연결할 수 있게 한 작업이다.
 - Codespaces Docker Compose 수동 인수 테스트, 글/이미지 등록, `docker compose restart`와 `down` → `up` 후 PostgreSQL/업로드 named volume 영속성 검증을 완료했다. 브라우저 쓰기 403은 코드 결함이 아니라 실제 접속 Origin과 `PUBLIC_ORIGIN` 불일치였고, 같은 값으로 맞춰 해결했다.

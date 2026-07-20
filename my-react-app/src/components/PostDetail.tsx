@@ -6,6 +6,7 @@ import { ActionMenu } from './ActionMenu'
 import { CommentEditForm } from './CommentEditForm'
 import { ArrowLeftIcon, BarChart3Icon, EyeIcon, HeartIcon, ImageIcon, MessageCircleIcon, ReplyIcon } from './Icons'
 import { HighlightedText } from './HighlightedText'
+import { FormattedText } from './FormattedText'
 import { PollBlock } from './PollBlock'
 import { PostEditForm } from './PostEditForm'
 import { PostImageGallery } from './PostImageGallery'
@@ -97,7 +98,6 @@ export function PostDetail({
   const isPopular = isPopularPost(post.likeCount)
   const postSearchQuery = searchMode === 'posts' ? searchQuery : ''
   const commentSearchQuery = searchMode === 'comments' ? searchQuery : ''
-
   return (
     <article className={`post-card detail-card ${isPopular ? 'popular-post' : ''}`} key={post.id}>
       <div className="detail-toolbar">
@@ -141,7 +141,7 @@ export function PostDetail({
         />
       ) : (
         <>
-          <p className="detail-content"><HighlightedText text={post.content} query={postSearchQuery} /></p>
+          <p className="detail-content"><FormattedText text={post.content} query={postSearchQuery} /></p>
           {post.showImagesInContent && <PostImageGallery images={postImages} variant="detail" />}
           {pollOptions.length > 0 && (
             <PollBlock
@@ -292,4 +292,3 @@ export function PostDetail({
     </article>
   )
 }
-
