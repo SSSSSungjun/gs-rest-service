@@ -3,10 +3,8 @@
   display: grid;
   width: 100%;
   grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
-  grid-template-areas:
-    "sort ."
-    ". search";
-  gap: 12px 20px;
+  grid-template-areas: "sort search";
+  column-gap: 20px;
   align-items: center;
 }
 
@@ -17,10 +15,10 @@
 }
 
 .feed-toolbar-list .feed-sort-menu select {
-  min-height: 30px;
-  border: 0;
-  border-radius: 6px;
-  background: #f1f3f2;
+  min-height: 38px;
+  border: 1px solid #d9dfdb;
+  border-radius: 8px;
+  background: #ffffff;
   color: #606c64;
   padding: 0 28px 0 10px;
   font: inherit;
@@ -31,9 +29,10 @@
 
 .feed-toolbar-list .feed-sort-menu select:hover,
 .feed-toolbar-list .feed-sort-menu select:focus-visible {
-  background: #e7ebe8;
+  border-color: #79b990;
+  background: #f7fbf8;
   color: #243229;
-  outline: 2px solid rgba(69, 157, 104, 0.2);
+  outline: 3px solid rgba(69, 157, 104, 0.09);
 }
 
 .feed-toolbar-list .feed-toolbar-actions {
@@ -47,12 +46,19 @@
 .feed-toolbar-list .feed-search-control {
   width: 100%;
 }
-.post-list .post-list-preview,
-.post-list .post-list-preview.has-images {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-items: start;
-  gap: 12px;
+.feed-scroll-region .post-list {
+  border-radius: 12px;
+}
+
+.post-list .post-list-preview {
+  display: block;
+  min-width: 0;
+}
+
+.post-list .post-list-media {
+  display: block;
+  min-width: 0;
+  margin-top: 4px;
 }
 
 .post-list .post-list-preview .post-content {
@@ -60,14 +66,14 @@
   -webkit-line-clamp: 7;
 }
 
-.post-list .post-list-preview .list-image-gallery {
+.post-list .post-list-media .list-image-gallery {
   order: 2;
   width: min(156px, 52vw);
   max-width: 100%;
   grid-template-columns: minmax(0, 1fr);
 }
 
-.post-list .post-list-preview .list-image-gallery .post-image-frame {
+.post-list .post-list-media .list-image-gallery .post-image-frame {
   width: min(156px, 52vw);
   max-width: 100%;
   aspect-ratio: 4 / 3;
@@ -179,8 +185,8 @@
     display: none;
   }
 
-  .post-list .post-list-preview .list-image-gallery,
-  .post-list .post-list-preview .list-image-gallery .post-image-frame {
+  .post-list .post-list-media .list-image-gallery,
+  .post-list .post-list-media .list-image-gallery .post-image-frame {
     width: min(148px, 46vw);
   }
 }
