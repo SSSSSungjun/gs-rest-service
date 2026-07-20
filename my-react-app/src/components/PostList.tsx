@@ -9,21 +9,7 @@ import { FormattedText } from './FormattedText'
 import { PollBlock } from './PollBlock'
 import { PostEditForm } from './PostEditForm'
 import { PostImageGallery } from './PostImageGallery'
-
-const AVATAR_TOKENS = ['🌱', '🍀', '🌿', '🍃', '🌼', '🎋']
-
-function getAvatarToken(postId: number, nickname: string) {
-  const nicknameHash = Array.from(nickname || '익명').reduce(
-    (hash, character) => ((hash * 31) + (character.codePointAt(0) ?? 0)) | 0,
-    0,
-  )
-  const tokenIndex = Math.abs(nicknameHash + (postId * 17)) % AVATAR_TOKENS.length
-
-  return {
-    symbol: AVATAR_TOKENS[tokenIndex],
-    tone: tokenIndex + 1,
-  }
-}
+import { getAvatarToken } from './avatarToken'
 
 interface PostListProps {
   posts: Post[]
@@ -136,8 +122,8 @@ export function PostList({
             ) : (
               <>
                 <div className={`post-list-preview ${postImages.length > 0 ? 'has-images' : ''}`} aria-label="게시글 상세 보기">
-                  {postImages.length > 0 && <PostImageGallery images={postImages} variant="list" />}
                   <span className="post-content"><FormattedText text={post.content} query={searchQuery} /></span>
+                  {postImages.length > 0 && <PostImageGallery images={postImages} variant="list" />}
                 </div>
                 {pollOptions.length > 0 && (
                   <PollBlock
