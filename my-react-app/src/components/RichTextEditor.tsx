@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import type { ClipboardEvent, DragEvent, KeyboardEvent, SyntheticEvent } from 'react'
+import type { ClipboardEvent, DragEvent, KeyboardEvent } from 'react'
 import './RichTextEditor.css'
 
 interface RichTextEditorProps {
