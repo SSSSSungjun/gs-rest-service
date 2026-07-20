@@ -125,8 +125,8 @@ export function RichTextEditor({
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const savedRangeRef = useRef<Range | null>(null)
-  const [textColor, setTextColor] = useState('#e5484d')
-  const [highlightColor, setHighlightColor] = useState('#fff3a3')
+  const [textColor, setTextColor] = useState('#000000')
+  const [highlightColor, setHighlightColor] = useState('#ffffff')
 
   const saveSelection = () => {
     const editor = editorRef.current
