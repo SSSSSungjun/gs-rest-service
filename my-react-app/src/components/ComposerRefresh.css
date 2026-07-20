@@ -265,3 +265,10 @@
     transform: none;
   }
 }
+
+.composer-screen-actions .composer-screen-submit svg,
+.composer-screen-actions .composer-screen-submit::before,
+.composer-screen-actions .composer-screen-submit::after {
+  display: none;
+  content: none;
+}
