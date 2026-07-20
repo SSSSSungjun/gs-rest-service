@@ -15,6 +15,7 @@ import {
 import { ImageAttachmentFields } from './ImageAttachmentFields'
 import '../composerLayout.css'
 import './BoardComposer.css'
+import './BoardComposerResponsive.css'
 
 interface BoardComposerProps {
   mode?: 'create' | 'edit'
@@ -147,7 +148,6 @@ export function BoardComposer({
   const toggleHeadingFormat = () => {
     const textarea = contentTextareaRef.current
     if (!textarea) return
-
     const selectionStart = textarea.selectionStart
     const lineStart = content.lastIndexOf('\n', Math.max(0, selectionStart - 1)) + 1
     const hasHeading = content.slice(lineStart).startsWith('## ')
@@ -197,7 +197,6 @@ export function BoardComposer({
       setAiGenerationSeconds(0)
       return
     }
-
     const startedAt = Date.now()
     const timer = window.setInterval(() => {
       setAiGenerationSeconds(Math.max(1, Math.floor((Date.now() - startedAt) / 1000)))
