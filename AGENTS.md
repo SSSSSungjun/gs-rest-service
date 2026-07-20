@@ -19,10 +19,11 @@
 다음 작업을 시작할 때는 전체 파일을 훑기 전에 아래 순서로 좁혀서 확인한다.
 
 1. `AGENTS.md`에서 프로젝트 규칙과 최근 작업 기준을 확인한다.
-2. 설계 의도나 트러블슈팅이 필요한 경우에만 `docs/technical-notes.md`를 확인한다.
-3. 변경 목표와 직접 관련된 파일만 검색한다.
-4. 관련 컴포넌트/서비스/API의 호출 경계가 불명확할 때만 주변 파일을 추가로 읽는다.
-5. 단순 UI 간격, 문구, 색상 조정은 전체 구조 재분석 없이 해당 CSS/컴포넌트부터 본다.
+2. Codespaces에서 집 로컬로 이전하거나 휴대폰 원격 운영을 설정할 때는 `docs/home-local-and-remote-runbook.md`를 확인한다.
+3. 설계 의도나 트러블슈팅이 필요한 경우에만 `docs/technical-notes.md`를 확인한다.
+4. 변경 목표와 직접 관련된 파일만 검색한다.
+5. 관련 컴포넌트/서비스/API의 호출 경계가 불명확할 때만 주변 파일을 추가로 읽는다.
+6. 단순 UI 간격, 문구, 색상 조정은 전체 구조 재분석 없이 해당 CSS/컴포넌트부터 본다.
 
 컨텍스트 캐시에 남길 내용:
 
@@ -166,6 +167,7 @@
 
 ## 새 세션 인계 기준
 
+- Codespaces 사용량 종료 후 집 Windows PC로 이전하는 전체 절차, `.env` 재작성, Docker Compose 실행, Tailscale 기반 무료 휴대폰 접속, 안전한 `main` 자동 동기화 기준은 `docs/home-local-and-remote-runbook.md`를 단일 실행 문서로 사용한다. 공개 저장소에 집 PC self-hosted runner를 연결하거나 공유기 포트를 공개하지 않는다.
 - 최신 완료 지점은 PR #105다. `익명 + 게시` 묶음은 하단이 아니라 `글쓰기` 헤더와 서식 툴바 사이의 상단 게시 행에 오른쪽 정렬한다. 사진이 없으면 하단 액션 행은 렌더링하지 않고, 사진이 있을 때만 본문 사진 미리보기 옵션을 하단에 남긴다. 글자색 검정/형광펜 흰색 기본값, 서식 툴바 `가` 네 개, 공통 상태색, 모바일 우선·웹 공용 `BoardComposer` 기조는 유지한다.
 - PR #72와 #73은 로컬 직접 실행의 게시글 업로드와 현재 lockfile 없이 실행되는 E2E의 생성 `package-lock.json`을 Git 추적 대상에서 제외해 Codespaces에서 `git add .`을 안전하게 사용할 수 있게 한 작업이다.
 - PR #74는 PostgreSQL을 외부 인터페이스가 아닌 host loopback `127.0.0.1:15432`에만 바인딩해 VS Code PostgreSQL 관리 도구가 연결할 수 있게 한 작업이다.
@@ -198,13 +200,3 @@
 - 이 문서의 규칙과 컨텍스트는 `SSSSSungjun/gs-rest-service` 저장소에만 적용하며, 다른 프로젝트로 자동 전이하지 않는다.
 - 새 PC·새 Codex 세션에서는 보관 대화나 특정 로컬 폴더명에 의존하지 않고, 먼저 GitHub connector의 `_get_repo`로 이 저장소 연결을 확인한 뒤 원격 `main`의 `AGENTS.md`를 읽는다.
 - 이 프로젝트를 다시 시작할 때 사용자가 제공해야 할 최소 정보는 저장소명과 “AGENTS.md 기준으로 진행”이라는 지시뿐이다.
-- 같은 Codespace를 다른 PC에서 열면 workspace 파일, 무시된 `.env`, Docker volume의 PostgreSQL 데이터가 유지된다. 새 Codespace에서는 Git 추적 파일은 자동 복원되지만 Secret/`.env`는 별도로 복원한다.
-- 작업 종료는 volume을 보존하는 `docker compose down`을 사용한다. `docker compose down -v`와 Codespace 삭제는 사용자가 데이터 초기화를 명시한 경우에만 수행한다.
-
-## 사용자가 짧게 말해도 되는 형식
-
-```text
-AGENTS.md 기준으로 해줘.
-이번 목표: ...
-완료 후 PR 번호/머지 커밋/핵심 변경만 짧게.
-```
