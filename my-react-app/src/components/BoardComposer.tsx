@@ -42,7 +42,7 @@ interface BoardComposerProps {
   onClearPoll: () => void
   onShowImagesInContentChange: (showImagesInContent: boolean) => void
   onGenerateAiDraft: (prompt: string, signal: AbortSignal) => Promise<string>
-  onApplyAiDraft: (content: string) => void
+  onContentApply: (content: string) => void
   onSubmit: (event: FormEvent) => void
 }
 
@@ -93,7 +93,7 @@ export function BoardComposer({
   onClearPoll,
   onShowImagesInContentChange,
   onGenerateAiDraft,
-  onApplyAiDraft,
+  onContentApply,
   onSubmit,
 }: BoardComposerProps) {
   const [isAiMode, setIsAiMode] = useState(false)
@@ -126,7 +126,44 @@ export function BoardComposer({
   }, [])
 
   useEffect(() => {
-    if (!isOpen) {
+    const applyInlineFormat = (prefix: string, suffix = prefix) => {
+    const textarea = contentTextareaRef.current
+    if (!textarea) return
+
+    const selectionStart = textarea.selectionStart
+    const selectionEnd = textarea.selectionEnd
+    const selectedText = content.slice(selectionStart, selectionEnd)
+    const formattedText = `${prefix}${selectedText}${suffix}`
+    const nextContent = `${content.slice(0, selectionStart)}${formattedText}${content.slice(selectionEnd)}`
+    onContentApply(nextContent)
+
+    window.requestAnimationFrame(() => {
+      textarea.focus()
+      const nextStart = selectionStart + prefix.length
+      textarea.setSelectionRange(nextStart, nextStart + selectedText.length)
+    })
+  }
+
+  const toggleHeadingFormat = () => {
+    const textarea = contentTextareaRef.current
+    if (!textarea) return
+
+    const selectionStart = textarea.selectionStart
+    const lineStart = content.lastIndexOf('\n', Math.max(0, selectionStart - 1)) + 1
+    const hasHeading = content.slice(lineStart).startsWith('## ')
+    const nextContent = hasHeading
+      ? `${content.slice(0, lineStart)}${content.slice(lineStart + 3)}`
+      : `${content.slice(0, lineStart)}## ${content.slice(lineStart)}`
+    onContentApply(nextContent)
+
+    window.requestAnimationFrame(() => {
+      textarea.focus()
+      const nextPosition = Math.max(lineStart, selectionStart + (hasHeading ? -3 : 3))
+      textarea.setSelectionRange(nextPosition, nextPosition)
+    })
+  }
+
+  if (!isOpen) {
       aiRequestRef.current?.abort()
       aiRequestRef.current = null
       setIsGeneratingAiDraft(false)
@@ -147,7 +184,6 @@ export function BoardComposer({
         handleCloseComposer()
       }
     }
-
     window.addEventListener('keydown', closeOnEscape)
     return () => {
       window.cancelAnimationFrame(focusFrame)
@@ -237,7 +273,7 @@ export function BoardComposer({
         return
       }
 
-      onApplyAiDraft(draft)
+      onContentApply(draft)
       setAiPrompt('')
       setIsAiMode(false)
       requestAnimationFrame(() => contentTextareaRef.current?.focus())
@@ -300,8 +336,14 @@ export function BoardComposer({
   if (!isOpen) {
     return (
       <section ref={launcherRef} className="composer-launcher composer-bottom" aria-label="게시글 작성 열기">
+        <span className="composer-launcher-avatar" aria-hidden="true">익</span>
         <button className="composer-launcher-button" type="button" onClick={onOpen}>
-          무슨 일이 있었나요?
+          <span className="composer-launcher-placeholder">익명님, 어떤 이야기를 나누고 싶나요?</span>
+          <span className="composer-launcher-tools" aria-hidden="true">
+            <CameraIcon />
+            <BarChart3Icon />
+            <SparklesIcon />
+          </span>
         </button>
       </section>
     )
@@ -318,7 +360,8 @@ export function BoardComposer({
             title={mode === 'edit' ? '수정 화면 닫기' : '작성 화면 닫기'}
             onClick={handleCloseComposer}
           >
-            <ArrowLeftIcon />
+            <span className="composer-close-mobile"><ArrowLeftIcon /></span>
+            <span className="composer-close-desktop"><XIcon /></span>
           </button>
           <strong>{mode === 'edit' ? '글 수정' : '글쓰기'}</strong>
           <button
@@ -342,6 +385,13 @@ export function BoardComposer({
               placeholder="익명"
               aria-label="게시글 닉네임"
             />
+          </div>
+
+          <div className="composer-format-toolbar" role="toolbar" aria-label="글자 서식">
+            <button type="button" onClick={toggleHeadingFormat} aria-label="제목 서식" title="제목">Tt</button>
+            <button type="button" onClick={() => applyInlineFormat('**')} aria-label="굵게" title="굵게"><strong>B</strong></button>
+            <button type="button" onClick={() => applyInlineFormat('_')} aria-label="기울임" title="기울임"><em>I</em></button>
+            <button type="button" onClick={() => applyInlineFormat('~~')} aria-label="취소선" title="취소선"><del>S</del></button>
           </div>
 
           <textarea
