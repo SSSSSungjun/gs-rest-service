@@ -149,10 +149,7 @@ export function RichTextEditor({
   }, [value])
 
   useEffect(() => {
-    const editor = editorRef.current
-    if (!editor) return
-    editor.innerHTML = valueToHtml(value)
-    editor.focus()
+    editorRef.current?.focus()
   }, [])
 
   return (
