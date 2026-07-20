@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { ClipboardEvent, DragEvent, KeyboardEvent } from 'react'
 import './RichTextEditor.css'
 
@@ -125,6 +125,8 @@ export function RichTextEditor({
 }: RichTextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const savedRangeRef = useRef<Range | null>(null)
+  const [textColor, setTextColor] = useState('#e5484d')
+  const [highlightColor, setHighlightColor] = useState('#fff3a3')
 
   const saveSelection = () => {
     const editor = editorRef.current
@@ -190,25 +192,31 @@ export function RichTextEditor({
           <u>U</u>
         </button>
         <label className="rich-text-color-control" title="글자색">
-          <span className="rich-text-color-letter" aria-hidden="true">A</span>
+          <span className="rich-text-color-letter" style={{ borderColor: textColor }} aria-hidden="true">A</span>
           <span className="sr-only">글자색</span>
           <input
             type="color"
-            defaultValue="#e5484d"
+            value={textColor}
             aria-label="글자색 선택"
             onMouseDown={saveSelection}
-            onChange={(event) => applyCommand('foreColor', event.target.value)}
+            onChange={(event) => {
+              setTextColor(event.target.value)
+              applyCommand('foreColor', event.target.value)
+            }}
           />
         </label>
         <label className="rich-text-color-control rich-text-highlight-control" title="형광펜">
-          <span className="rich-text-highlight-mark" aria-hidden="true">형광펜</span>
+          <span className="rich-text-highlight-mark" style={{ backgroundColor: highlightColor }} aria-hidden="true" />
           <span className="sr-only">형광펜 색상</span>
           <input
             type="color"
-            defaultValue="#fff3a3"
+            value={highlightColor}
             aria-label="형광펜 색상 선택"
             onMouseDown={saveSelection}
-            onChange={(event) => applyCommand('hiliteColor', event.target.value)}
+            onChange={(event) => {
+              setHighlightColor(event.target.value)
+              applyCommand('hiliteColor', event.target.value)
+            }}
           />
         </label>
       </div>

@@ -302,3 +302,197 @@
 .composer-screen-actions .composer-screen-submit {
   font-weight: 500;
 }
+
+/* Reference-driven compact composer refinements. */
+.composer-author-line {
+  margin-bottom: 14px;
+  border-bottom: 1px solid #e5e9e6;
+  padding: 0 2px 12px;
+}
+
+.composer-author-line .composer-screen-nickname {
+  width: min(100%, 260px);
+  min-height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #253129;
+  padding: 0 6px;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.composer-author-line .composer-screen-nickname:hover,
+.composer-author-line .composer-screen-nickname:focus {
+  border: 0;
+  background: #f5f7f5;
+  outline: 0;
+}
+
+.rich-text-editor-shell .composer-format-toolbar {
+  width: fit-content;
+  max-width: 100%;
+  gap: 1px;
+  overflow-x: auto;
+  border-radius: 9px;
+  padding: 3px;
+}
+
+.composer-screen-actions .composer-screen-submit {
+  grid-column: 2;
+  width: auto;
+  min-width: 90px;
+  max-width: 110px;
+  justify-self: end;
+  padding: 0 18px;
+}
+
+.composer-screen-section .image-attachment-preview-list {
+  justify-items: center;
+}
+
+.composer-screen-section .image-attachment-preview {
+  display: inline-block;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 0;
+  aspect-ratio: auto;
+  overflow: hidden;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  box-shadow: none;
+}
+
+.composer-screen-section .image-attachment-preview:hover,
+.composer-screen-section .image-attachment-preview:focus-within {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.composer-screen-section .image-attachment-open {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  height: auto;
+}
+
+.composer-screen-section .image-attachment-preview img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 58vh;
+  border: 1px solid #e1e6e2;
+  border-radius: 9px;
+  object-fit: contain;
+}
+
+.image-attachment-actions {
+  top: 6px;
+  right: 6px;
+  border-radius: 6px;
+}
+
+.image-replace-button,
+.image-delete-button {
+  min-height: 28px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.composer-poll-header,
+.composer-ai-header {
+  min-height: 30px;
+  justify-content: flex-end;
+}
+
+.composer-panel-close,
+.composer-ai-cancel {
+  width: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  flex-basis: 30px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #6c7870;
+  padding: 0;
+}
+
+.composer-panel-close:hover,
+.composer-ai-cancel:hover {
+  background: #e9edea;
+  color: #243129;
+}
+
+.composer-panel-close svg,
+.composer-ai-cancel svg {
+  width: 17px;
+  height: 17px;
+}
+
+.composer-poll-editor {
+  border: 1px solid #e3e8e4;
+  border-radius: 12px;
+  background: #fafbfa;
+  padding: 12px;
+}
+
+.composer-ai-mode {
+  position: relative;
+  border: 1px solid rgba(89, 112, 255, 0.24);
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(247, 249, 255, 0.98), rgba(247, 255, 251, 0.98));
+  box-shadow:
+    0 0 0 3px rgba(100, 116, 255, 0.06),
+    0 12px 32px rgba(72, 91, 170, 0.11);
+  padding: 12px;
+}
+
+.composer-ai-prompt {
+  border-color: rgba(103, 119, 226, 0.28);
+  border-radius: 10px;
+  box-shadow: 0 0 18px rgba(93, 112, 236, 0.08);
+}
+
+.composer-ai-prompt:focus {
+  border-color: rgba(85, 105, 226, 0.58);
+  outline: 3px solid rgba(97, 116, 235, 0.1);
+  box-shadow: 0 0 24px rgba(84, 105, 228, 0.16);
+}
+
+.composer-ai-actions {
+  justify-content: flex-end;
+}
+
+.composer-ai-generate {
+  width: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 50%;
+  padding: 0;
+}
+
+.composer-ai-submit-arrow {
+  font-size: 23px;
+  font-weight: 400;
+  line-height: 1;
+}
+
+@media (max-width: 720px) {
+  .composer-screen-actions .composer-screen-submit {
+    min-width: 76px;
+    max-width: 90px;
+    padding: 0 14px;
+  }
+
+  .composer-screen-section .image-attachment-preview img {
+    max-height: 52vh;
+  }
+
+  .composer-poll-editor,
+  .composer-ai-mode {
+    border-radius: 12px;
+  }
+}

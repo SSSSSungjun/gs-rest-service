@@ -6,21 +6,19 @@
 }
 
 .rich-text-editor-shell .composer-format-toolbar {
-  margin: 0 0 22px;
+  margin: 0 0 16px;
 }
 
 .rich-text-color-control {
   position: relative;
-  display: inline-flex;
-  min-height: 36px;
-  align-items: center;
-  gap: 7px;
-  border-radius: 8px;
+  display: inline-grid;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 7px;
   color: #526158;
-  padding: 0 8px;
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 450;
 }
 
 .rich-text-color-control:hover,
@@ -30,36 +28,27 @@
 }
 
 .rich-text-color-letter {
-  border-bottom: 3px solid #e5484d;
+  border-bottom: 3px solid;
   font-size: 15px;
   line-height: 19px;
 }
 
 .rich-text-highlight-mark {
-  border-radius: 3px;
-  background: #fff3a3;
-  padding: 2px 4px;
-  line-height: 18px;
+  width: 17px;
+  height: 8px;
+  border: 1px solid rgba(32, 48, 40, 0.12);
+  border-radius: 2px;
+  transform: rotate(-8deg);
 }
 
 .rich-text-color-control input[type='color'] {
-  width: 20px;
-  height: 20px;
-  overflow: hidden;
-  border: 1px solid #d7ded9;
-  border-radius: 50%;
-  background: #ffffff;
-  padding: 2px;
-  cursor: pointer;
-}
-
-.rich-text-color-control input[type='color']::-webkit-color-swatch-wrapper {
-  padding: 0;
-}
-
-.rich-text-color-control input[type='color']::-webkit-color-swatch {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   border: 0;
-  border-radius: 50%;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .rich-text-editor {
@@ -122,10 +111,5 @@
   .rich-text-editor {
     min-height: 200px;
     font-size: 16px;
-  }
-
-  .rich-text-color-control {
-    padding-right: 6px;
-    padding-left: 6px;
   }
 }

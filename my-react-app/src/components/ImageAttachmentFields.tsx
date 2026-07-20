@@ -97,7 +97,7 @@ export function ImageAttachmentFields({
               </button>
               <div className="image-attachment-actions">
                 <label className={`image-replace-button ${isUploading ? 'disabled' : ''}`}>
-                  사진 교체
+                  교체
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/gif,image/webp"
@@ -112,7 +112,7 @@ export function ImageAttachmentFields({
                   onClick={() => onRemoveImage(index)}
                   aria-label={`첨부 이미지 ${index + 1} 삭제`}
                 >
-                  삭제하기
+                  삭제
                 </button>
               </div>
             </div>

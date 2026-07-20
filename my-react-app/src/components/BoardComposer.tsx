@@ -8,7 +8,6 @@ import {
   CameraIcon,
   PlusIcon,
   SparklesIcon,
-  Trash2Icon,
   XIcon,
 } from './Icons'
 import { ImageAttachmentFields } from './ImageAttachmentFields'
@@ -371,24 +370,15 @@ export function BoardComposer({
         </header>
 
         <div className="composer-screen-scroll">
-          <div className="composer-author-card">
-            <span
-              className={`composer-author-mark post-avatar post-avatar-tone-${composerAvatar.tone}`}
-              aria-hidden="true"
-            >
-              {composerAvatar.symbol}
-            </span>
-            <label className="composer-author-field">
-              <span>작성자</span>
-              <input
-                className="composer-screen-nickname"
-                value={nickname}
-                onChange={(event) => onNicknameChange(event.target.value)}
-                maxLength={40}
-                placeholder="익명"
-                aria-label="게시글 닉네임"
-              />
-            </label>
+          <div className="composer-author-line">
+            <input
+              className="composer-screen-nickname"
+              value={nickname}
+              onChange={(event) => onNicknameChange(event.target.value)}
+              maxLength={40}
+              placeholder="익명"
+              aria-label="게시글 닉네임"
+            />
           </div>
 
           <RichTextEditor
@@ -419,9 +409,14 @@ export function BoardComposer({
           {hasPoll && (
             <section className="composer-poll-editor" aria-label="투표 만들기">
               <div className="composer-poll-header">
-                <strong><BarChart3Icon />투표</strong>
-                <button className="text-button icon-text-button" type="button" onClick={onClearPoll}>
-                  <Trash2Icon />삭제
+                <button
+                  className="composer-panel-close icon-only-button"
+                  type="button"
+                  onClick={onClearPoll}
+                  aria-label="투표 삭제"
+                  title="투표 삭제"
+                >
+                  <XIcon />
                 </button>
               </div>
               <div className="composer-poll-options">
@@ -432,6 +427,7 @@ export function BoardComposer({
                       maxLength={80}
                       placeholder={`선택지 ${index + 1}`}
                       aria-label={`투표 선택지 ${index + 1}`}
+                      autoFocus={index === 0}
                       onChange={(event) => onPollOptionChange(index, event.target.value)}
                     />
                     {pollOptions.length > 2 && (
@@ -442,7 +438,7 @@ export function BoardComposer({
                         title="선택지 삭제"
                         onClick={() => onRemovePollOption(index)}
                       >
-                        <Trash2Icon />
+                        <XIcon />
                       </button>
                     )}
                   </div>
@@ -467,7 +463,6 @@ export function BoardComposer({
           {isAiMode && (
             <section className="composer-ai-mode" aria-label="AI 글쓰기">
               <div className="composer-ai-header">
-                <strong className="composer-ai-title"><SparklesIcon />AI 글쓰기</strong>
                 <button
                   className="composer-ai-cancel icon-only-button"
                   type="button"
@@ -484,7 +479,7 @@ export function BoardComposer({
                   value={aiPrompt}
                   maxLength={2000}
                   rows={4}
-                  placeholder="원하는 내용, 형식, 말투를 자유롭게 설명해주세요."
+                  placeholder="AI 글쓰기입니다. 원하는 내용과 말투를 자유롭게 적어주세요."
                   aria-label="AI 글쓰기 요청"
                   aria-busy={isGeneratingAiDraft}
                   onChange={(event) => setAiPrompt(event.target.value)}
@@ -504,15 +499,15 @@ export function BoardComposer({
               </div>
               {aiErrorMessage && <p className="composer-ai-error" role="alert">{aiErrorMessage}</p>}
               <div className="composer-ai-actions">
-                <p className="composer-ai-hint">생성된 글은 본문에서 이어 쓰거나 고칠 수 있습니다.</p>
                 <button
                   className="composer-ai-generate"
                   type="button"
                   onClick={() => void handleGenerateAiDraft()}
                   disabled={isGeneratingAiDraft || !aiPrompt.trim()}
+                  aria-label={isGeneratingAiDraft ? 'AI 글 작성 중' : 'AI 글 생성'}
+                  title={isGeneratingAiDraft ? 'AI 글 작성 중' : 'AI 글 생성'}
                 >
-                  <SparklesIcon />
-                  {isGeneratingAiDraft ? '작성 중' : '초안 만들기'}
+                  <span className="composer-ai-submit-arrow" aria-hidden="true">↑</span>
                 </button>
               </div>
             </section>
