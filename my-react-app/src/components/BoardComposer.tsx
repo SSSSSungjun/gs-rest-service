@@ -127,43 +127,7 @@ export function BoardComposer({
   }, [])
 
   useEffect(() => {
-    const applyInlineFormat = (prefix: string, suffix = prefix) => {
-    const textarea = contentTextareaRef.current
-    if (!textarea) return
-
-    const selectionStart = textarea.selectionStart
-    const selectionEnd = textarea.selectionEnd
-    const selectedText = content.slice(selectionStart, selectionEnd)
-    const formattedText = `${prefix}${selectedText}${suffix}`
-    const nextContent = `${content.slice(0, selectionStart)}${formattedText}${content.slice(selectionEnd)}`
-    onContentApply(nextContent)
-
-    window.requestAnimationFrame(() => {
-      textarea.focus()
-      const nextStart = selectionStart + prefix.length
-      textarea.setSelectionRange(nextStart, nextStart + selectedText.length)
-    })
-  }
-
-  const toggleHeadingFormat = () => {
-    const textarea = contentTextareaRef.current
-    if (!textarea) return
-    const selectionStart = textarea.selectionStart
-    const lineStart = content.lastIndexOf('\n', Math.max(0, selectionStart - 1)) + 1
-    const hasHeading = content.slice(lineStart).startsWith('## ')
-    const nextContent = hasHeading
-      ? `${content.slice(0, lineStart)}${content.slice(lineStart + 3)}`
-      : `${content.slice(0, lineStart)}## ${content.slice(lineStart)}`
-    onContentApply(nextContent)
-
-    window.requestAnimationFrame(() => {
-      textarea.focus()
-      const nextPosition = Math.max(lineStart, selectionStart + (hasHeading ? -3 : 3))
-      textarea.setSelectionRange(nextPosition, nextPosition)
-    })
-  }
-
-  if (!isOpen) {
+    if (!isOpen) {
       aiRequestRef.current?.abort()
       aiRequestRef.current = null
       setIsGeneratingAiDraft(false)
@@ -332,6 +296,43 @@ export function BoardComposer({
     }
   }
 
+  const applyInlineFormat = (prefix: string, suffix = prefix) => {
+    const textarea = contentTextareaRef.current
+    if (!textarea) return
+
+    const selectionStart = textarea.selectionStart
+    const selectionEnd = textarea.selectionEnd
+    const selectedText = content.slice(selectionStart, selectionEnd)
+    const formattedText = `${prefix}${selectedText}${suffix}`
+    const nextContent = `${content.slice(0, selectionStart)}${formattedText}${content.slice(selectionEnd)}`
+    onContentApply(nextContent)
+
+    window.requestAnimationFrame(() => {
+      textarea.focus()
+      const nextStart = selectionStart + prefix.length
+      textarea.setSelectionRange(nextStart, nextStart + selectedText.length)
+    })
+  }
+
+  const toggleHeadingFormat = () => {
+    const textarea = contentTextareaRef.current
+    if (!textarea) return
+
+    const selectionStart = textarea.selectionStart
+    const lineStart = content.lastIndexOf('\n', Math.max(0, selectionStart - 1)) + 1
+    const hasHeading = content.slice(lineStart).startsWith('## ')
+    const nextContent = hasHeading
+      ? `${content.slice(0, lineStart)}${content.slice(lineStart + 3)}`
+      : `${content.slice(0, lineStart)}## ${content.slice(lineStart)}`
+    onContentApply(nextContent)
+
+    window.requestAnimationFrame(() => {
+      textarea.focus()
+      const nextPosition = Math.max(lineStart, selectionStart + (hasHeading ? -3 : 3))
+      textarea.setSelectionRange(nextPosition, nextPosition)
+    })
+  }
+
   if (!isOpen) {
     return (
       <section ref={launcherRef} className="composer-launcher composer-bottom" aria-label="게시글 작성 열기">
@@ -347,7 +348,6 @@ export function BoardComposer({
       </section>
     )
   }
-
   return (
     <section className="composer-screen" aria-label={mode === 'edit' ? '게시글 수정' : '게시글 작성'}>
       <form className="composer-screen-form" onSubmit={onSubmit} onKeyDown={preventEnterSubmit}>
