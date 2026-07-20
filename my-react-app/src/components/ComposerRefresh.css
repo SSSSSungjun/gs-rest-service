@@ -497,7 +497,12 @@
   }
 }
 
-/* Mobile-first composer typography and icon-only actions. */
+/* Unified mobile-first composer controls. */
+.composer-screen-form {
+  --composer-control-size: 36px;
+  --composer-tool-size: 40px;
+}
+
 .composer-author-line {
   padding-right: 0;
   padding-left: 0;
@@ -509,7 +514,7 @@
   border: 0;
   border-radius: 0;
   background: transparent !important;
-  color: #17231c;
+  color: var(--color-text);
   padding: 0;
   font-family: inherit;
   font-size: 17px;
@@ -525,6 +530,84 @@
   outline: 0;
 }
 
+.rich-text-editor-shell .composer-format-toolbar {
+  width: 100%;
+  max-width: none;
+  min-height: 42px;
+  box-sizing: border-box;
+  gap: 0;
+  margin: 0 0 28px;
+  overflow: visible;
+  border: 1px solid var(--color-line);
+  border-radius: 2px;
+  background: var(--color-surface);
+  padding: 2px 8px;
+}
+
+.composer-format-toolbar button,
+.rich-text-color-control,
+.composer-tool-button {
+  border: 0;
+  background: transparent;
+  color: var(--color-control);
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.composer-format-toolbar button,
+.rich-text-color-control {
+  width: var(--composer-control-size);
+  min-width: var(--composer-control-size);
+  height: var(--composer-control-size);
+  min-height: var(--composer-control-size);
+  border-radius: 4px;
+}
+
+.composer-format-toolbar button:hover,
+.rich-text-color-control:hover,
+.composer-tool-button:hover {
+  background: transparent;
+  color: var(--color-control);
+}
+
+.composer-format-toolbar button:active,
+.rich-text-color-control:active,
+.composer-tool-button:active {
+  background: var(--color-control-active);
+  color: var(--color-control-active-text);
+}
+
+.composer-format-toolbar button:focus-visible,
+.rich-text-color-control:focus-within,
+.composer-tool-button:focus-visible,
+.composer-screen-back:focus-visible,
+.composer-panel-close:focus-visible,
+.composer-ai-cancel:focus-visible,
+.composer-screen-submit:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 1px;
+}
+
+.composer-tool-button.active,
+.composer-tool-button[aria-pressed='true'] {
+  border-color: transparent;
+  background: var(--color-control-active);
+  color: var(--color-control-active-text);
+}
+
+.composer-format-toolbar button:disabled,
+.composer-tool-button:disabled,
+.composer-tool-button.disabled {
+  background: transparent;
+  color: var(--color-control-disabled);
+  cursor: not-allowed;
+  opacity: 1;
+}
+
 .composer-screen-toolbar {
   min-height: 60px;
   justify-content: flex-start;
@@ -532,19 +615,79 @@
 }
 
 .composer-tool-button {
-  width: 40px;
-  min-width: 40px;
-  min-height: 40px;
-  flex: 0 0 40px;
+  display: inline-grid;
+  width: var(--composer-tool-size);
+  min-width: var(--composer-tool-size);
+  min-height: var(--composer-tool-size);
+  flex: 0 0 var(--composer-tool-size);
+  place-items: center;
   gap: 0;
   border-radius: 50%;
-  padding: 0;
   font-size: 0;
 }
 
 .composer-tool-button svg {
   width: 20px;
   height: 20px;
+}
+
+.composer-screen-back,
+.composer-panel-close,
+.composer-ai-cancel {
+  color: var(--color-control);
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.composer-screen-back:hover,
+.composer-panel-close:hover,
+.composer-ai-cancel:hover {
+  background: transparent;
+  color: var(--color-control);
+}
+
+.composer-screen-back:active,
+.composer-panel-close:active,
+.composer-ai-cancel:active {
+  background: var(--color-control-active);
+  color: var(--color-control-active-text);
+}
+
+.composer-screen-submit {
+  background: var(--color-brand-600);
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+
+.composer-screen-submit:hover:not(:disabled) {
+  background: var(--color-brand-600);
+}
+
+.composer-screen-submit:active:not(:disabled) {
+  background: var(--color-brand-500);
+}
+
+.composer-screen-submit:disabled {
+  background: var(--color-line);
+  color: var(--color-control-disabled);
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .composer-format-toolbar button:hover,
+  .rich-text-color-control:hover,
+  .composer-tool-button:hover:not(.active):not([aria-pressed='true']),
+  .composer-screen-back:hover,
+  .composer-panel-close:hover,
+  .composer-ai-cancel:hover {
+    background: var(--color-control-hover);
+    color: var(--color-text);
+  }
+
+  .composer-screen-submit:hover:not(:disabled) {
+    background: var(--color-brand-500);
+  }
 }
 
 @media (max-width: 720px) {
