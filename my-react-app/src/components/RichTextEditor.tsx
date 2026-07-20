@@ -47,7 +47,8 @@ function normalizeCssColor(value: string | null) {
   const normalized = value.trim().toLowerCase()
 
   if (/^#[0-9a-f]{6}$/.test(normalized)) return normalized
-  if (/^#[0-9a-f]{3}$/.test(normalized)) {    return `#${normalized.slice(1).split('').map((character) => character.repeat(2)).join('')}`
+  if (/^#[0-9a-f]{3}$/.test(normalized)) {
+    return `#${normalized.slice(1).split('').map((character) => character.repeat(2)).join('')}`
   }
 
   const rgb = normalized.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/)
@@ -96,7 +97,8 @@ function serializeNode(node: Node): string {
   if (node.nodeType === Node.TEXT_NODE) return (node.textContent ?? '').replaceAll('\u00a0', ' ')
   if (!(node instanceof HTMLElement)) return ''
 
-  const tagName = node.tagName  if (tagName === 'BR') return '\n'
+  const tagName = node.tagName
+  if (tagName === 'BR') return '\n'
 
   const content = Array.from(node.childNodes).map(serializeNode).join('')
   if (tagName === 'H1' || tagName === 'H2' || tagName === 'H3') return `## ${content}\n`
@@ -145,7 +147,8 @@ export function RichTextEditor({
     selection.addRange(savedRangeRef.current)
   }
 
-  const emitValue = () => {    const editor = editorRef.current
+  const emitValue = () => {
+    const editor = editorRef.current
     if (!editor) return
     const nextValue = editorToValue(editor)
     if (nextValue !== value) onChange(nextValue)
@@ -194,7 +197,8 @@ export function RichTextEditor({
           <input
             type="color"
             value={textColor}
-            aria-label="글자색 선택"            onMouseDown={saveSelection}
+            aria-label="글자색 선택"
+            onMouseDown={saveSelection}
             onChange={(event) => {
               setTextColor(event.target.value)
               applyCommand('foreColor', event.target.value)
