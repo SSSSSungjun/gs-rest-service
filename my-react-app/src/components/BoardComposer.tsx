@@ -371,6 +371,26 @@ export function BoardComposer({
         </header>
 
         <div className="composer-screen-scroll">
+          <div className="composer-author-card">
+            <span
+              className={`composer-author-mark post-avatar post-avatar-tone-${composerAvatar.tone}`}
+              aria-hidden="true"
+            >
+              {composerAvatar.symbol}
+            </span>
+            <label className="composer-author-field">
+              <span>작성자</span>
+              <input
+                className="composer-screen-nickname"
+                value={nickname}
+                onChange={(event) => onNicknameChange(event.target.value)}
+                maxLength={40}
+                placeholder="익명"
+                aria-label="게시글 닉네임"
+              />
+            </label>
+          </div>
+
           <RichTextEditor
             value={content}
             placeholder="무슨 일이 있었나요?"
@@ -536,22 +556,6 @@ export function BoardComposer({
         </footer>
 
         <footer className="composer-screen-actions">
-          <div className="composer-footer-author">
-            <span
-              className={`composer-author-mark post-avatar post-avatar-tone-${composerAvatar.tone}`}
-              aria-hidden="true"
-            >
-              {composerAvatar.symbol}
-            </span>
-            <input
-              className="composer-screen-nickname"
-              value={nickname}
-              onChange={(event) => onNicknameChange(event.target.value)}
-              maxLength={40}
-              placeholder="익명"
-              aria-label="게시글 닉네임"
-            />
-          </div>
           {hasImages && (
             <label className="composer-footer-preview-toggle">
               <input

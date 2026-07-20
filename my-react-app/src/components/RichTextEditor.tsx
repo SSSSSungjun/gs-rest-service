@@ -20,6 +20,11 @@ function escapeHtml(value: string) {
 
 function renderInline(value: string) {
   return escapeHtml(value)
+    .replace(/\[(color|mark)=(#[0-9a-f]{6})\]([\s\S]*?)\[\/\1\]/gi, (_, type, color, text) => (
+      type.toLowerCase() === 'color'
+        ? `<span style="color: ${color}">${text}</span>`
+        : `<mark style="background-color: ${color}">${text}</mark>`
+    ))
     .replace(/\[size=(small|large)\]([\s\S]*?)\[\/size\]/g, '<span class="rich-text-size-$1">$2</span>')
     .replace(/\[u\]([\s\S]*?)\[\/u\]/g, '<u>$1</u>')
     .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
@@ -37,27 +42,55 @@ function valueToHtml(value: string) {
   }).join('')
 }
 
+function normalizeCssColor(value: string | null) {
+  if (!value) return null
+  const normalized = value.trim().toLowerCase()
+
+  if (/^#[0-9a-f]{6}$/.test(normalized)) return normalized
+  if (/^#[0-9a-f]{3}$/.test(normalized)) {
+    return `#${normalized.slice(1).split('').map((character) => character.repeat(2)).join('')}`
+  }
+
+  const rgb = normalized.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/)
+  if (!rgb) return null
+
+  return `#${rgb.slice(1, 4)
+    .map((channel) => Math.min(255, Number(channel)).toString(16).padStart(2, '0'))
+    .join('')}`
+}
+
 function wrapInline(tagName: string, content: string, element: HTMLElement) {
-  if (tagName === 'STRONG' || tagName === 'B') return `**${content}**`
-  if (tagName === 'EM' || tagName === 'I') return `_${content}_`
-  if (tagName === 'U') return `[u]${content}[/u]`
-  if (tagName === 'S' || tagName === 'STRIKE' || tagName === 'DEL') return `~~${content}~~`
+  let result = content
+
+  if (tagName === 'STRONG' || tagName === 'B') return `**${result}**`
+  if (tagName === 'EM' || tagName === 'I') return `_${result}_`
+  if (tagName === 'U') return `[u]${result}[/u]`
+  if (tagName === 'S' || tagName === 'STRIKE' || tagName === 'DEL') return `~~${result}~~`
 
   if (tagName === 'FONT') {
     const size = element.getAttribute('size')
-    if (size === '1' || size === '2') return `[size=small]${content}[/size]`
+    if (size === '1' || size === '2') result = `[size=small]${result}[/size]`
     if (size === '4' || size === '5' || size === '6' || size === '7') {
-      return `[size=large]${content}[/size]`
+      result = `[size=large]${result}[/size]`
     }
+
+    const color = normalizeCssColor(element.getAttribute('color') || element.style.color)
+    if (color) result = `[color=${color}]${result}[/color]`
   }
 
-  if (tagName === 'SPAN') {
+  if (tagName === 'SPAN' || tagName === 'MARK') {
     const fontSize = element.style.fontSize
-    if (fontSize && Number.parseFloat(fontSize) <= 13) return `[size=small]${content}[/size]`
-    if (fontSize && Number.parseFloat(fontSize) >= 20) return `[size=large]${content}[/size]`
+    if (fontSize && Number.parseFloat(fontSize) <= 13) result = `[size=small]${result}[/size]`
+    if (fontSize && Number.parseFloat(fontSize) >= 20) result = `[size=large]${result}[/size]`
+
+    const color = normalizeCssColor(element.style.color)
+    if (color) result = `[color=${color}]${result}[/color]`
+
+    const highlight = normalizeCssColor(element.style.backgroundColor)
+    if (highlight) result = `[mark=${highlight}]${result}[/mark]`
   }
 
-  return content
+  return result
 }
 
 function serializeNode(node: Node): string {
@@ -130,11 +163,6 @@ export function RichTextEditor({
     emitValue()
   }
 
-  const toggleHeading = () => {
-    const currentBlock = String(document.queryCommandValue('formatBlock')).toLowerCase()
-    applyCommand('formatBlock', currentBlock === 'h2' ? 'div' : 'h2')
-  }
-
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     event.stopPropagation()
     if (event.key !== 'Tab') return
@@ -155,25 +183,34 @@ export function RichTextEditor({
   return (
     <div className="rich-text-editor-shell">
       <div className="composer-format-toolbar" role="toolbar" aria-label="글자 서식">
-        <button type="button" onMouseDown={(event) => { event.preventDefault(); toggleHeading() }} aria-label="제목 서식" title="제목">Tt</button>
-        <label className="rich-text-size-control">
-          <span className="sr-only">글씨 크기</span>
-          <select
-            defaultValue="3"
-            aria-label="글씨 크기"
-            title="글씨 크기"
+        <button type="button" onMouseDown={(event) => { event.preventDefault(); applyCommand('bold') }} aria-label="굵게" title="굵게">
+          <strong>B</strong>
+        </button>
+        <button type="button" onMouseDown={(event) => { event.preventDefault(); applyCommand('underline') }} aria-label="밑줄" title="밑줄">
+          <u>U</u>
+        </button>
+        <label className="rich-text-color-control" title="글자색">
+          <span className="rich-text-color-letter" aria-hidden="true">A</span>
+          <span className="sr-only">글자색</span>
+          <input
+            type="color"
+            defaultValue="#e5484d"
+            aria-label="글자색 선택"
             onMouseDown={saveSelection}
-            onChange={(event) => applyCommand('fontSize', event.target.value)}
-          >
-            <option value="2">작게</option>
-            <option value="3">보통</option>
-            <option value="5">크게</option>
-          </select>
+            onChange={(event) => applyCommand('foreColor', event.target.value)}
+          />
         </label>
-        <button type="button" onMouseDown={(event) => { event.preventDefault(); applyCommand('bold') }} aria-label="굵게" title="굵게"><strong>B</strong></button>
-        <button type="button" onMouseDown={(event) => { event.preventDefault(); applyCommand('italic') }} aria-label="기울임" title="기울임"><em>I</em></button>
-        <button type="button" onMouseDown={(event) => { event.preventDefault(); applyCommand('underline') }} aria-label="밑줄" title="밑줄"><u>U</u></button>
-        <button type="button" onMouseDown={(event) => { event.preventDefault(); applyCommand('strikeThrough') }} aria-label="취소선" title="취소선"><s>S</s></button>
+        <label className="rich-text-color-control rich-text-highlight-control" title="형광펜">
+          <span className="rich-text-highlight-mark" aria-hidden="true">형광펜</span>
+          <span className="sr-only">형광펜 색상</span>
+          <input
+            type="color"
+            defaultValue="#fff3a3"
+            aria-label="형광펜 색상 선택"
+            onMouseDown={saveSelection}
+            onChange={(event) => applyCommand('hiliteColor', event.target.value)}
+          />
+        </label>
       </div>
       <div
         ref={editorRef}

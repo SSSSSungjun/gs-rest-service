@@ -9,29 +9,57 @@
   margin: 0 0 22px;
 }
 
-.rich-text-size-control {
+.rich-text-color-control {
+  position: relative;
   display: inline-flex;
+  min-height: 36px;
   align-items: center;
+  gap: 7px;
+  border-radius: 8px;
+  color: #526158;
+  padding: 0 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 450;
 }
 
-.rich-text-size-control select {
-  min-width: 76px;
-  min-height: 36px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: #526158;
-  padding: 0 24px 0 8px;
-  font: inherit;
-  font-size: 12px;
+.rich-text-color-control:hover,
+.rich-text-color-control:focus-within {
+  background: #e9efea;
+  color: #17231c;
+}
+
+.rich-text-color-letter {
+  border-bottom: 3px solid #e5484d;
+  font-size: 15px;
+  line-height: 19px;
+}
+
+.rich-text-highlight-mark {
+  border-radius: 3px;
+  background: #fff3a3;
+  padding: 2px 4px;
+  line-height: 18px;
+}
+
+.rich-text-color-control input[type='color'] {
+  width: 20px;
+  height: 20px;
+  overflow: hidden;
+  border: 1px solid #d7ded9;
+  border-radius: 50%;
+  background: #ffffff;
+  padding: 2px;
   cursor: pointer;
 }
 
-.rich-text-size-control select:hover,
-.rich-text-size-control select:focus-visible {
-  background: #e9efea;
-  color: #17231c;
-  outline: 0;
+.rich-text-color-control input[type='color']::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.rich-text-color-control input[type='color']::-webkit-color-swatch {
+  border: 0;
+  border-radius: 50%;
 }
 
 .rich-text-editor {
@@ -66,6 +94,11 @@
   line-height: 1.55;
 }
 
+.rich-text-editor mark {
+  color: inherit;
+  padding: 0;
+}
+
 .rich-text-editor font[size='1'],
 .rich-text-editor font[size='2'],
 .rich-text-editor .rich-text-size-small {
@@ -91,8 +124,8 @@
     font-size: 16px;
   }
 
-  .rich-text-size-control select {
-    min-width: 70px;
-    font-size: 12px;
+  .rich-text-color-control {
+    padding-right: 6px;
+    padding-left: 6px;
   }
 }

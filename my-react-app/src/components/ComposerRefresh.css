@@ -26,6 +26,50 @@
   padding-bottom: 28px;
 }
 
+.composer-author-card {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
+  border-radius: 16px;
+  background: #f5f7f5;
+  padding: 10px 12px;
+}
+
+.composer-author-card .composer-author-mark {
+  width: 40px;
+  height: 40px;
+  font-size: 13px;
+}
+
+.composer-author-field {
+  display: grid;
+  width: min(100%, 320px);
+  gap: 3px;
+  color: #7b867f;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.composer-author-card .composer-screen-nickname {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #243028;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.composer-author-card .composer-screen-nickname:hover,
+.composer-author-card .composer-screen-nickname:focus {
+  border-color: #c7d7cb;
+  outline: 3px solid rgba(69, 157, 104, 0.08);
+}
+
 .composer-screen-section {
   margin-top: 22px;
   border: 0;
@@ -43,31 +87,12 @@
 .composer-screen-actions {
   display: grid;
   min-height: 70px;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 18px;
   align-items: center;
   border-top: 1px solid #e3e8e4;
   background: #ffffff;
   padding: 10px 20px max(10px, env(safe-area-inset-bottom));
-}
-
-.composer-footer-author {
-  display: grid;
-  min-width: 150px;
-  grid-template-columns: 34px minmax(90px, 150px);
-  gap: 8px;
-  align-items: center;
-}
-
-.composer-footer-author .composer-author-mark {
-  width: 34px;
-  height: 34px;
-  font-size: 12px;
-}
-
-.composer-footer-author .composer-screen-nickname {
-  width: 100%;
-  min-height: 36px;
 }
 
 .composer-footer-preview-toggle {
@@ -231,11 +256,6 @@
     padding-left: 12px;
   }
 
-  .composer-footer-author {
-    min-width: 0;
-    grid-template-columns: 32px minmax(0, 1fr);
-  }
-
   .composer-footer-preview-toggle {
     grid-column: 1 / -1;
     grid-row: 2;
@@ -271,4 +291,14 @@
 .composer-screen-actions .composer-screen-submit::after {
   display: none;
   content: none;
+}
+
+.board-shell .composer-launcher .composer-launcher-placeholder,
+.composer-tool-button,
+.composer-screen-actions .composer-screen-submit {
+  font-weight: 400;
+}
+
+.composer-screen-actions .composer-screen-submit {
+  font-weight: 500;
 }
