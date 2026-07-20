@@ -68,16 +68,39 @@
 
 .post-list .post-list-media .list-image-gallery {
   order: 2;
-  width: min(156px, 52vw);
+  width: min(240px, 72vw);
   max-width: 100%;
   grid-template-columns: minmax(0, 1fr);
 }
 
 .post-list .post-list-media .list-image-gallery .post-image-frame {
-  width: min(156px, 52vw);
+  display: grid;
+  width: min(240px, 72vw);
   max-width: 100%;
-  aspect-ratio: 4 / 3;
-  border-radius: 7px;
+  aspect-ratio: auto;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.post-list .post-list-media .post-image-open {
+  display: grid;
+  width: 100%;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  padding: 0;
+}
+
+.post-list .post-list-media .post-image-frame img {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 320px;
+  border: 1px solid #e0e6e1;
+  border-radius: 8px;
+  object-fit: contain;
 }
 
 .board-shell .composer-launcher .composer-launcher-panel {
@@ -187,6 +210,10 @@
 
   .post-list .post-list-media .list-image-gallery,
   .post-list .post-list-media .list-image-gallery .post-image-frame {
-    width: min(148px, 46vw);
+    width: min(220px, 68vw);
+  }
+
+  .post-list .post-list-media .post-image-frame img {
+    max-height: 300px;
   }
 }
