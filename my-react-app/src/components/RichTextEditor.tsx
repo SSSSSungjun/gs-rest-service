@@ -159,9 +159,18 @@ export function RichTextEditor({
     const editor = editorRef.current
     if (!editor) return
 
-    editor.focus()
+    editor.focus({ preventScroll: true })
     restoreSelection()
-    document.execCommand(command, false, commandValue)
+
+    const isColorCommand = command === 'foreColor' || command === 'hiliteColor'
+    if (isColorCommand) document.execCommand('styleWithCSS', false, 'true')
+
+    const applied = document.execCommand(command, false, commandValue)
+    if (command === 'hiliteColor' && !applied) {
+      document.execCommand('backColor', false, commandValue)
+    }
+
+    if (isColorCommand) document.execCommand('styleWithCSS', false, 'false')
     emitValue()
   }
 
@@ -182,23 +191,38 @@ export function RichTextEditor({
     editorRef.current?.focus()
   }, [])
 
+  useEffect(() => {
+    const trackEditorSelection = () => {
+      const editor = editorRef.current
+      const selection = window.getSelection()
+      if (!editor || !selection || selection.rangeCount === 0) return
+
+      const range = selection.getRangeAt(0)
+      if (editor.contains(range.commonAncestorContainer)) {
+        savedRangeRef.current = range.cloneRange()
+      }
+    }
+
+    document.addEventListener('selectionchange', trackEditorSelection)
+    return () => document.removeEventListener('selectionchange', trackEditorSelection)
+  }, [])
+
   return (
     <div className="rich-text-editor-shell">
       <div className="composer-format-toolbar" role="toolbar" aria-label="글자 서식">
-        <button type="button" onMouseDown={(event) => { event.preventDefault(); applyCommand('bold') }} aria-label="굵게" title="굵게">
+        <button type="button" onPointerDown={(event) => { event.preventDefault(); applyCommand('bold') }} aria-label="굵게" title="굵게">
           <span className="rich-text-format-glyph rich-text-format-bold" aria-hidden="true">가</span>
         </button>
-        <button type="button" onMouseDown={(event) => { event.preventDefault(); applyCommand('underline') }} aria-label="밑줄" title="밑줄">
+        <button type="button" onPointerDown={(event) => { event.preventDefault(); applyCommand('underline') }} aria-label="밑줄" title="밑줄">
           <span className="rich-text-format-glyph rich-text-format-underline" aria-hidden="true">가</span>
         </button>
         <label className="rich-text-color-control" title="글자색">
           <span className="rich-text-format-glyph rich-text-color-letter" style={{ color: textColor }} aria-hidden="true">가</span>
-          <span className="sr-only">글자색</span>
           <input
             type="color"
             value={textColor}
             aria-label="글자색 선택"
-            onMouseDown={saveSelection}
+            onPointerDown={saveSelection}
             onChange={(event) => {
               setTextColor(event.target.value)
               applyCommand('foreColor', event.target.value)
@@ -207,12 +231,11 @@ export function RichTextEditor({
         </label>
         <label className="rich-text-color-control rich-text-highlight-control" title="형광펜">
           <span className="rich-text-format-glyph rich-text-highlight-letter" style={{ backgroundColor: highlightColor }} aria-hidden="true">가</span>
-          <span className="sr-only">형광펜 색상</span>
           <input
             type="color"
             value={highlightColor}
             aria-label="형광펜 색상 선택"
-            onMouseDown={saveSelection}
+            onPointerDown={saveSelection}
             onChange={(event) => {
               setHighlightColor(event.target.value)
               applyCommand('hiliteColor', event.target.value)
@@ -233,6 +256,7 @@ export function RichTextEditor({
         onBlur={emitValue}
         onKeyUp={saveSelection}
         onMouseUp={saveSelection}
+        onPointerUp={saveSelection}
         onKeyDown={handleKeyDown}
         onPaste={onPaste}
         onDragOver={onDragOver}
