@@ -1,0 +1,186 @@
+/* Feed and composer refinements requested after the responsive composer rollout. */
+.feed-toolbar-list .feed-toolbar-controls {
+  display: grid;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
+  grid-template-areas:
+    "sort ."
+    ". search";
+  gap: 12px 20px;
+  align-items: center;
+}
+
+.feed-toolbar-list .feed-sort-menu {
+  position: relative;
+  grid-area: sort;
+  width: fit-content;
+}
+
+.feed-toolbar-list .feed-sort-menu select {
+  min-height: 30px;
+  border: 0;
+  border-radius: 6px;
+  background: #f1f3f2;
+  color: #606c64;
+  padding: 0 28px 0 10px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.feed-toolbar-list .feed-sort-menu select:hover,
+.feed-toolbar-list .feed-sort-menu select:focus-visible {
+  background: #e7ebe8;
+  color: #243229;
+  outline: 2px solid rgba(69, 157, 104, 0.2);
+}
+
+.feed-toolbar-list .feed-toolbar-actions {
+  grid-area: search;
+  justify-self: end;
+  width: 100%;
+  min-width: 0;
+}
+
+.feed-toolbar-list .feed-search-field,
+.feed-toolbar-list .feed-search-control {
+  width: 100%;
+}
+.post-list .post-list-preview,
+.post-list .post-list-preview.has-images {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+}
+
+.post-list .post-list-preview .post-content {
+  order: 1;
+  -webkit-line-clamp: 7;
+}
+
+.post-list .post-list-preview .list-image-gallery {
+  order: 2;
+  width: min(156px, 52vw);
+  max-width: 100%;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.post-list .post-list-preview .list-image-gallery .post-image-frame {
+  width: min(156px, 52vw);
+  max-width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 7px;
+}
+
+.board-shell .composer-launcher .composer-launcher-panel {
+  display: grid;
+  min-width: 0;
+  gap: 18px;
+  border-radius: 8px;
+  background: #f4f6f4;
+  padding: 14px 16px;
+}
+
+.board-shell .composer-launcher .composer-launcher-panel .composer-launcher-button {
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+  box-shadow: none;
+}
+
+.board-shell .composer-launcher .composer-launcher-panel .composer-launcher-button:hover {
+  background: transparent;
+}
+
+.board-shell .composer-launcher .composer-launcher-tools {
+  gap: 9px;
+}
+
+.board-shell .composer-launcher .composer-launcher-tool {
+  position: relative;
+  display: inline-grid;
+  width: 34px;
+  min-width: 34px;
+  min-height: 32px;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #6f7c74;
+  padding: 0;
+  cursor: pointer;
+}
+
+.board-shell .composer-launcher .composer-launcher-tool:hover {
+  background: #e4e9e5;
+  color: #2d4636;
+}
+
+.board-shell .composer-launcher .composer-launcher-tool input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.composer-launcher-avatar.post-avatar,
+.composer-author-mark.post-avatar {
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(69, 157, 104, 0.2);
+  color: #245a38;
+}
+
+@media (min-width: 721px) {
+  .board-shell .composer-launcher .composer-launcher-panel {
+    min-height: 86px;
+  }
+}
+
+@media (max-width: 820px) {
+  .feed-toolbar-list .feed-toolbar-controls {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "sort"
+      "search";
+    gap: 10px;
+  }
+
+  .feed-toolbar-list .feed-toolbar-actions {
+    justify-self: stretch;
+  }
+}
+
+@media (max-width: 720px) {
+  .board-shell .composer-launcher .composer-launcher-panel {
+    gap: 0;
+    min-height: 52px;
+    border: 1px solid #d8dfda;
+    border-radius: 18px;
+    background: #ffffff;
+    padding: 0;
+    box-shadow: 0 8px 24px rgba(36, 54, 43, 0.1);
+  }
+
+  .board-shell .composer-launcher .composer-launcher-panel .composer-launcher-button {
+    min-height: 52px;
+    border-radius: 18px;
+    background: #ffffff;
+    padding: 0 16px;
+  }
+
+  .composer-launcher-tools {
+    display: none;
+  }
+
+  .post-list .post-list-preview .list-image-gallery,
+  .post-list .post-list-preview .list-image-gallery .post-image-frame {
+    width: min(148px, 46vw);
+  }
+}
