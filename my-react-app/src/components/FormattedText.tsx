@@ -7,9 +7,8 @@ interface FormattedTextProps {
   query: string
 }
 
-
 function renderInline(text: string, query: string, keyPrefix: string): ReactNode[] {
-  const inlinePattern = /\[size=(small|large)\]([^\n]*?)\[\/size\]|\[u\]([^\n]*?)\[\/u\]|\*\*([^*]+)\*\*|~~([^~]+)~~|_([^_]+)_/g
+  const inlinePattern = /\[(color|mark)=(#[0-9a-fA-F]{6})\]([^\n]*?)\[\/\1\]|\[size=(small|large)\]([^\n]*?)\[\/size\]|\[u\]([^\n]*?)\[\/u\]|\*\*([^*]+)\*\*|~~([^~]+)~~|_([^_]+)_/g
   const nodes: ReactNode[] = []
   let cursor = 0
   let match: RegExpExecArray | null
@@ -26,20 +25,32 @@ function renderInline(text: string, query: string, keyPrefix: string): ReactNode
     }
 
     const key = `${keyPrefix}-format-${index}`
-    if (match[1]) {
+    if (match[1] === 'color') {
       nodes.push(
-        <span className={`formatted-size-${match[1]}`} key={key}>
-          {renderInline(match[2], query, key)}
+        <span style={{ color: match[2] }} key={key}>
+          {renderInline(match[3], query, key)}
         </span>,
       )
-    } else if (match[3] !== undefined) {
-      nodes.push(<u key={key}>{renderInline(match[3], query, key)}</u>)
-    } else if (match[4] !== undefined) {
-      nodes.push(<strong key={key}>{renderInline(match[4], query, key)}</strong>)
-    } else if (match[5] !== undefined) {
-      nodes.push(<del key={key}>{renderInline(match[5], query, key)}</del>)
+    } else if (match[1] === 'mark') {
+      nodes.push(
+        <mark style={{ backgroundColor: match[2] }} key={key}>
+          {renderInline(match[3], query, key)}
+        </mark>,
+      )
+    } else if (match[4]) {
+      nodes.push(
+        <span className={`formatted-size-${match[4]}`} key={key}>
+          {renderInline(match[5], query, key)}
+        </span>,
+      )
     } else if (match[6] !== undefined) {
-      nodes.push(<em key={key}>{renderInline(match[6], query, key)}</em>)
+      nodes.push(<u key={key}>{renderInline(match[6], query, key)}</u>)
+    } else if (match[7] !== undefined) {
+      nodes.push(<strong key={key}>{renderInline(match[7], query, key)}</strong>)
+    } else if (match[8] !== undefined) {
+      nodes.push(<del key={key}>{renderInline(match[8], query, key)}</del>)
+    } else if (match[9] !== undefined) {
+      nodes.push(<em key={key}>{renderInline(match[9], query, key)}</em>)
     }
 
     cursor = inlinePattern.lastIndex
