@@ -47,8 +47,7 @@ function normalizeCssColor(value: string | null) {
   const normalized = value.trim().toLowerCase()
 
   if (/^#[0-9a-f]{6}$/.test(normalized)) return normalized
-  if (/^#[0-9a-f]{3}$/.test(normalized)) {
-    return `#${normalized.slice(1).split('').map((character) => character.repeat(2)).join('')}`
+  if (/^#[0-9a-f]{3}$/.test(normalized)) {    return `#${normalized.slice(1).split('').map((character) => character.repeat(2)).join('')}`
   }
 
   const rgb = normalized.match(/^rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/)
@@ -97,8 +96,7 @@ function serializeNode(node: Node): string {
   if (node.nodeType === Node.TEXT_NODE) return (node.textContent ?? '').replaceAll('\u00a0', ' ')
   if (!(node instanceof HTMLElement)) return ''
 
-  const tagName = node.tagName
-  if (tagName === 'BR') return '\n'
+  const tagName = node.tagName  if (tagName === 'BR') return '\n'
 
   const content = Array.from(node.childNodes).map(serializeNode).join('')
   if (tagName === 'H1' || tagName === 'H2' || tagName === 'H3') return `## ${content}\n`
@@ -147,8 +145,7 @@ export function RichTextEditor({
     selection.addRange(savedRangeRef.current)
   }
 
-  const emitValue = () => {
-    const editor = editorRef.current
+  const emitValue = () => {    const editor = editorRef.current
     if (!editor) return
     const nextValue = editorToValue(editor)
     if (nextValue !== value) onChange(nextValue)
@@ -186,19 +183,18 @@ export function RichTextEditor({
     <div className="rich-text-editor-shell">
       <div className="composer-format-toolbar" role="toolbar" aria-label="글자 서식">
         <button type="button" onMouseDown={(event) => { event.preventDefault(); applyCommand('bold') }} aria-label="굵게" title="굵게">
-          <strong>B</strong>
+          <span className="rich-text-format-glyph rich-text-format-bold" aria-hidden="true">가</span>
         </button>
         <button type="button" onMouseDown={(event) => { event.preventDefault(); applyCommand('underline') }} aria-label="밑줄" title="밑줄">
-          <u>U</u>
+          <span className="rich-text-format-glyph rich-text-format-underline" aria-hidden="true">가</span>
         </button>
         <label className="rich-text-color-control" title="글자색">
-          <span className="rich-text-color-letter" style={{ borderColor: textColor }} aria-hidden="true">A</span>
+          <span className="rich-text-format-glyph rich-text-color-letter" style={{ color: textColor }} aria-hidden="true">가</span>
           <span className="sr-only">글자색</span>
           <input
             type="color"
             value={textColor}
-            aria-label="글자색 선택"
-            onMouseDown={saveSelection}
+            aria-label="글자색 선택"            onMouseDown={saveSelection}
             onChange={(event) => {
               setTextColor(event.target.value)
               applyCommand('foreColor', event.target.value)
@@ -206,7 +202,7 @@ export function RichTextEditor({
           />
         </label>
         <label className="rich-text-color-control rich-text-highlight-control" title="형광펜">
-          <span className="rich-text-highlight-mark" style={{ backgroundColor: highlightColor }} aria-hidden="true" />
+          <span className="rich-text-format-glyph rich-text-highlight-letter" style={{ backgroundColor: highlightColor }} aria-hidden="true">가</span>
           <span className="sr-only">형광펜 색상</span>
           <input
             type="color"
