@@ -319,7 +319,7 @@ export function BoardComposer({
     if (!textarea) return
 
     const selectionStart = textarea.selectionStart
-    const lineStart = content.lastIndexOf('\n', Math.max(0, selectionStart - 1)) + 1
+    const lineStart = content.lastIndexOf('\n', selectionStart - 1) + 1
     const hasHeading = content.slice(lineStart).startsWith('## ')
     const nextContent = hasHeading
       ? `${content.slice(0, lineStart)}${content.slice(lineStart + 3)}`
