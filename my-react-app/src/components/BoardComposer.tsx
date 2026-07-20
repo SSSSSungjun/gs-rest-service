@@ -517,9 +517,12 @@ export function BoardComposer({
         </div>
 
         <footer className="composer-screen-toolbar" aria-label="게시글 도구">
-          <label className={`composer-tool-button ${isUploadingImage ? 'disabled' : ''}`}>
+          <label
+            className={`composer-tool-button ${isUploadingImage ? 'disabled' : ''}`}
+            aria-label={isUploadingImage ? '사진 올리는 중' : '사진 첨부'}
+            title={isUploadingImage ? '사진 올리는 중' : '사진 첨부'}
+          >
             <CameraIcon />
-            <span>{isUploadingImage ? '올리는 중' : '사진'}</span>
             <input
               type="file"
               accept="image/jpeg,image/png,image/gif,image/webp"
@@ -533,20 +536,22 @@ export function BoardComposer({
               className={`composer-tool-button ${hasPoll ? 'active' : ''}`}
               type="button"
               aria-pressed={hasPoll}
+              aria-label="투표 만들기"
+              title="투표 만들기"
               onClick={onStartPoll}
             >
               <BarChart3Icon />
-              <span>투표</span>
             </button>
           )}
           <button
             className={`composer-tool-button ${isAiMode ? 'active' : ''}`}
             type="button"
             aria-pressed={isAiMode}
+            aria-label="AI 글쓰기"
+            title="AI 글쓰기"
             onClick={handleStartAiMode}
           >
             <SparklesIcon />
-            <span>AI 글쓰기</span>
           </button>
         </footer>
 

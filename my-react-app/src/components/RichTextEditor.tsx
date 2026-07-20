@@ -186,13 +186,13 @@ export function RichTextEditor({
     <div className="rich-text-editor-shell">
       <div className="composer-format-toolbar" role="toolbar" aria-label="글자 서식">
         <button type="button" onMouseDown={(event) => { event.preventDefault(); applyCommand('bold') }} aria-label="굵게" title="굵게">
-          <strong>B</strong>
+          <span className="rich-text-format-glyph rich-text-format-bold" aria-hidden="true">가</span>
         </button>
         <button type="button" onMouseDown={(event) => { event.preventDefault(); applyCommand('underline') }} aria-label="밑줄" title="밑줄">
-          <u>U</u>
+          <span className="rich-text-format-glyph rich-text-format-underline" aria-hidden="true">가</span>
         </button>
         <label className="rich-text-color-control" title="글자색">
-          <span className="rich-text-color-letter" style={{ borderColor: textColor }} aria-hidden="true">A</span>
+          <span className="rich-text-format-glyph rich-text-color-letter" style={{ color: textColor }} aria-hidden="true">가</span>
           <span className="sr-only">글자색</span>
           <input
             type="color"
@@ -206,7 +206,7 @@ export function RichTextEditor({
           />
         </label>
         <label className="rich-text-color-control rich-text-highlight-control" title="형광펜">
-          <span className="rich-text-highlight-mark" style={{ backgroundColor: highlightColor }} aria-hidden="true" />
+          <span className="rich-text-format-glyph rich-text-highlight-letter" style={{ backgroundColor: highlightColor }} aria-hidden="true">가</span>
           <span className="sr-only">형광펜 색상</span>
           <input
             type="color"
