@@ -10,6 +10,12 @@
   --color-text: #1b2820;
   --color-text-muted: #7d8981;
   --color-icon-muted: #87948c;
+  --color-control: #6f7b73;
+  --color-control-hover: #f1f4f2;
+  --color-control-active: #e7f1ea;
+  --color-control-active-text: #2f704b;
+  --color-control-disabled: #b8bfba;
+  --color-focus-ring: rgba(69, 157, 104, 0.28);
   --color-like: #e45461;
   --color-like-soft: #fff0f2;
   --color-avatar-1: #dff4e6;
