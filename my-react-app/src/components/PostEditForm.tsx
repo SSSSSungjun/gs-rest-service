@@ -62,7 +62,7 @@ export function PostEditForm({
         onShowImagesInContentChange(postId, showImagesInContent)
       )}
       onGenerateAiDraft={onGenerateAiDraft}
-      onApplyAiDraft={(content) => onContentChange(postId, content)}
+      onContentApply={(content) => onContentChange(postId, content)}
       onSubmit={(event) => onSubmit(event, postId)}
     />
   )
