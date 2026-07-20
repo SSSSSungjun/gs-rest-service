@@ -47,8 +47,7 @@
   display: grid;
   width: min(100%, 320px);
   gap: 3px;
-  color: #7b867f;
-  font-size: 11px;
+  color: #7b867f;  font-size: 11px;
   font-weight: 400;
 }
 
@@ -97,8 +96,7 @@
 
 .composer-footer-preview-toggle {
   display: inline-flex;
-  justify-self: start;
-  align-items: center;
+  justify-self: start;  align-items: center;
   gap: 8px;
   color: #4e5d54;
   font-size: 13px;
@@ -147,8 +145,7 @@
   padding: 0;
 }
 
-.composer-screen-section .image-attachment-preview img {
-  width: 100%;
+.composer-screen-section .image-attachment-preview img {  width: 100%;
   height: 100%;
   object-fit: contain;
 }
@@ -197,8 +194,7 @@
 }
 
 .image-replace-button:hover,
-.image-delete-button:hover {
-  background: rgba(255, 255, 255, 0.14);
+.image-delete-button:hover {  background: rgba(255, 255, 255, 0.14);
 }
 
 .image-delete-button:hover {
@@ -247,7 +243,6 @@
   .composer-screen-toolbar {
     min-height: 62px;
   }
-
   .composer-screen-actions {
     min-height: 66px;
     grid-template-columns: minmax(0, 1fr) auto;
@@ -298,7 +293,6 @@
 .composer-screen-actions .composer-screen-submit {
   font-weight: 400;
 }
-
 .composer-screen-actions .composer-screen-submit {
   font-weight: 500;
 }
@@ -347,8 +341,7 @@
   padding: 0 18px;
 }
 
-.composer-screen-section .image-attachment-preview-list {
-  justify-items: center;
+.composer-screen-section .image-attachment-preview-list {  justify-items: center;
 }
 
 .composer-screen-section .image-attachment-preview {
@@ -397,8 +390,7 @@
 .image-delete-button {
   min-height: 28px;
   padding: 0 8px;
-  font-size: 11px;
-  font-weight: 500;
+  font-size: 11px;  font-weight: 500;
 }
 
 .composer-poll-header,
@@ -447,8 +439,7 @@
   box-shadow:
     0 0 0 3px rgba(100, 116, 255, 0.06),
     0 12px 32px rgba(72, 91, 170, 0.11);
-  padding: 12px;
-}
+  padding: 12px;}
 
 .composer-ai-prompt {
   border-color: rgba(103, 119, 226, 0.28);
@@ -494,5 +485,67 @@
   .composer-poll-editor,
   .composer-ai-mode {
     border-radius: 12px;
+  }
+}
+
+
+/* Mobile-first composer typography and icon-only actions. */
+.composer-author-line {
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.composer-author-line .composer-screen-nickname {
+  width: 100%;
+  min-height: 30px;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  color: #17231c;
+  padding: 0;
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.75;
+}
+
+.composer-author-line .composer-screen-nickname:hover,
+.composer-author-line .composer-screen-nickname:focus {
+  border: 0;
+  background: transparent !important;
+  box-shadow: none;
+  outline: 0;
+}
+
+.composer-screen-toolbar {
+  min-height: 60px;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.composer-tool-button {
+  width: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  flex: 0 0 40px;
+  gap: 0;
+  border-radius: 50%;
+  padding: 0;
+  font-size: 0;
+}
+
+.composer-tool-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+@media (max-width: 720px) {
+  .composer-author-line .composer-screen-nickname {
+    font-size: 16px;
+  }
+
+  .composer-screen-toolbar {
+    padding-right: 18px;
+    padding-left: 18px;
   }
 }
