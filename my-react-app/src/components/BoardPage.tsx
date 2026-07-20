@@ -43,8 +43,6 @@ export function BoardPage({ controller }: BoardPageProps) {
         </div>
       </header>
 
-      <BoardFeed controller={controller} />
-
       {canCompose && (
         <BoardComposer
           isOpen={screen.isComposerViewOpen}
@@ -82,13 +80,15 @@ export function BoardPage({ controller }: BoardPageProps) {
             payload: showImagesInContent,
           })}
           onGenerateAiDraft={actions.generateAiDraft}
-          onApplyAiDraft={(content) => dispatch({
+          onContentApply={(content) => dispatch({
             type: 'composer/contentChanged',
             payload: content,
           })}
           onSubmit={actions.handleSubmit}
         />
       )}
+
+      <BoardFeed controller={controller} />
 
       <ConfirmDialog
         pendingDelete={state.pendingDelete}
