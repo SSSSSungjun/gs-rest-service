@@ -13,7 +13,7 @@ import {
 } from './Icons'
 import { ImageAttachmentFields } from './ImageAttachmentFields'
 import { RichTextEditor } from './RichTextEditor'
-import { getAvatarToken } from './avatarToken'
+import { getComposerAvatarToken } from './avatarToken'
 import '../composerLayout.css'
 import './BoardComposer.css'
 import './BoardComposerResponsive.css'
@@ -107,7 +107,7 @@ export function BoardComposer({
   const aiRequestRef = useRef<AbortController | null>(null)
   const hasImages = images.length > 0
   const hasPoll = pollOptions.length > 0
-  const composerAvatar = getAvatarToken(0, nickname)
+  const composerAvatar = getComposerAvatarToken()
 
   const resetAiMode = () => {
     aiRequestRef.current?.abort()
