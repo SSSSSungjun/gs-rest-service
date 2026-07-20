@@ -47,7 +47,6 @@
 .feed-toolbar-list .feed-search-control {
   width: 100%;
 }
-
 .post-list .post-list-preview,
 .post-list .post-list-preview.has-images {
   display: grid;
@@ -75,7 +74,7 @@
   border-radius: 7px;
 }
 
-.composer-launcher-panel {
+.board-shell .composer-launcher .composer-launcher-panel {
   display: grid;
   min-width: 0;
   gap: 18px;
@@ -84,7 +83,7 @@
   padding: 14px 16px;
 }
 
-.board-shell .composer-launcher-button {
+.board-shell .composer-launcher .composer-launcher-panel .composer-launcher-button {
   min-height: 0;
   border: 0;
   border-radius: 0;
@@ -93,15 +92,15 @@
   box-shadow: none;
 }
 
-.board-shell .composer-launcher-button:hover {
+.board-shell .composer-launcher .composer-launcher-panel .composer-launcher-button:hover {
   background: transparent;
 }
 
-.composer-launcher-tools {
+.board-shell .composer-launcher .composer-launcher-tools {
   gap: 9px;
 }
 
-.composer-launcher-tool {
+.board-shell .composer-launcher .composer-launcher-tool {
   position: relative;
   display: inline-grid;
   width: 34px;
@@ -116,12 +115,12 @@
   cursor: pointer;
 }
 
-.composer-launcher-tool:hover {
+.board-shell .composer-launcher .composer-launcher-tool:hover {
   background: #e4e9e5;
   color: #2d4636;
 }
 
-.composer-launcher-tool input {
+.board-shell .composer-launcher .composer-launcher-tool input {
   position: absolute;
   width: 1px;
   height: 1px;
@@ -139,7 +138,7 @@
 }
 
 @media (min-width: 721px) {
-  .board-shell .composer-launcher-panel {
+  .board-shell .composer-launcher .composer-launcher-panel {
     min-height: 86px;
   }
 }
@@ -159,10 +158,21 @@
 }
 
 @media (max-width: 720px) {
-  .composer-launcher-panel {
+  .board-shell .composer-launcher .composer-launcher-panel {
     gap: 0;
+    min-height: 52px;
+    border: 1px solid #d8dfda;
+    border-radius: 18px;
+    background: #ffffff;
     padding: 0;
-    background: transparent;
+    box-shadow: 0 8px 24px rgba(36, 54, 43, 0.1);
+  }
+
+  .board-shell .composer-launcher .composer-launcher-panel .composer-launcher-button {
+    min-height: 52px;
+    border-radius: 18px;
+    background: #ffffff;
+    padding: 0 16px;
   }
 
   .composer-launcher-tools {
