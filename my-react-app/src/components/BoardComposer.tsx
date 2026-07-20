@@ -1,22 +1,23 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import type { ChangeEvent, ClipboardEvent, DragEvent, FormEvent, KeyboardEvent as ReactKeyboardEvent } from 'react'
 import type { PostImage } from '../boardApi'
-import { handleTextareaKeyDown, preventEnterSubmit, resizeTextarea } from '../boardUi'
+import { preventEnterSubmit } from '../boardUi'
 import {
   ArrowLeftIcon,
   BarChart3Icon,
   CameraIcon,
   PlusIcon,
-  SendIcon,
   SparklesIcon,
   Trash2Icon,
   XIcon,
 } from './Icons'
 import { ImageAttachmentFields } from './ImageAttachmentFields'
+import { RichTextEditor } from './RichTextEditor'
 import { getAvatarToken } from './avatarToken'
 import '../composerLayout.css'
 import './BoardComposer.css'
 import './BoardComposerResponsive.css'
+import './ComposerRefresh.css'
 
 interface BoardComposerProps {
   mode?: 'create' | 'edit'
@@ -33,7 +34,7 @@ interface BoardComposerProps {
   onOpen: () => void
   onClose: () => void
   onNicknameChange: (nickname: string) => void
-  onContentChange: (event: ChangeEvent<HTMLTextAreaElement>) => void
+  onContentChange?: (event: ChangeEvent<HTMLTextAreaElement>) => void
   onAddImageUrl: (url: string) => void
   onUploadImages: (files: File[]) => void
   onRemoveImage: (index: number) => void
@@ -84,7 +85,6 @@ export function BoardComposer({
   onOpen,
   onClose,
   onNicknameChange,
-  onContentChange,
   onAddImageUrl,
   onUploadImages,
   onRemoveImage,
@@ -104,7 +104,6 @@ export function BoardComposer({
   const [aiGenerationSeconds, setAiGenerationSeconds] = useState(0)
   const [aiErrorMessage, setAiErrorMessage] = useState('')
   const launcherRef = useRef<HTMLElement>(null)
-  const contentTextareaRef = useRef<HTMLTextAreaElement>(null)
   const aiRequestRef = useRef<AbortController | null>(null)
   const hasImages = images.length > 0
   const hasPoll = pollOptions.length > 0
@@ -141,7 +140,6 @@ export function BoardComposer({
 
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    const focusFrame = window.requestAnimationFrame(() => contentTextareaRef.current?.focus())
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
       if (isAiMode) {
@@ -152,7 +150,6 @@ export function BoardComposer({
     }
     window.addEventListener('keydown', closeOnEscape)
     return () => {
-      window.cancelAnimationFrame(focusFrame)
       window.removeEventListener('keydown', closeOnEscape)
       document.body.style.overflow = previousOverflow
     }
@@ -170,11 +167,6 @@ export function BoardComposer({
 
     return () => window.clearInterval(timer)
   }, [isGeneratingAiDraft])
-
-  useLayoutEffect(() => {
-    if (!isOpen || !contentTextareaRef.current) return
-    resizeTextarea(contentTextareaRef.current)
-  }, [content, isOpen])
 
   useLayoutEffect(() => {
     if (isOpen) return
@@ -250,7 +242,6 @@ export function BoardComposer({
       onContentApply(draft)
       setAiPrompt('')
       setIsAiMode(false)
-      requestAnimationFrame(() => contentTextareaRef.current?.focus())
     } catch (error) {
       if (!controller.signal.aborted) {
         setAiErrorMessage('AI 글 생성에 실패했습니다. 잠시 후 다시 시도해주세요.')
@@ -271,7 +262,7 @@ export function BoardComposer({
     }
   }
 
-  const handlePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {
+  const handlePaste = (event: ClipboardEvent<HTMLDivElement>) => {
     const pastedFiles = getImageFiles(event.clipboardData.files)
     if (pastedFiles.length > 0) {
       event.preventDefault()
@@ -286,13 +277,13 @@ export function BoardComposer({
     }
   }
 
-  const handleDragOver = (event: DragEvent<HTMLTextAreaElement>) => {
+  const handleDragOver = (event: DragEvent<HTMLDivElement>) => {
     if (event.dataTransfer.types.includes('Files') || event.dataTransfer.types.includes('text/uri-list')) {
       event.preventDefault()
     }
   }
 
-  const handleDrop = (event: DragEvent<HTMLTextAreaElement>) => {
+  const handleDrop = (event: DragEvent<HTMLDivElement>) => {
     const droppedFiles = getImageFiles(event.dataTransfer.files)
     if (droppedFiles.length > 0) {
       event.preventDefault()
@@ -305,43 +296,6 @@ export function BoardComposer({
       event.preventDefault()
       onAddImageUrl(imageUrl)
     }
-  }
-
-  const applyInlineFormat = (prefix: string, suffix = prefix) => {
-    const textarea = contentTextareaRef.current
-    if (!textarea) return
-
-    const selectionStart = textarea.selectionStart
-    const selectionEnd = textarea.selectionEnd
-    const selectedText = content.slice(selectionStart, selectionEnd)
-    const formattedText = `${prefix}${selectedText}${suffix}`
-    const nextContent = `${content.slice(0, selectionStart)}${formattedText}${content.slice(selectionEnd)}`
-    onContentApply(nextContent)
-
-    window.requestAnimationFrame(() => {
-      textarea.focus()
-      const nextStart = selectionStart + prefix.length
-      textarea.setSelectionRange(nextStart, nextStart + selectedText.length)
-    })
-  }
-
-  const toggleHeadingFormat = () => {
-    const textarea = contentTextareaRef.current
-    if (!textarea) return
-
-    const selectionStart = textarea.selectionStart
-    const lineStart = content.lastIndexOf('\n', selectionStart - 1) + 1
-    const hasHeading = content.slice(lineStart).startsWith('## ')
-    const nextContent = hasHeading
-      ? `${content.slice(0, lineStart)}${content.slice(lineStart + 3)}`
-      : `${content.slice(0, lineStart)}## ${content.slice(lineStart)}`
-    onContentApply(nextContent)
-
-    window.requestAnimationFrame(() => {
-      textarea.focus()
-      const nextPosition = Math.max(lineStart, selectionStart + (hasHeading ? -3 : 3))
-      textarea.setSelectionRange(nextPosition, nextPosition)
-    })
   }
 
   if (!isOpen) {
@@ -398,6 +352,7 @@ export function BoardComposer({
       </section>
     )
   }
+
   return (
     <section className="composer-screen" aria-label={mode === 'edit' ? '게시글 수정' : '게시글 작성'}>
       <form className="composer-screen-form" onSubmit={onSubmit} onKeyDown={preventEnterSubmit}>
@@ -413,53 +368,16 @@ export function BoardComposer({
             <span className="composer-close-desktop"><XIcon /></span>
           </button>
           <strong>{mode === 'edit' ? '글 수정' : '글쓰기'}</strong>
-          <button
-            className="composer-screen-submit"
-            type="submit"
-            disabled={isSubmitting || isUploadingImage || !content.trim()}
-          >
-            <SendIcon />
-            {isSubmitting ? '저장 중' : mode === 'edit' ? '수정' : '게시'}
-          </button>
         </header>
 
         <div className="composer-screen-scroll">
-          <div className="composer-author-row">
-            <span
-              className={`composer-author-mark post-avatar post-avatar-tone-${composerAvatar.tone}`}
-              aria-hidden="true"
-            >
-              {composerAvatar.symbol}
-            </span>
-            <input
-              className="composer-screen-nickname"
-              value={nickname}
-              onChange={(event) => onNicknameChange(event.target.value)}
-              maxLength={40}
-              placeholder="익명"
-              aria-label="게시글 닉네임"
-            />
-          </div>
-
-          <div className="composer-format-toolbar" role="toolbar" aria-label="글자 서식">
-            <button type="button" onClick={toggleHeadingFormat} aria-label="제목 서식" title="제목">Tt</button>
-            <button type="button" onClick={() => applyInlineFormat('**')} aria-label="굵게" title="굵게"><strong>B</strong></button>
-            <button type="button" onClick={() => applyInlineFormat('_')} aria-label="기울임" title="기울임"><em>I</em></button>
-            <button type="button" onClick={() => applyInlineFormat('~~')} aria-label="취소선" title="취소선"><del>S</del></button>
-          </div>
-
-          <textarea
-            ref={contentTextareaRef}
-            className="composer-screen-textarea"
+          <RichTextEditor
             value={content}
-            onChange={onContentChange}
-            onKeyDown={handleTextareaKeyDown}
+            placeholder="무슨 일이 있었나요?"
+            onChange={onContentApply}
             onPaste={handlePaste}
             onDragOver={handleDragOver}
             onDrop={handleDrop}
-            rows={8}
-            placeholder="무슨 일이 있었나요?"
-            aria-label="게시글 내용"
           />
 
           {hasImages && (
@@ -470,6 +388,7 @@ export function BoardComposer({
                 isUploading={isUploadingImage}
                 showSummary={false}
                 showFilePicker={false}
+                showPreviewToggle={false}
                 onUploadFiles={onUploadImages}
                 onRemoveImage={onRemoveImage}
                 onShowImagesInContentChange={onShowImagesInContentChange}
@@ -613,6 +532,42 @@ export function BoardComposer({
           >
             <SparklesIcon />
             <span>AI 글쓰기</span>
+          </button>
+        </footer>
+
+        <footer className="composer-screen-actions">
+          <div className="composer-footer-author">
+            <span
+              className={`composer-author-mark post-avatar post-avatar-tone-${composerAvatar.tone}`}
+              aria-hidden="true"
+            >
+              {composerAvatar.symbol}
+            </span>
+            <input
+              className="composer-screen-nickname"
+              value={nickname}
+              onChange={(event) => onNicknameChange(event.target.value)}
+              maxLength={40}
+              placeholder="익명"
+              aria-label="게시글 닉네임"
+            />
+          </div>
+          {hasImages && (
+            <label className="composer-footer-preview-toggle">
+              <input
+                type="checkbox"
+                checked={showImagesInContent}
+                onChange={(event) => onShowImagesInContentChange(event.target.checked)}
+              />
+              <span>게시글 본문에서 사진 미리보기 표시</span>
+            </label>
+          )}
+          <button
+            className="composer-screen-submit"
+            type="submit"
+            disabled={isSubmitting || isUploadingImage || !content.trim()}
+          >
+            {isSubmitting ? '저장 중' : mode === 'edit' ? '수정' : '게시'}
           </button>
         </footer>
       </form>
