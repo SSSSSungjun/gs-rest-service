@@ -12,6 +12,7 @@ interface ImageAttachmentFieldsProps {
   isUploading?: boolean
   showSummary?: boolean
   showFilePicker?: boolean
+  showPreviewToggle?: boolean
   onUploadFiles: (files: File[]) => void
   onRemoveImage: (index: number) => void
   onShowImagesInContentChange: (showImagesInContent: boolean) => void
@@ -23,6 +24,7 @@ export function ImageAttachmentFields({
   isUploading = false,
   showSummary = true,
   showFilePicker = true,
+  showPreviewToggle = true,
   onUploadFiles,
   onRemoveImage,
   onShowImagesInContentChange,
@@ -34,6 +36,15 @@ export function ImageAttachmentFields({
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? [])
     if (files.length > 0) onUploadFiles(files)
+    event.currentTarget.value = ''
+  }
+
+  const handleReplaceImage = (index: number, event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      onRemoveImage(index)
+      onUploadFiles([file])
+    }
     event.currentTarget.value = ''
   }
 
@@ -61,7 +72,7 @@ export function ImageAttachmentFields({
         </div>
       )}
 
-      {hasImages && (
+      {showPreviewToggle && hasImages && (
         <label className="image-preview-toggle">
           <input
             type="checkbox"
@@ -84,9 +95,26 @@ export function ImageAttachmentFields({
               >
                 <img src={resolveImageUrl(image.url)} alt={image.originalFilename || `첨부 이미지 ${index + 1}`} />
               </button>
-              <button type="button" className="image-remove-button" onClick={() => onRemoveImage(index)} aria-label="첨부 이미지 삭제">
-                삭제
-              </button>
+              <div className="image-attachment-actions">
+                <label className={`image-replace-button ${isUploading ? 'disabled' : ''}`}>
+                  사진 교체
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/gif,image/webp"
+                    onChange={(event) => handleReplaceImage(index, event)}
+                    disabled={isUploading}
+                    aria-label={`첨부 이미지 ${index + 1} 교체`}
+                  />
+                </label>
+                <button
+                  type="button"
+                  className="image-delete-button"
+                  onClick={() => onRemoveImage(index)}
+                  aria-label={`첨부 이미지 ${index + 1} 삭제`}
+                >
+                  삭제하기
+                </button>
+              </div>
             </div>
           ))}
         </div>
