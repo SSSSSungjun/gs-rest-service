@@ -370,17 +370,6 @@ export function BoardComposer({
         </header>
 
         <div className="composer-screen-scroll">
-          <div className="composer-author-line">
-            <input
-              className="composer-screen-nickname"
-              value={nickname}
-              onChange={(event) => onNicknameChange(event.target.value)}
-              maxLength={40}
-              placeholder="익명"
-              aria-label="게시글 닉네임"
-            />
-          </div>
-
           <RichTextEditor
             value={content}
             placeholder="무슨 일이 있었나요?"
@@ -566,6 +555,14 @@ export function BoardComposer({
               <span>게시글 본문에서 사진 미리보기 표시</span>
             </label>
           )}
+          <input
+            className="composer-footer-nickname"
+            value={nickname}
+            onChange={(event) => onNicknameChange(event.target.value)}
+            maxLength={40}
+            placeholder="익명"
+            aria-label="게시글 닉네임"
+          />
           <button
             className="composer-screen-submit"
             type="submit"
