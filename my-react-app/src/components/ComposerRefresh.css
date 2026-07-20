@@ -701,20 +701,25 @@
   }
 }
 
-/* Compact footer identity beside the publish action. */
-.composer-screen-actions {
-  grid-template-columns: minmax(0, 1fr) auto auto;
+/* Publish controls between the title and formatting toolbar. */
+.composer-screen-form {
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+}
+
+.composer-publish-bar {
+  display: flex;
+  min-height: 58px;
+  align-items: center;
+  justify-content: flex-end;
   gap: 10px;
+  border-bottom: 1px solid var(--color-line);
+  background: var(--color-surface);
+  padding: 8px 32px;
 }
 
-.composer-footer-preview-toggle {
-  grid-column: 1;
-}
-
-.composer-footer-nickname {
+.composer-publish-nickname {
   width: 104px;
   min-height: 38px;
-  grid-column: 2;
   border: 1px solid var(--color-line);
   border-radius: 8px;
   background: var(--color-surface);
@@ -727,33 +732,50 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.composer-footer-nickname::placeholder {
+.composer-publish-nickname::placeholder {
   color: var(--color-text-muted);
 }
 
-.composer-footer-nickname:focus {
+.composer-publish-nickname:focus {
   border-color: var(--color-brand-600);
   outline: 2px solid var(--color-focus-ring);
   outline-offset: 1px;
 }
 
-.composer-screen-actions .composer-screen-submit {
-  grid-column: 3;
+.composer-publish-bar .composer-screen-submit {
+  min-width: 90px;
+  border-radius: 8px;
+}
+
+.composer-preview-actions {
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 58px;
+}
+
+.composer-preview-actions .composer-footer-preview-toggle {
+  grid-column: 1;
 }
 
 @media (max-width: 720px) {
-  .composer-screen-actions {
+  .composer-publish-bar {
+    min-height: 54px;
     gap: 8px;
+    padding-right: 18px;
+    padding-left: 18px;
   }
 
-  .composer-footer-nickname {
+  .composer-publish-nickname {
     width: 88px;
     min-height: 36px;
     font-size: 13px;
   }
 
-  .composer-footer-preview-toggle {
-    grid-column: 1 / -1;
-    grid-row: 2;
+  .composer-publish-bar .composer-screen-submit {
+    min-width: 76px;
+  }
+
+  .composer-preview-actions .composer-footer-preview-toggle {
+    grid-column: 1;
+    grid-row: auto;
   }
 }
