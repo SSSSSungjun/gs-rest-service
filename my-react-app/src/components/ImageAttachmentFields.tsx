@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import type { ChangeEvent } from 'react'
 import type { PostImage } from '../boardApi'
 import { resolveImageUrl } from '../imageUrl'
+import { ImageLightbox } from './ImageLightbox'
 
 const MAX_IMAGE_COUNT = 10
 
@@ -25,14 +27,13 @@ export function ImageAttachmentFields({
   onRemoveImage,
   onShowImagesInContentChange,
 }: ImageAttachmentFieldsProps) {
+  const [activeImageIndex, setActiveImageIndex] = useState<number | null>(null)
   const remainingCount = MAX_IMAGE_COUNT - images.length
   const hasImages = images.length > 0
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files ?? [])
-    if (files.length > 0) {
-      onUploadFiles(files)
-    }
+    if (files.length > 0) onUploadFiles(files)
     event.currentTarget.value = ''
   }
 
@@ -75,7 +76,14 @@ export function ImageAttachmentFields({
         <div className="image-attachment-preview-list">
           {images.map((image, index) => (
             <div className="image-attachment-preview" key={`${image.url}-${index}`}>
-              <img src={resolveImageUrl(image.url)} alt={image.originalFilename || `첨부 이미지 ${index + 1}`} />
+              <button
+                className="image-attachment-open"
+                type="button"
+                onClick={() => setActiveImageIndex(index)}
+                aria-label={`첨부 이미지 ${index + 1} 전체 화면으로 보기`}
+              >
+                <img src={resolveImageUrl(image.url)} alt={image.originalFilename || `첨부 이미지 ${index + 1}`} />
+              </button>
               <button type="button" className="image-remove-button" onClick={() => onRemoveImage(index)} aria-label="첨부 이미지 삭제">
                 삭제
               </button>
@@ -83,6 +91,13 @@ export function ImageAttachmentFields({
           ))}
         </div>
       )}
+
+      <ImageLightbox
+        images={images}
+        activeIndex={activeImageIndex}
+        onChange={setActiveImageIndex}
+        onClose={() => setActiveImageIndex(null)}
+      />
     </div>
   )
 }
