@@ -121,10 +121,14 @@ export function PostList({
               />
             ) : (
               <>
-                <div className={`post-list-preview ${postImages.length > 0 ? 'has-images' : ''}`} aria-label="게시글 상세 보기">
+                <div className="post-list-preview" aria-label="게시글 상세 보기">
                   <span className="post-content"><FormattedText text={post.content} query={searchQuery} /></span>
-                  {postImages.length > 0 && <PostImageGallery images={postImages} variant="list" />}
                 </div>
+                {postImages.length > 0 && (
+                  <div className="post-list-media">
+                    <PostImageGallery images={postImages} variant="list" />
+                  </div>
+                )}
                 {pollOptions.length > 0 && (
                   <PollBlock
                     postId={post.id}
