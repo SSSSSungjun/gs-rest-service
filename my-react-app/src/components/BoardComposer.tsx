@@ -369,6 +369,24 @@ export function BoardComposer({
           <strong>{mode === 'edit' ? '글 수정' : '글쓰기'}</strong>
         </header>
 
+        <div className="composer-publish-bar" aria-label="게시글 작성자와 게시">
+          <input
+            className="composer-publish-nickname"
+            value={nickname}
+            onChange={(event) => onNicknameChange(event.target.value)}
+            maxLength={40}
+            placeholder="익명"
+            aria-label="게시글 닉네임"
+          />
+          <button
+            className="composer-screen-submit"
+            type="submit"
+            disabled={isSubmitting || isUploadingImage || !content.trim()}
+          >
+            {isSubmitting ? '저장 중' : mode === 'edit' ? '수정' : '게시'}
+          </button>
+        </div>
+
         <div className="composer-screen-scroll">
           <RichTextEditor
             value={content}
@@ -544,8 +562,8 @@ export function BoardComposer({
           </button>
         </footer>
 
-        <footer className="composer-screen-actions">
-          {hasImages && (
+        {hasImages && (
+          <footer className="composer-screen-actions composer-preview-actions">
             <label className="composer-footer-preview-toggle">
               <input
                 type="checkbox"
@@ -554,23 +572,8 @@ export function BoardComposer({
               />
               <span>게시글 본문에서 사진 미리보기 표시</span>
             </label>
-          )}
-          <input
-            className="composer-footer-nickname"
-            value={nickname}
-            onChange={(event) => onNicknameChange(event.target.value)}
-            maxLength={40}
-            placeholder="익명"
-            aria-label="게시글 닉네임"
-          />
-          <button
-            className="composer-screen-submit"
-            type="submit"
-            disabled={isSubmitting || isUploadingImage || !content.trim()}
-          >
-            {isSubmitting ? '저장 중' : mode === 'edit' ? '수정' : '게시'}
-          </button>
-        </footer>
+          </footer>
+        )}
       </form>
     </section>
   )
