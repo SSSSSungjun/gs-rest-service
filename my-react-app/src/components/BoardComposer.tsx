@@ -13,6 +13,7 @@ import {
   XIcon,
 } from './Icons'
 import { ImageAttachmentFields } from './ImageAttachmentFields'
+import { getAvatarToken } from './avatarToken'
 import '../composerLayout.css'
 import './BoardComposer.css'
 import './BoardComposerResponsive.css'
@@ -107,6 +108,7 @@ export function BoardComposer({
   const aiRequestRef = useRef<AbortController | null>(null)
   const hasImages = images.length > 0
   const hasPoll = pollOptions.length > 0
+  const composerAvatar = getAvatarToken(0, nickname)
 
   const resetAiMode = () => {
     aiRequestRef.current?.abort()
@@ -207,6 +209,15 @@ export function BoardComposer({
 
   const handleFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
     uploadImages(Array.from(event.target.files ?? []))
+    event.currentTarget.value = ''
+  }
+
+  const handleLauncherFileInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files ?? [])
+    if (files.length > 0) {
+      onOpen()
+      uploadImages(files)
+    }
     event.currentTarget.value = ''
   }
 
@@ -336,15 +347,54 @@ export function BoardComposer({
   if (!isOpen) {
     return (
       <section ref={launcherRef} className="composer-launcher composer-bottom" aria-label="게시글 작성 열기">
-        <span className="composer-launcher-avatar" aria-hidden="true">익</span>
-        <button className="composer-launcher-button" type="button" onClick={onOpen}>
-          <span className="composer-launcher-placeholder">익명님, 어떤 이야기를 나누고 싶나요?</span>
-          <span className="composer-launcher-tools" aria-hidden="true">
-            <CameraIcon />
-            <BarChart3Icon />
-            <SparklesIcon />
-          </span>
-        </button>
+        <span
+          className={`composer-launcher-avatar post-avatar post-avatar-tone-${composerAvatar.tone}`}
+          aria-hidden="true"
+        >
+          {composerAvatar.symbol}
+        </span>
+        <div className="composer-launcher-panel">
+          <button className="composer-launcher-button" type="button" onClick={onOpen}>
+            <span className="composer-launcher-placeholder">익명님, 어떤 이야기를 나누고 싶나요?</span>
+          </button>
+          <div className="composer-launcher-tools" aria-label="글쓰기 빠른 도구">
+            <label className={`composer-launcher-tool ${isUploadingImage ? 'disabled' : ''}`} title="사진 첨부">
+              <CameraIcon />
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/gif,image/webp"
+                multiple
+                onChange={handleLauncherFileInputChange}
+                disabled={isUploadingImage}
+                aria-label="사진을 첨부하며 글쓰기 열기"
+              />
+            </label>
+            <button
+              className="composer-launcher-tool"
+              type="button"
+              onClick={() => {
+                onStartPoll()
+                onOpen()
+              }}
+              aria-label="투표를 만들며 글쓰기 열기"
+              title="투표 만들기"
+            >
+              <BarChart3Icon />
+            </button>
+            <button
+              className="composer-launcher-tool"
+              type="button"
+              onClick={() => {
+                handleStartAiMode()
+                onOpen()
+              }}
+              aria-label="AI 글쓰기로 열기"
+              title="AI 글쓰기"
+            >
+              <SparklesIcon />
+            </button>
+          </div>
+        </div>
       </section>
     )
   }
@@ -375,7 +425,12 @@ export function BoardComposer({
 
         <div className="composer-screen-scroll">
           <div className="composer-author-row">
-            <span className="composer-author-mark" aria-hidden="true">익</span>
+            <span
+              className={`composer-author-mark post-avatar post-avatar-tone-${composerAvatar.tone}`}
+              aria-hidden="true"
+            >
+              {composerAvatar.symbol}
+            </span>
             <input
               className="composer-screen-nickname"
               value={nickname}
