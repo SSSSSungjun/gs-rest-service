@@ -45,6 +45,7 @@ export function ImageLightbox({ images, activeIndex, onChange, onClose }: ImageL
       role="dialog"
       aria-modal="true"
       aria-label="첨부 이미지 전체 화면 보기"
+      onClick={(event) => event.stopPropagation()}
       onMouseDown={(event) => {
         if (event.currentTarget === event.target) onClose()
       }}
